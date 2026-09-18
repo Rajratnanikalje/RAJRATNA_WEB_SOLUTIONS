@@ -1,0 +1,1 @@
+import mongoose from"mongoose";export default mongoose.model("Project",new mongoose.Schema({name:{type:String,required:true},title:{type:String,required:true},description:{type:String,required:true},technologies:[String],url:{type:String,required:true},imageUrl:String,published:{type:Boolean,default:true}},{timestamps:true}));

@@ -1,0 +1,1 @@
+import mongoose from"mongoose";export default mongoose.model("Service",new mongoose.Schema({title:{type:String,required:true},description:{type:String,required:true},imageUrl:String,published:{type:Boolean,default:true}},{timestamps:true}));

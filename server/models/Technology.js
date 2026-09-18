@@ -1,0 +1,1 @@
+import mongoose from"mongoose";export default mongoose.model("Technology",new mongoose.Schema({name:{type:String,unique:true,required:true},category:String,iconUrl:String,published:{type:Boolean,default:true}},{timestamps:true}));

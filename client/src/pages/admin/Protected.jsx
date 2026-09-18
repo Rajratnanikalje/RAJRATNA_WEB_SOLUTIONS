@@ -1,0 +1,1 @@
+import{Navigate,Outlet}from"react-router-dom";export default()=>localStorage.getItem("rws_token")?<Outlet/>:<Navigate to="/admin/login" replace/>;

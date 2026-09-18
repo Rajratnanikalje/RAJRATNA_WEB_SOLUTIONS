@@ -1,0 +1,1 @@
+import mongoose from"mongoose";export default mongoose.model("Settings",new mongoose.Schema({siteTitle:String,logoUrl:String,heroImageUrl:String,phone:String,email:String,location:String,socialLinks:[String],seoTitle:String,seoDescription:String,faviconUrl:String},{timestamps:true}));
