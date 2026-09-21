@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ArrowUpRight, Code } from "lucide-react";
 import { Link } from "react-router-dom";
 import { pub } from "../services/api";
+import useContentRefresh from "../hooks/useContentRefresh";
 import { Card, Reveal, Heading } from "../components/UI";
 
 export default function Services() {
@@ -9,7 +10,8 @@ export default function Services() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
+  const loadServices = useCallback((silent = false) => {
+    if (!silent) setLoading(true);
     pub
       .services()
       .then((r) => {
@@ -22,6 +24,12 @@ export default function Services() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    loadServices();
+  }, [loadServices]);
+
+  useContentRefresh(() => loadServices(true));
 
   return (
     <section className="section pt-40">
@@ -59,6 +67,13 @@ export default function Services() {
                     {s.title}
                   </h3>
                   <p className="muted mt-3 leading-7">{s.description}</p>
+                  {s.imageUrl && (
+                    <img
+                      src={s.imageUrl}
+                      alt={s.title}
+                      className="w-full h-44 object-cover rounded-2xl border border-white/10 mt-5"
+                    />
+                  )}
                   <Link
                     to="/contact"
                     className="secondary mt-6 text-sm group-hover:border-[#78a9ff] transition-colors"

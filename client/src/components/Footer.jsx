@@ -1,14 +1,21 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { pub } from "../services/api";
+import useContentRefresh from "../hooks/useContentRefresh";
 
 export default function Footer() {
   const [settings, setSettings] = useState({});
 
-  useEffect(() => {
+  const loadSettings = useCallback(() => {
     pub.settings().then((r) => setSettings(r.data.data || {})).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    loadSettings();
+  }, [loadSettings]);
+
+  useContentRefresh(loadSettings);
 
   const phone = settings.phone || "+91 9156914227";
   const email = settings.email || "rajratnaofficial7252@gmail.com";

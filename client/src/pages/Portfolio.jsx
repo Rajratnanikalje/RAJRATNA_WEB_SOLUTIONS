@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ExternalLink, Github } from "lucide-react";
 import { pub } from "../services/api";
+import useContentRefresh from "../hooks/useContentRefresh";
 import { Card, Reveal, Heading } from "../components/UI";
 
 export default function Portfolio() {
@@ -8,7 +9,8 @@ export default function Portfolio() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
+  const loadProjects = useCallback((silent = false) => {
+    if (!silent) setLoading(true);
     pub
       .projects()
       .then((r) => {
@@ -20,6 +22,12 @@ export default function Portfolio() {
       )
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    loadProjects();
+  }, [loadProjects]);
+
+  useContentRefresh(() => loadProjects(true));
 
   return (
     <section className="section pt-0">
@@ -53,7 +61,7 @@ export default function Portfolio() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-12">
             {projects.map((p, i) => (
               <Reveal key={p._id || i} delay={i * 0.06}>
-                <Card className="portfolio-card group overflow-hidden">
+                <Card className="portfolio-card group overflow-hidden h-full">
                   <div className="h-48 bg-gradient-to-br from-[#1a2a4a]/50 to-[#0a1429]/50 flex items-center justify-center overflow-hidden">
                     {p.imageUrl ? (
                       <img
@@ -67,11 +75,11 @@ export default function Portfolio() {
                       </span>
                     )}
                   </div>
-                  <div className="p-6 flex-1">
+                  <div className="p-6 flex-1 flex flex-col">
                     <div className="text-[#78a9ff] text-xs font-mono">
                       {p.category || "Project"}
                     </div>
-                    <h3 className="font-bold text-xl mt-2 group-hover:text-[#78a9ff] transition-colors">
+                    <h3 className="font-bold text-xl mt-2 line-clamp-2 group-hover:text-[#78a9ff] transition-colors">
                       {p.name}
                     </h3>
                     {p.title && (
@@ -94,7 +102,7 @@ export default function Portfolio() {
                         ))}
                       </div>
                     )}
-                    <div className="flex gap-2 mt-5">
+                    <div className="flex gap-2 mt-auto pt-5">
                       {p.url && (
                         <a
                           href={p.url}

@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import useContentRefresh from "../hooks/useContentRefresh";
 import { Link, NavLink } from "react-router-dom";
 import { ArrowUpRight, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { pub } from "../services/api";
 
 const links = [
   ["/", "Home"],
@@ -14,17 +16,44 @@ const links = [
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const [logoUrl, setLogoUrl] = useState("");
+
+  const loadLogo = useCallback(() => {
+    pub
+      .settings()
+      .then((r) => setLogoUrl(r.data?.data?.logoUrl || ""))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    loadLogo();
+  }, [loadLogo]);
+
+  useContentRefresh(loadLogo);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
       <div className="container border-b border-white/5">
         <div className="h-[76px] flex items-center justify-between">
-          <Link to="/" onClick={() => setOpen(false)} className="leading-none">
-            <span className="text-xl font-bold text-white">
-              RAJRATNA <span className="text-[#78a9ff]">.</span>
-            </span>
-            <span className="block text-[9px] tracking-[.26em] text-slate-500 mt-0.5">
-              WEB SOLUTIONS
+          <Link
+            to="/"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-3 leading-none"
+          >
+            {logoUrl && (
+              <img
+                src={logoUrl}
+                alt="RAJRATNA WEB SOLUTIONS logo"
+                className="h-11 w-auto max-w-[110px] object-contain shrink-0"
+              />
+            )}
+            <span>
+              <span className="text-xl font-bold text-white block">
+                RAJRATNA <span className="text-[#78a9ff]">.</span>
+              </span>
+              <span className="block text-[9px] tracking-[.26em] text-slate-500 mt-0.5">
+                WEB SOLUTIONS
+              </span>
             </span>
           </Link>
 

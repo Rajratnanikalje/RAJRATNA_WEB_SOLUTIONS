@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Montserrat:wght@800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -197,6 +197,84 @@ body:before{
 
 @keyframes orb-float{
   50%{transform:translate3d(-30px,35px,0) scale(1.08)}
+}
+
+/* --- Hero v2: full-bleed photo + left content --- */
+.hero-bg{position:absolute;inset:0;z-index:0}
+.hero-bg img{width:100%;height:100%;object-fit:cover;object-position:center}
+.hero-bg-fallback{
+  position:absolute;inset:0;background:
+  radial-gradient(60% 80% at 78% 38%,#14315e 0,transparent 62%),
+  radial-gradient(52% 64% at 18% 82%,#0d2140 0,transparent 68%),
+  var(--blue-mid);
+}
+.hero-shade{
+  position:absolute;inset:0;background:
+  linear-gradient(90deg,rgba(4,10,20,.94) 0%,rgba(4,10,20,.84) 30%,rgba(4,10,20,.46) 58%,rgba(4,10,20,.16) 100%),
+  linear-gradient(180deg,rgba(4,10,20,.6) 0%,transparent 24%,rgba(4,10,20,.92) 97%);
+}
+.hero-tagline{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  font-size:12px;letter-spacing:.3em;text-transform:uppercase;
+  color:#e2ebfa;font-weight:600;
+}
+.hero-dot{
+  width:5px;height:5px;border-radius:99px;background:var(--acid);
+  box-shadow:0 0 10px rgba(120,169,255,.9);display:inline-block;
+}
+.hero-title-v2{
+  font-family:'Montserrat',var(--font-sans);font-weight:900;
+  font-size:clamp(44px,7vw,104px);line-height:.98;letter-spacing:.01em;
+  text-transform:uppercase;
+}
+.hero-silver{
+  background:linear-gradient(180deg,#fff 12%,#cdd9ec 55%,#8fa3c4 100%);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:transparent;
+  filter:drop-shadow(0 4px 18px rgba(0,0,0,.45));
+}
+.hero-blue{color:#4a90ff;text-shadow:0 0 34px rgba(59,130,246,.45)}
+.hero-sub{
+  font-size:clamp(18px,2.2vw,26px);font-weight:800;
+  color:#f2f6ff;letter-spacing:-.01em;
+}
+.hero-cta{
+  display:inline-flex;align-items:center;gap:14px;
+  padding:8px 8px 8px 26px;border-radius:999px;
+  background:linear-gradient(135deg,#5ea0ff 0,#2f6ff2 55%,#1f5fe0 100%);
+  color:#fff;font-weight:700;font-size:15px;
+  box-shadow:0 10px 30px rgba(47,111,242,.35);
+  transition:transform .25s,box-shadow .25s;
+}
+.hero-cta:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(47,111,242,.5)}
+.hero-cta-arrow{
+  width:38px;height:38px;border-radius:99px;flex-shrink:0;
+  background:rgba(255,255,255,.94);color:#1f5fe0;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+.hero-feature{border-left:1px solid rgba(120,169,255,.28);padding:4px 26px}
+.hero-feature:first-child{border-left:0;padding-left:0}
+@media (max-width:1023px){
+  .hero-feature{padding:4px 16px}
+  .hero-feature:nth-child(odd){border-left:0;padding-left:0}
+}
+.hero-script{
+  position:absolute;top:13%;right:3.5%;z-index:5;pointer-events:none;
+  font-family:'Caveat',cursive;font-weight:700;text-align:left;
+  font-size:clamp(30px,2.7vw,44px);line-height:1.16;color:#dbe7ff;
+  transform:rotate(-5deg);
+  text-shadow:0 2px 26px rgba(59,130,246,.55);
+}
+@media (max-width:1279px){.hero-script{display:none}}
+.hero-swoosh{
+  position:absolute;left:-4%;bottom:-5%;z-index:1;pointer-events:none;
+  width:min(56%,740px);height:auto;opacity:.85;
+}
+@media (max-width:767px){
+  .hero-shade{
+    background:linear-gradient(180deg,rgba(4,10,20,.9) 0%,rgba(4,10,20,.8) 45%,rgba(4,10,20,.96) 100%);
+  }
+  .hero-swoosh{opacity:.6}
 }
 
 .eyebrow-line{
@@ -622,8 +700,11 @@ body:before{
   .admin-shell .secondary{min-height:44px;padding:11px 15px}
   .admin-shell form .primary{width:100%}
   .admin-shell textarea.input{min-height:48px}
+  .admin-shell .p-6{padding:20px!important}
+  .admin-shell .p-7{padding:20px!important}
   .admin-shell .grid.sm\:grid-cols-2,
-  .admin-shell .grid.lg\:grid-cols-2{gap:12px}
+  .admin-shell .grid.lg\:grid-cols-2,
+  .admin-shell .grid.xl\:grid-cols-2{gap:12px}
   .admin-shell .border-b{border-color:rgba(181,204,241,.1)}
   .admin-shell .bg-white\/\[\.03\]{background:rgba(12,24,43,.5)}
   .admin-shell select.input{max-width:145px}
@@ -631,6 +712,8 @@ body:before{
   .admin-shell table th{padding:10px 8px;font-size:10px}
   .admin-shell table td{padding:8px 6px}
   .admin-shell .overflow-x-auto{-webkit-overflow-scrolling:touch}
+  .admin-shell table td .truncate,
+  .admin-shell table td .line-clamp-2{max-width:100%}
 }
 
 @media(max-width:700px){

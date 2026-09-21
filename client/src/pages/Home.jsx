@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
+  ArrowRight,
   ArrowUpRight,
+  Cloud,
   Code,
   Globe,
   Layout,
@@ -13,6 +15,7 @@ import {
   Zap,
 } from "lucide-react";
 import { pub } from "../services/api";
+import useContentRefresh from "../hooks/useContentRefresh";
 import { Card, Reveal, Heading } from "../components/UI";
 
 const techStack = [
@@ -82,17 +85,11 @@ const steps = [
   },
 ];
 
-const codeLines = [
-  { text: "<!DOCTYPE html>", color: "text-pink-400" },
-  { text: "<html lang='en'>", color: "text-pink-400" },
-  { text: "  <head>", color: "text-emerald-400" },
-  { text: "    <meta charset='UTF-8' />", color: "text-emerald-400" },
-  { text: "    <title>RWS</title>", color: "text-emerald-400" },
-  { text: "  </head>", color: "text-pink-400" },
-  { text: "  <body>", color: "text-pink-400" },
-  { text: "    <div class='gradient'>Your Vision | Our Code</div>", color: "text-blue-400" },
-  { text: "  </body>", color: "text-pink-400" },
-  { text: "</html>", color: "text-pink-400" },
+const heroFeatures = [
+  { icon: Code, title: "Web Development", sub: "Modern & Scalable" },
+  { icon: Smartphone, title: "Responsive Design", sub: "All Devices" },
+  { icon: Cloud, title: "API Integration", sub: "Seamless & Secure" },
+  { icon: Rocket, title: "Ongoing Support", sub: "Always With You" },
 ];
 
 export default function Home() {
@@ -100,9 +97,13 @@ export default function Home() {
   const [projects, setProjects] = useState([]);
   const [technologies, setTechnologies] = useState([]);
   const [counts, setCounts] = useState({ projects: 0, services: 0, tech: 0 });
+  const [settings, setSettings] = useState({});
   const [loading, setLoading] = useState({ services: true, projects: true, tech: true });
 
-  useEffect(() => {
+  const loadHomeContent = useCallback((silent = false) => {
+    if (!silent) {
+      setLoading({ services: true, projects: true, tech: true });
+    }
     pub
       .projects()
       .then((r) => {
@@ -111,6 +112,11 @@ export default function Home() {
         setCounts((c) => ({ ...c, projects: d.length }));
       })
       .finally(() => setLoading((l) => ({ ...l, projects: false })));
+
+    pub
+      .settings()
+      .then((r) => setSettings(r.data?.data || {}))
+      .catch(() => {});
 
     pub
       .services()
@@ -129,84 +135,135 @@ export default function Home() {
         setCounts((c) => ({ ...c, tech: d.length }));
       })
       .finally(() => setLoading((l) => ({ ...l, tech: false })));
-
-    pub.view().catch(() => {});
   }, []);
+
+  useEffect(() => {
+    loadHomeContent();
+    pub.view().catch(() => {});
+  }, [loadHomeContent]);
+
+  // Re-fetch silently when the admin saves new content (same tab, other
+  // tab, or when this tab becomes visible again) — no manual refresh needed.
+  useContentRefresh(() => loadHomeContent(true));
 
   return (
     <>
       {/* ===== HERO ===== */}
-      <section className="hero-section relative min-h-screen flex items-center overflow-hidden pt-24">
-        <div className="hero-orb hero-orb--one" />
-        <div className="hero-orb hero-orb--two" />
-        <div className="hero-orb hero-orb--three" />
-        <div className="container relative grid lg:grid-cols-[1.1fr_0.9fr] gap-12 items-center py-20">
+      <section className="hero-section relative min-h-screen flex flex-col overflow-hidden pt-28">
+        {/* Full-bleed background — upload via Admin → Settings → Hero Image */}
+        <div className="hero-bg">
+          {settings.heroImageUrl ? (
+            <img
+              src={settings.heroImageUrl}
+              alt="Rajratna Web Solutions — modern workspace"
+            />
+          ) : (
+            <div className="hero-bg-fallback" />
+          )}
+          <div className="hero-orb hero-orb--two" />
+          <div className="hero-orb hero-orb--three" />
+          <div className="hero-shade" />
+        </div>
+
+        {/* Handwritten accent — top right */}
+        <div className="hero-script" aria-hidden="true">
+          Design
+          <br />
+          Develop
+          <br />
+          Deploy
+          <br />
+          Grow
+        </div>
+
+        {/* Blue swoosh curves — bottom left */}
+        <svg
+          className="hero-swoosh hidden sm:block"
+          viewBox="0 0 900 320"
+          fill="none"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <defs>
+            <linearGradient id="swooshA" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stopColor="#0a3f8f" stopOpacity="0.95" />
+              <stop offset="1" stopColor="#1f6feb" stopOpacity="0" />
+            </linearGradient>
+            <linearGradient id="swooshB" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stopColor="#3b82f6" />
+              <stop offset="1" stopColor="#78a9ff" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M-60 290 C 210 150, 470 95, 950 30"
+            stroke="url(#swooshA)"
+            strokeWidth="90"
+            strokeLinecap="round"
+            opacity="0.5"
+          />
+          <path
+            d="M-60 315 C 230 175, 490 125, 950 75"
+            stroke="url(#swooshB)"
+            strokeWidth="24"
+            strokeLinecap="round"
+          />
+        </svg>
+
+        {/* Main content — left */}
+        <div className="container relative z-10 flex-1 flex items-center">
           <Reveal>
-            <div>
-              <div className="label">
-                <span className="eyebrow-line" />
-                Rajratna Web Solutions &middot; India
+            <div className="max-w-2xl pb-10">
+              <div className="hero-tagline">
+                <span>Your Vision</span>
+                <span className="hero-dot" />
+                <span>Our Code</span>
+                <span className="hero-dot" />
+                <span>Digital Success</span>
               </div>
 
-              <h1 className="hero-title font-['Playfair_Display'] font-bold mt-8">
-                RAJRATNA
+              <h1 className="hero-title-v2 mt-7">
+                <span className="hero-silver">Rajratna</span>
                 <br />
-                <span className="text-gradient">WEB SOLUTIONS</span>
+                <span className="hero-blue">Web Solution</span>
               </h1>
 
-              <p className="text-lg text-[#78a9ff] font-mono mt-4 tracking-wider">
-                Your Vision | Our Code
+              <p className="hero-sub mt-7">
+                Build Your Ideas Into Powerful Digital Experiences
               </p>
 
-              <p className="muted text-base md:text-lg leading-8 max-w-xl mt-6">
-                We build modern, responsive, secure and high-performing
-                websites and web applications that scale with your ambitions.
+              <p className="muted text-base md:text-lg leading-8 max-w-xl mt-4">
+                We create modern websites, powerful web applications and
+                digital solutions that help your business grow in the digital
+                world.
               </p>
 
-              <div className="flex flex-wrap gap-3 mt-8">
-                <Link to="/contact" className="primary">
-                  GET A FREE QUOTE <ArrowUpRight size={15} />
-                </Link>
-                <Link to="/portfolio" className="secondary">
-                  VIEW OUR WORK <ArrowUpRight size={15} />
+              <div className="mt-9">
+                <Link to="/contact" className="hero-cta">
+                  Let&rsquo;s Build Together
+                  <span className="hero-cta-arrow">
+                    <ArrowRight size={16} strokeWidth={2.4} />
+                  </span>
                 </Link>
               </div>
             </div>
           </Reveal>
+        </div>
 
-            <Reveal delay={0.2}>
-              <div className="laptop">
-                <div className="laptop-screen">
-                  <div className="p-5 overflow-x-auto">
-                    <div className="flex items-center gap-2 pb-3 border-b border-white/10 mb-4">
-                      <span className="w-3 h-3 rounded-full bg-red-400" />
-                      <span className="w-3 h-3 rounded-full bg-yellow-400" />
-                      <span className="w-3 h-3 rounded-full bg-green-400" />
-                    </div>
-                    <div className="font-mono text-sm space-y-1 text-slate-300">
-                      {codeLines.map((line, i) => (
-                        <div key={i} className="flex">
-                          <span className="text-slate-600 w-12 text-right mr-3 select-none">
-                            {i + 1}
-                          </span>
-                          <span className={line.color}>{line.text}</span>
-                        </div>
-                      ))}
-                      <div className="flex mt-2">
-                        <span className="text-slate-600 w-12 text-right mr-3 select-none">
-                          {codeLines.length + 1}
-                        </span>
-                        <span className="text-[#78a9ff]">
-                          &lt;Your Vision /&gt;
-                          <span className="cursor-blink" />
-                        </span>
-                      </div>
-                    </div>
+        {/* Feature strip — bottom */}
+        <div className="container relative z-10 pb-12">
+          <Reveal delay={0.15}>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-8">
+              {heroFeatures.map((f) => (
+                <div className="hero-feature" key={f.title}>
+                  <f.icon size={22} className="text-[#78a9ff]" />
+                  <div className="mt-2.5 text-sm font-bold text-white">
+                    {f.title}
                   </div>
+                  <div className="text-xs text-slate-400 mt-1">{f.sub}</div>
                 </div>
-                <div className="laptop-base"></div>
-              </div>
-            </Reveal>
+              ))}
+            </div>
+          </Reveal>
         </div>
       </section>
 
@@ -380,9 +437,17 @@ export default function Home() {
               {services.map((s, i) => (
                 <Reveal key={s._id || i} delay={i * 0.06}>
                   <Card className="service-card p-7 h-full group">
+                    {s.imageUrl ? (
+                      <img
+                        src={s.imageUrl}
+                        alt={s.title}
+                        className="w-full h-40 object-cover rounded-2xl border border-white/10 mb-6"
+                      />
+                    ) : (
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#78a9ff] to-[#3b82f6] flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(120,169,255,.3)]">
                       <Code size={20} className="text-slate-900" />
                     </div>
+                    )}
                     <div className="text-xs text-slate-500 font-mono">
                       0{i + 1}
                     </div>
@@ -472,7 +537,7 @@ export default function Home() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-12">
               {projects.slice(0, 6).map((p, i) => (
                 <Reveal key={p._id || i} delay={i * 0.06}>
-                  <Card className="portfolio-card group overflow-hidden">
+                  <Card className="portfolio-card group overflow-hidden h-full">
                     <div className="h-56 bg-gradient-to-br from-[#1a2a4a]/50 to-[#0a1429]/50 flex items-center justify-center overflow-hidden">
                       {p.imageUrl ? (
                         <img
@@ -486,11 +551,11 @@ export default function Home() {
                         </span>
                       )}
                     </div>
-                    <div className="p-6">
+                    <div className="p-6 flex-1 flex flex-col">
                       <div className="text-[#78a9ff] text-xs font-mono">
                         {p.category || "Project"}
                       </div>
-                      <h3 className="font-bold text-lg mt-2 group-hover:text-[#78a9ff] transition-colors">
+                      <h3 className="font-bold text-lg mt-2 line-clamp-2 group-hover:text-[#78a9ff] transition-colors">
                         {p.name}
                       </h3>
                       <p className="muted text-sm leading-6 mt-2 line-clamp-2">
@@ -508,14 +573,16 @@ export default function Home() {
                           ))}
                         </div>
                       )}
-                      <a
-                        href={p.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="secondary mt-5 text-xs w-full group-hover:border-[#78a9ff] transition-colors"
-                      >
-                        View Project <ArrowUpRight size={13} />
-                      </a>
+                      <div className="mt-auto pt-5">
+                        <a
+                          href={p.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="secondary text-xs w-full group-hover:border-[#78a9ff] transition-colors"
+                        >
+                          View Project <ArrowUpRight size={13} />
+                        </a>
+                      </div>
                     </div>
                   </Card>
                 </Reveal>

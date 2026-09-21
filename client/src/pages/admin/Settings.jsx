@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Save, AlertCircle } from "lucide-react";
 import { admin } from "../../services/api";
+import { notifyContentUpdated } from "../../hooks/useContentRefresh";
+import ImageUploader from "../../components/ImageUploader";
 import { Card } from "../../components/UI";
 
 const keys = [
@@ -14,6 +16,25 @@ const keys = [
   "seoDescription",
   "faviconUrl",
 ];
+
+// Image settings use the direct upload control instead of a pasted URL.
+const imageFields = {
+  logoUrl: {
+    label: "Logo",
+    previewHeight: "h-36",
+    hint: "PNG or WEBP with a transparent background works best. Shown in the website navbar.",
+  },
+  heroImageUrl: {
+    label: "Hero Image",
+    previewHeight: "h-44",
+    hint: "Full-width background photo for the home page hero. Landscape 1920×1080 or larger works best.",
+  },
+  faviconUrl: {
+    label: "Favicon",
+    previewHeight: "h-24",
+    hint: "Square PNG, 512 x 512 recommended.",
+  },
+};
 
 export default function Settings() {
   const [form, setForm] = useState({});
@@ -37,6 +58,7 @@ export default function Settings() {
     setSuccess("");
     try {
       await admin.settings.save(form);
+      notifyContentUpdated();
       setSuccess("Settings saved successfully.");
     } catch (e) {
       setError(e.response?.data?.message || "Could not save settings.");
@@ -88,9 +110,16 @@ export default function Settings() {
           {keys.map((k) => (
             <div key={k}>
               <label className="text-xs font-medium text-slate-400 mb-1 block capitalize">
-                {k.replace(/([A-Z])/g, " $1").trim()}
+                {imageFields[k]?.label || k.replace(/([A-Z])/g, " $1").trim()}
               </label>
-              {k === "seoDescription" ? (
+              {imageFields[k] ? (
+                <ImageUploader
+                  value={form[k] || ""}
+                  onChange={(url) => handleChange(k, url)}
+                  previewHeight={imageFields[k].previewHeight}
+                  hint={imageFields[k].hint}
+                />
+              ) : k === "seoDescription" ? (
                 <textarea
                   className="input"
                   rows={3}

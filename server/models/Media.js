@@ -1,1 +1,0 @@
-import mongoose from"mongoose";export default mongoose.model("Media",new mongoose.Schema({url:{type:String,required:true},publicId:{type:String,unique:true,required:true},resourceType:{type:String,default:"image"},alt:String},{timestamps:true}));

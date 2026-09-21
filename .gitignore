@@ -6,4 +6,7 @@ dist/
 
 .env.*
 
+# Keep the documented templates committable (they hold no secrets).
+!.env.example
+
 npm-debug.log*

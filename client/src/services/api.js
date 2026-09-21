@@ -19,10 +19,10 @@ api.interceptors.response.use(
   },
 );
 export const pub = {
-  services: () => api.get("/services/public"),
-  projects: () => api.get("/projects/public"),
-  technologies: () => api.get("/technologies/public"),
-  settings: () => api.get("/settings/public"),
+  services: () => api.get("/services/public", { params: { _t: Date.now() } }),
+  projects: () => api.get("/projects/public", { params: { _t: Date.now() } }),
+  technologies: () => api.get("/technologies/public", { params: { _t: Date.now() } }),
+  settings: () => api.get("/settings/public", { params: { _t: Date.now() } }),
   enquiry: (d) => api.post("/enquiries", d),
   view: () => api.post("/dashboard/view"),
 };
@@ -56,13 +56,12 @@ export const admin = {
     get: () => api.get("/settings"),
     save: (d) => api.put("/settings", d),
   },
-  media: {
-    list: () => api.get("/media"),
-    upload: (d) =>
-      api.post("/media", d, {
-        headers: { "Content-Type": "multipart/form-data" },
-      }),
-    del: (id) => api.delete(`/media/${id}`),
+  uploads: {
+    image: (file) => {
+      const data = new FormData();
+      data.append("image", file);
+      return api.post("/uploads/image", data);
+    },
   },
 };
 export default api;

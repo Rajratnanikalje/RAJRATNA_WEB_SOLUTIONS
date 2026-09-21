@@ -240,41 +240,46 @@ function RecentEnquiriesTable({ enquiries, loading }) {
         className="border-t border-white/5 hover:bg-white/[.02]"
       >
         <td className="py-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             <div
-              className={`w-2 h-2 rounded-full ${
+              className={`w-2 h-2 rounded-full shrink-0 ${
                 isNew
                   ? "bg-[#78a9ff] shadow-[0_0_8px_rgba(120,169,255,.5)]"
                   : "bg-slate-600"
               }`}
             />
-            <b
-              className={`truncate ${
-                isNew ? "text-white" : "text-slate-300"
-              }`}
-            >
-              {item.name}
-            </b>
+            <div className="min-w-0">
+              <b
+                className={`block truncate ${
+                  isNew ? "text-white" : "text-slate-300"
+                }`}
+                title={item.name}
+              >
+                {item.name}
+              </b>
+              <span className="block text-xs text-slate-500 truncate">
+                {formatDate(item.createdAt)}
+              </span>
+            </div>
           </div>
         </td>
         <td className="py-3 text-slate-400">
-          <div className="break-all">{item.email}</div>
+          <div className="truncate" title={item.email}>
+            {item.email}
+          </div>
           {item.phone && (
-            <div className="text-xs mt-0.5 break-all">
+            <div className="text-xs mt-0.5 truncate" title={item.phone}>
               {item.phone}
             </div>
           )}
         </td>
         <td className="py-3">
           <span
-            className={`text-xs px-2.5 py-1 rounded-full border flex items-center gap-1.5 w-fit ${statusClass}`}
+            className={`text-xs px-2.5 py-1 rounded-full border flex items-center gap-1.5 w-fit whitespace-nowrap ${statusClass}`}
           >
             <Icon size={10} />
             {item.status}
           </span>
-        </td>
-        <td className="py-3 text-slate-500">
-          {formatDate(item.createdAt)}
         </td>
         <td className="py-3">
           <div className="flex justify-end gap-1.5">
@@ -294,40 +299,45 @@ function RecentEnquiriesTable({ enquiries, loading }) {
     return (
       <div
         key={item._id}
-        className="border-t border-white/5 py-3"
+        className="py-3"
       >
-        <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center gap-2">
           <div
-            className={`w-2 h-2 rounded-full ${
+            className={`w-2 h-2 rounded-full shrink-0 ${
               isNew
                 ? "bg-[#78a9ff] shadow-[0_0_8px_rgba(120,169,255,.5)]"
                 : "bg-slate-600"
             }`}
           />
           <b
-            className={`truncate ${isNew ? "text-white" : "text-slate-300"}`}
+            className={`flex-1 min-w-0 truncate block ${isNew ? "text-white" : "text-slate-300"}`}
+            title={item.name}
           >
             {item.name}
           </b>
+          <span className="text-xs text-slate-500 shrink-0 whitespace-nowrap">
+            {formatDate(item.createdAt)}
+          </span>
         </div>
-        <div className="text-sm text-slate-400 mb-2 space-y-0.5">
-          <div className="break-all">{item.email}</div>
+        <div className="text-sm text-slate-400 mt-1.5 space-y-0.5">
+          <div className="truncate" title={item.email}>
+            {item.email}
+          </div>
           {item.phone && (
-            <div className="text-xs break-all">{item.phone}</div>
+            <div className="text-xs truncate" title={item.phone}>
+              {item.phone}
+            </div>
           )}
         </div>
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mt-2.5 gap-2">
           <span
-            className={`text-xs px-2.5 py-1 rounded-full border flex items-center gap-1.5 w-fit ${statusClass}`}
+            className={`text-xs px-2.5 py-1 rounded-full border flex items-center gap-1.5 w-fit whitespace-nowrap shrink-0 ${statusClass}`}
           >
             <Icon size={10} />
             {item.status}
           </span>
-          <span className="text-xs text-slate-500">
-            {formatDate(item.createdAt)}
-          </span>
+          <div className="flex gap-1 shrink-0">{renderEnquiryActions(item)}</div>
         </div>
-        <div className="flex gap-1">{renderEnquiryActions(item)}</div>
       </div>
     );
   };
@@ -349,14 +359,13 @@ function RecentEnquiriesTable({ enquiries, loading }) {
         </Link>
       </div>
 
-      <div className="hidden sm:block overflow-x-auto">
-        <table className="w-full text-sm">
+      <div className="hidden sm:block">
+        <table className="w-full text-sm table-fixed">
           <thead>
             <tr>
-              <th className="text-left whitespace-nowrap">Customer</th>
-              <th className="text-left whitespace-nowrap">Contact</th>
-              <th className="text-left whitespace-nowrap">Status</th>
-              <th className="text-left whitespace-nowrap">Date</th>
+              <th className="text-left whitespace-nowrap w-[26%]">Customer</th>
+              <th className="text-left whitespace-nowrap w-[30%]">Contact</th>
+              <th className="text-left whitespace-nowrap w-[22%]">Status</th>
               <th className="text-right whitespace-nowrap">Actions</th>
             </tr>
           </thead>
@@ -364,14 +373,14 @@ function RecentEnquiriesTable({ enquiries, loading }) {
             {loading ? (
               [1, 2, 3, 4].map((n) => (
                 <tr key={n}>
-                  <td colSpan={5}>
+                  <td colSpan={4}>
                     <div className="h-12 bg-white/5 rounded animate-pulse" />
                   </td>
                 </tr>
               ))
             ) : enquiries.length === 0 ? (
               <tr>
-                <td colSpan={5} className="text-center py-8 text-slate-500">
+                <td colSpan={4} className="text-center py-8 text-slate-500">
                   No enquiries yet.
                 </td>
               </tr>
@@ -382,7 +391,7 @@ function RecentEnquiriesTable({ enquiries, loading }) {
         </table>
       </div>
 
-      <div className="sm:hidden space-y-0">
+      <div className="sm:hidden divide-y divide-white/5">
         {loading ? (
           [1, 2, 3, 4].map((n) => (
             <div key={n} className="h-14 bg-white/5 rounded animate-pulse" />
@@ -411,13 +420,13 @@ function RecentProjectsTable({ projects, loading }) {
         <img
           src={item.imageUrl}
           alt={item.name}
-          className={`${size} rounded-lg object-cover border border-white/10`}
+          className={`${size} rounded-lg object-cover border border-white/10 shrink-0`}
         />
       );
     }
     return (
       <div
-        className={`${size} rounded-lg bg-gradient-to-br from-[#78a9ff]/20 to-[#3b82f6]/10 border border-[#78a9ff]/20 flex items-center justify-center`}
+        className={`${size} rounded-lg bg-gradient-to-br from-[#78a9ff]/20 to-[#3b82f6]/10 border border-[#78a9ff]/20 flex items-center justify-center shrink-0`}
       >
         <FolderKanban size={18} className="text-[#78a9ff]" />
       </div>
@@ -425,8 +434,8 @@ function RecentProjectsTable({ projects, loading }) {
   };
 
   const renderTechTags = (item) => (
-    <div className="flex flex-wrap gap-1">
-      {(item.technologies || []).slice(0, 3).map((tech) => (
+    <div className="flex flex-wrap gap-1 min-w-0">
+      {(item.technologies || []).slice(0, 2).map((tech) => (
         <span
           key={tech}
           className="text-xs px-2 py-0.5 rounded bg-[#78a9ff]/5 border border-[#78a9ff]/15 text-slate-400"
@@ -434,9 +443,9 @@ function RecentProjectsTable({ projects, loading }) {
           {tech}
         </span>
       ))}
-      {(item.technologies || []).length > 3 && (
+      {(item.technologies || []).length > 2 && (
         <span className="text-xs text-slate-600">
-          +{item.technologies.length - 3}
+          +{item.technologies.length - 2}
         </span>
       )}
     </div>
@@ -444,7 +453,7 @@ function RecentProjectsTable({ projects, loading }) {
 
   const renderStatusBadge = (item) => (
     <span
-      className={`text-xs px-2.5 py-1 rounded-full border ${
+      className={`text-xs px-2.5 py-1 rounded-full border whitespace-nowrap w-fit ${
         item.published
           ? "bg-green-500/15 text-green-300 border-green-500/30"
           : "bg-slate-500/15 text-slate-400 border-slate-500/30"
@@ -497,13 +506,13 @@ function RecentProjectsTable({ projects, loading }) {
         className="border-t border-white/5 hover:bg-white/[.02]"
       >
         <td className="py-3">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             {renderProjectImage(item)}
-            <div>
-              <b className="text-slate-200 block truncate">
+            <div className="min-w-0">
+              <b className="text-slate-200 block truncate" title={item.name}>
                 {item.name}
               </b>
-              <span className="text-xs text-slate-500 block mt-0.5">
+              <span className="text-xs text-slate-500 block mt-0.5 truncate">
                 {formatDate(item.createdAt)}
               </span>
             </div>
@@ -524,12 +533,12 @@ function RecentProjectsTable({ projects, loading }) {
     return (
       <div
         key={item._id}
-        className="border-t border-white/5 py-3"
+        className="py-3"
       >
         <div className="flex items-center gap-3">
           {renderProjectImage(item)}
           <div className="flex-1 min-w-0">
-            <b className="text-slate-200 block truncate">
+            <b className="text-slate-200 block truncate" title={item.name}>
               {item.name}
             </b>
             <span className="text-xs text-slate-500 block mt-0.5">
@@ -538,11 +547,13 @@ function RecentProjectsTable({ projects, loading }) {
           </div>
         </div>
 
-        <div className="mt-2">{renderTechTags(item)}</div>
+        {(item.technologies || []).length > 0 && (
+          <div className="mt-2">{renderTechTags(item)}</div>
+        )}
 
-        <div className="flex items-center justify-between mt-2">
+        <div className="flex items-center justify-between mt-2.5 gap-2">
           {renderStatusBadge(item)}
-          <div className="flex gap-1">{renderProjectActions(item)}</div>
+          <div className="flex gap-1 shrink-0">{renderProjectActions(item)}</div>
         </div>
       </div>
     );
@@ -565,13 +576,13 @@ function RecentProjectsTable({ projects, loading }) {
         </Link>
       </div>
 
-      <div className="hidden sm:block overflow-x-auto">
-        <table className="w-full text-sm">
+      <div className="hidden sm:block">
+        <table className="w-full text-sm table-fixed">
           <thead>
             <tr>
-              <th className="text-left whitespace-nowrap">Project</th>
-              <th className="text-left whitespace-nowrap">Technologies</th>
-              <th className="text-left whitespace-nowrap">Status</th>
+              <th className="text-left whitespace-nowrap w-[32%]">Project</th>
+              <th className="text-left whitespace-nowrap w-[28%]">Technologies</th>
+              <th className="text-left whitespace-nowrap w-[22%]">Status</th>
               <th className="text-right whitespace-nowrap">Actions</th>
             </tr>
           </thead>
@@ -597,7 +608,7 @@ function RecentProjectsTable({ projects, loading }) {
         </table>
       </div>
 
-      <div className="sm:hidden space-y-0">
+      <div className="sm:hidden divide-y divide-white/5">
         {loading ? (
           [1, 2, 3].map((n) => (
             <div key={n} className="h-14 bg-white/5 rounded animate-pulse" />
@@ -616,7 +627,6 @@ function QuickActions() {
   const actions = [
     { label: "Add New Project", icon: Briefcase, to: "/admin/projects" },
     { label: "Add Service", icon: BarChart3, to: "/admin/services" },
-    { label: "Manage Media", icon: Eye, to: "/admin/media" },
     { label: "View Enquiries", icon: Inbox, to: "/admin/enquiries" },
   ];
 

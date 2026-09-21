@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Mail, MapPin, Phone, Send } from "lucide-react";
 import { pub } from "../services/api";
+import useContentRefresh from "../hooks/useContentRefresh";
 import { Card, Reveal, Heading } from "../components/UI";
 
 const initialState = { name: "", email: "", phone: "", message: "" };
@@ -10,9 +11,15 @@ export default function Contact() {
   const [settings, setSettings] = useState({});
   const [status, setStatus] = useState({ busy: false, error: "", ok: "" });
 
-  useEffect(() => {
+  const loadContactSettings = useCallback(() => {
     pub.settings().then((r) => setSettings(r.data.data || {})).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    loadContactSettings();
+  }, [loadContactSettings]);
+
+  useContentRefresh(loadContactSettings);
 
   const validate = () => {
     if (!form.name.trim()) return "Name is required.";

@@ -6,7 +6,6 @@ import {
   Briefcase,
   Cpu,
   FolderKanban,
-  Image,
   Inbox,
   LayoutDashboard,
   LogOut,
@@ -27,7 +26,6 @@ const mainLinks = [
   ["projects", "Projects", FolderKanban],
   ["technologies", "Technologies", Cpu],
   ["enquiries", "Enquiries", Inbox],
-  ["media", "Media", Image],
 ];
 
 const systemLinks = [["settings", "Settings", Settings]];
@@ -437,7 +435,7 @@ export default function AdminLayout() {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#78a9ff] to-[#3b82f6] flex items-center justify-center">
               <Sparkles size={16} className="text-slate-900" />
             </div>
-            <b className="text-xl text-slate-300">
+            <b className="text-lg text-slate-300">
               RAJRATNA <span className="text-[#78a9ff]">CMS</span>
             </b>
           </div>
@@ -463,8 +461,8 @@ export default function AdminLayout() {
       </header>
 
       {/* Desktop Header */}
-      <header className="hidden lg:block sticky top-0 z-40 mb-6">
-        <div className="flex justify-between items-center px-6 py-3 ml-64">
+      <header className="hidden lg:block sticky top-0 z-30 mb-6">
+        <div className="flex justify-between items-center px-6 py-3 ml-64 bg-[#0a1429]/90 backdrop-blur-xl border-b border-[#78a9ff]/10">
           {/* Search */}
           <div className="relative w-80">
             <Search

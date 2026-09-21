@@ -1,7 +1,7 @@
 import Service from"../models/Service.js";import Project from"../models/Project.js";import Technology from"../models/Technology.js";
 const M={services:Service,projects:Project,technologies:Technology};
-const pick=(type,b)=>{const fields={services:["title","description","imageUrl","published"],projects:["name","title","description","technologies","url","imageUrl","published"],technologies:["name","category","iconUrl","published"]}[type];return Object.fromEntries(fields.filter(k=>b[k]!==undefined).map(k=>[k,b[k]]))};
-export async function list(req,res){res.json({data:await M[req.params.type].find().sort({createdAt:-1})})}
-export async function pub(req,res){res.json({data:await M[req.params.type].find({published:true}).sort({createdAt:-1})})}
-export async function save(req,res){const m=M[req.params.type],d=pick(req.params.type,req.body);const x=req.params.id?await m.findByIdAndUpdate(req.params.id,d,{new:true,runValidators:true}):await m.create(d);if(!x)return res.status(404).json({message:"Record not found"});res.status(req.params.id?200:201).json({data:x})}
-export async function del(req,res){const x=await M[req.params.type].findByIdAndDelete(req.params.id);if(!x)return res.status(404).json({message:"Record not found"});res.json({message:"Deleted"})}
+const pick=(type,b)=>{const fields={services:["title","description","imageUrl","published"],projects:["name","title","category","description","technologies","url","imageUrl","published"],technologies:["name","category","iconUrl","published"]}[type];return Object.fromEntries(fields.filter(k=>b[k]!==undefined).map(k=>[k,b[k]]))};
+export async function list(req,res){res.set("Cache-Control","no-store");res.json({data:await M[req.params.type].find().sort({createdAt:-1})})}
+export async function pub(req,res){res.set("Cache-Control","no-store");res.json({data:await M[req.params.type].find({published:true}).sort({createdAt:-1})})}
+export async function save(req,res){res.set("Cache-Control","no-store");const m=M[req.params.type],d=pick(req.params.type,req.body);const x=req.params.id?await m.findByIdAndUpdate(req.params.id,d,{new:true,runValidators:true}):await m.create(d);if(!x)return res.status(404).json({message:"Record not found"});res.status(req.params.id?200:201).json({data:x})}
+export async function del(req,res){res.set("Cache-Control","no-store");const x=await M[req.params.type].findByIdAndDelete(req.params.id);if(!x)return res.status(404).json({message:"Record not found"});res.json({message:"Deleted"})}

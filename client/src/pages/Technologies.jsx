@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Code, Cpu, Database, Globe, Server, Zap } from "lucide-react";
 import { pub } from "../services/api";
+import useContentRefresh from "../hooks/useContentRefresh";
 import { Card, Reveal, Heading } from "../components/UI";
 
 const categoryIcons = {
@@ -17,7 +18,8 @@ export default function Technologies() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
+  const loadTechs = useCallback((silent = false) => {
+    if (!silent) setLoading(true);
     pub
       .technologies()
       .then((r) => {
@@ -30,6 +32,12 @@ export default function Technologies() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    loadTechs();
+  }, [loadTechs]);
+
+  useContentRefresh(() => loadTechs(true));
 
   return (
     <section className="section pt-40">

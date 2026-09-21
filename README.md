@@ -41,12 +41,12 @@ http://localhost:5173/admin/login
 - Customer enquiries with status management
 - Call, Email and WhatsApp actions
 - New-enquiry notification tracking
-- Cloudinary media management
+- Direct image upload (JPG/JPEG/PNG/WEBP) for services, projects, technologies and site images via Cloudinary
 - Website/contact/SEO settings
 - Responsive public website and admin panel
 
 ## Important
 - Never commit or share `.env` files.
-- Configure Cloudinary before using Media uploads.
+- Configure Cloudinary before using image uploads.
 - The frontend uses the backend/MongoDB data as the source of truth; it does not silently replace failed API data with fake sample records.
 - `vite.config.js` retains the existing Framer Motion/Motion DOM dependency optimization workaround. Do not remove it unless the runtime issue is re-tested and resolved.

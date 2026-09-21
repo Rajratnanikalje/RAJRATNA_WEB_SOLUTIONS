@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Edit, Trash2, Save, X, Plus, AlertCircle, CheckCircle } from "lucide-react";
 import { admin } from "../../services/api";
+import { notifyContentUpdated } from "../../hooks/useContentRefresh";
+import ImageUploader from "../../components/ImageUploader";
 import { Card } from "../../components/UI";
 
 const cfg = {
@@ -10,7 +12,7 @@ const cfg = {
     fields: [
       { key: "title", label: "Title", type: "text", placeholder: "Service title" },
       { key: "description", label: "Description", type: "textarea", placeholder: "Brief description of this service" },
-      { key: "imageUrl", label: "Image URL", type: "text", placeholder: "https://..." },
+      { key: "imageUrl", label: "Service Image", type: "image", imageHint: "JPG, JPEG, PNG or WEBP up to 8 MB." },
     ],
   },
   projects: {
@@ -18,11 +20,12 @@ const cfg = {
     singular: "Project",
     fields: [
       { key: "name", label: "Name", type: "text", placeholder: "Project name" },
+      { key: "category", label: "Category", type: "text", placeholder: "Web App / E-commerce / Portfolio" },
       { key: "title", label: "Title", type: "text", placeholder: "Project headline" },
       { key: "description", label: "Description", type: "textarea", placeholder: "Project description" },
       { key: "url", label: "URL", type: "text", placeholder: "https://..." },
       { key: "technologies", label: "Tech Stack (comma separated)", type: "text", placeholder: "React, Node.js, MongoDB" },
-      { key: "imageUrl", label: "Image URL", type: "text", placeholder: "https://..." },
+      { key: "imageUrl", label: "Project Image", type: "image", imageHint: "JPG, JPEG, PNG or WEBP up to 8 MB. Shown on the public Portfolio and home page." },
     ],
   },
   technologies: {
@@ -31,7 +34,7 @@ const cfg = {
     fields: [
       { key: "name", label: "Name", type: "text", placeholder: "Technology name" },
       { key: "category", label: "Category", type: "text", placeholder: "Frontend / Backend / Database" },
-      { key: "iconUrl", label: "Icon URL", type: "text", placeholder: "https://..." },
+      { key: "iconUrl", label: "Technology Icon", type: "image", imageHint: "Square transparent PNG works best. JPG, JPEG, PNG or WEBP up to 8 MB." },
     ],
   },
 };
@@ -56,8 +59,17 @@ export default function CMS({ type }) {
   };
 
   useEffect(() => {
+    // The admin routes reuse this component for Services / Projects /
+    // Technologies, so reset and re-fetch whenever the section (type)
+    // changes — otherwise the previous section's list and form stayed
+    // visible until a full page refresh.
+    setItems([]);
+    setForm({});
+    setEditId(null);
+    setError("");
+    setSuccess("");
     load();
-  }, []);
+  }, [type]);
 
   const startEdit = (item) => {
     setEditId(item._id);
@@ -100,6 +112,9 @@ export default function CMS({ type }) {
       setForm({});
       setEditId(null);
       load();
+      // Tell any open public page (same tab or another tab) to re-fetch,
+      // so new content appears without a manual browser refresh.
+      notifyContentUpdated();
     } catch (e) {
       setError(e.response?.data?.message || "Save failed");
     } finally {
@@ -112,6 +127,8 @@ export default function CMS({ type }) {
     try {
       await A.del(id);
       load();
+      // Public pages (e.g. Portfolio) must drop the deleted item immediately.
+      notifyContentUpdated();
     } catch (e) {
       setError(e.response?.data?.message || "Delete failed");
     }
@@ -123,6 +140,17 @@ export default function CMS({ type }) {
 
   const renderField = (f) => {
     const value = form[f.key] ?? "";
+    if (f.type === "image") {
+      return (
+        <ImageUploader
+          key={f.key}
+          value={value}
+          onChange={(url) => handleChange(f.key, url)}
+          previewHeight={f.key === "iconUrl" ? "h-28" : "h-44"}
+          hint={f.imageHint}
+        />
+      );
+    }
     if (f.type === "textarea") {
       return (
         <textarea
@@ -244,14 +272,14 @@ export default function CMS({ type }) {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-sm table-fixed">
                 <thead>
                   <tr>
-                    <th className="text-left">
+                    <th className="text-left whitespace-nowrap w-[38%]">
                       {type === "projects" ? "Name" : type === "services" ? "Title" : "Name"}
                     </th>
-                    <th className="text-left">Details</th>
-                    <th className="text-right">Actions</th>
+                    <th className="text-left whitespace-nowrap w-[42%]">Details</th>
+                    <th className="text-right whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -261,17 +289,32 @@ export default function CMS({ type }) {
                       className="border-t border-white/5 hover:bg-white/[.02] transition-all"
                     >
                       <td className="py-3">
-                        <b className="text-slate-200">
+                        <b
+                          className="text-slate-200 block truncate"
+                          title={item.title || item.name}
+                        >
                           {item.title || item.name}
                         </b>
                       </td>
-                      <td className="muted text-xs break-words max-w-xs py-3">
-                        {item.description ||
-                          item.category ||
-                          item.url ||
-                          (item.technologies?.length
-                            ? item.technologies.join(", ")
-                            : "")}
+                      <td className="muted text-xs py-3">
+                        <div
+                          className="line-clamp-2"
+                          title={
+                            item.description ||
+                            item.category ||
+                            item.url ||
+                            (item.technologies?.length
+                              ? item.technologies.join(", ")
+                              : "")
+                          }
+                        >
+                          {item.description ||
+                            item.category ||
+                            item.url ||
+                            (item.technologies?.length
+                              ? item.technologies.join(", ")
+                              : "")}
+                        </div>
                       </td>
                       <td className="py-3">
                         <div className="flex justify-end gap-1">
