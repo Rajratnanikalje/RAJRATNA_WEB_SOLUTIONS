@@ -69,7 +69,7 @@ export default function Contact() {
     {
       icon: Mail,
       label: "Email",
-      value: settings.email || "rajratnaofficial7252@gmail.com",
+      value: settings.email || "rajratnawebsolutions@gmail.com",
     },
     {
       icon: MapPin,
@@ -159,7 +159,7 @@ export default function Contact() {
                   </label>
                   <input
                     className="input"
-                    placeholder="+91 91 56914227"
+                    placeholder="+91 XXXXX XXXXX"
                     value={form.phone}
                     onChange={(e) =>
                       setForm({ ...form, phone: e.target.value })

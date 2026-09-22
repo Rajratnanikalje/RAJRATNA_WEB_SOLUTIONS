@@ -1,4 +1,78 @@
-import"dotenv/config";import{connectDB}from"../config/db.js";import Service from"../models/Service.js";import Project from"../models/Project.js";import Technology from"../models/Technology.js";import Settings from"../models/Settings.js";
+import "dotenv/config";
+import { connectDB } from "../config/db.js";
+import Service from "../models/Service.js";
+import Project from "../models/Project.js";
+import Technology from "../models/Technology.js";
+import Settings from "../models/Settings.js";
 
-if(process.env.NODE_ENV==="production"&&process.env.SEED_CONFIRM!=="DELETE_AND_RESEED")throw new Error("Refusing to delete production CMS data. Set SEED_CONFIRM=DELETE_AND_RESEED only when this is intentional.");
-await connectDB();await Service.deleteMany();await Project.deleteMany();await Technology.deleteMany();await Service.insertMany([{title:"Business Website",description:"Modern & Professional Websites"},{title:"E-commerce Website",description:"Sell Online, Grow Faster"},{title:"Portfolio Website",description:"Showcase Your Work"},{title:"Website Maintenance",description:"Keep Your Website Secure & Up-to-Date"},{title:"Custom Web Solutions",description:"Solutions Tailored To Your Needs"}]);await Project.insertMany([{name:"RideOn",title:"Premium Car Rental Platform",description:"A full-stack car rental and local ride platform.",technologies:["React.js","Node.js","Express.js","MongoDB"],url:"https://rideonpremiumcarrental.vercel.app/"},{name:"Inner Strength Martial Arts & Fitness Academy",title:"Academy Website & CMS",description:"A modern academy website with backend-powered content management.",technologies:["React.js","Node.js","Express.js","MongoDB"],url:"https://innerstrengthmartialarts.vercel.app/"}]);await Technology.insertMany(["HTML5","CSS3","JavaScript","React.js","Node.js","Express.js","MongoDB","Git","GitHub","Tailwind CSS","Redux Toolkit","MUI"].map(name=>({name})));await Settings.findOneAndUpdate({}, {siteTitle:"RAJRATNA WEB SOLUTIONS",phone:"+91 9156914227",email:"rajratnaofficial7252@gmail.com",location:"Buldhana, Maharashtra, India",seoTitle:"Rajratna Web Solutions",seoDescription:"Website Design & Development — Your Vision | Our Code"},{upsert:true});console.log("Seed complete");process.exit(0);
+if (
+  process.env.NODE_ENV === "production" &&
+  process.env.SEED_CONFIRM !== "DELETE_AND_RESEED"
+)
+  throw new Error(
+    "Refusing to delete production CMS data. Set SEED_CONFIRM=DELETE_AND_RESEED only when this is intentional.",
+  );
+await connectDB();
+await Service.deleteMany();
+await Project.deleteMany();
+await Technology.deleteMany();
+await Service.insertMany([
+  { title: "Business Website", description: "Modern & Professional Websites" },
+  { title: "E-commerce Website", description: "Sell Online, Grow Faster" },
+  { title: "Portfolio Website", description: "Showcase Your Work" },
+  {
+    title: "Website Maintenance",
+    description: "Keep Your Website Secure & Up-to-Date",
+  },
+  {
+    title: "Custom Web Solutions",
+    description: "Solutions Tailored To Your Needs",
+  },
+]);
+await Project.insertMany([
+  {
+    name: "RideOn",
+    title: "Premium Car Rental Platform",
+    description: "A full-stack car rental and local ride platform.",
+    technologies: ["React.js", "Node.js", "Express.js", "MongoDB"],
+    url: "https://rideonpremiumcarrental.vercel.app/",
+  },
+  {
+    name: "Inner Strength Martial Arts & Fitness Academy",
+    title: "Academy Website & CMS",
+    description:
+      "A modern academy website with backend-powered content management.",
+    technologies: ["React.js", "Node.js", "Express.js", "MongoDB"],
+    url: "https://innerstrengthmartialarts.vercel.app/",
+  },
+]);
+await Technology.insertMany(
+  [
+    "HTML5",
+    "CSS3",
+    "JavaScript",
+    "React.js",
+    "Node.js",
+    "Express.js",
+    "MongoDB",
+    "Git",
+    "GitHub",
+    "Tailwind CSS",
+    "Redux Toolkit",
+    "MUI",
+  ].map((name) => ({ name })),
+);
+await Settings.findOneAndUpdate(
+  {},
+  {
+    siteTitle: "RAJRATNA WEB SOLUTIONS",
+    phone: "+91 9156914227",
+    email: "rajratnawebsolutions@gmail.com",
+    location: "Buldhana, Maharashtra, India",
+    seoTitle: "Rajratna Web Solutions",
+    seoDescription: "Website Design & Development — Your Vision | Our Code",
+  },
+  { upsert: true },
+);
+console.log("Seed complete");
+process.exit(0);

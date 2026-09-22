@@ -24,7 +24,7 @@ export default function Footer() {
   useContentRefresh(loadSettings);
 
   const phone = settings.phone || "+91 9156914227";
-  const email = settings.email || "rajratnaofficial7252@gmail.com";
+  const email = settings.email || "rajratnawebsolutions@gmail.com";
   const location = settings.location || "Buldhana, Maharashtra, India";
 
   return (
