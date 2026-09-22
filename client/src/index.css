@@ -446,9 +446,11 @@ body:before{
 .admin-shell{
   min-height:100vh;
   max-width:100%;
+  overflow-x:hidden;
   background:linear-gradient(180deg,#020612 0,#0a1429 40%,#08111f 100%);
   color:var(--ink);
 }
+.admin-shell main{max-width:100%}
 
 .admin-grid{
   position:absolute;
@@ -686,54 +688,89 @@ body:before{
   border-radius:0 0 12px 12px;
 }
 
-@media(min-width:640px) and (max-width:1023px){
-  .admin-shell .grid.lg\:grid-cols-4{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-  .admin-shell .grid.lg\:grid-cols-4 .text-4xl{font-size:30px;line-height:1}
-}
-
-@media(max-width:1023px){
-  .admin-shell main{padding:20px 14px 32px}
-  .admin-shell .title{font-size:30px;line-height:1.08;margin:8px 0}
-  .admin-shell .label{font-size:10px;letter-spacing:.12em}
-  .admin-shell .glass{border-radius:18px!important}
-  .admin-shell .primary,
-  .admin-shell .secondary{min-height:44px;padding:11px 15px}
-  .admin-shell form .primary{width:100%}
-  .admin-shell textarea.input{min-height:48px}
-  .admin-shell .p-6{padding:20px!important}
-  .admin-shell .p-7{padding:20px!important}
-  .admin-shell .grid.sm\:grid-cols-2,
-  .admin-shell .grid.lg\:grid-cols-2,
-  .admin-shell .grid.xl\:grid-cols-2{gap:12px}
-  .admin-shell .border-b{border-color:rgba(181,204,241,.1)}
-  .admin-shell .bg-white\/\[\.03\]{background:rgba(12,24,43,.5)}
-  .admin-shell select.input{max-width:145px}
-  .admin-shell table{font-size:13px}
-  .admin-shell table th{padding:10px 8px;font-size:10px}
-  .admin-shell table td{padding:8px 6px}
-  .admin-shell .overflow-x-auto{-webkit-overflow-scrolling:touch}
-  .admin-shell table td .truncate,
-  .admin-shell table td .line-clamp-2{max-width:100%}
-}
-
 @media(max-width:700px){
   .section{padding:80px 0}
   .container{width:calc(100% - 28px)}
   .hero-orb--one{width:75vw;height:75vw;right:-32vw}
   .title{font-size:clamp(39px,12vw,56px)}
+}
+
+/* ===== ADMIN SHELL — RESPONSIVE BREAKPOINTS ===== */
+
+/* Mobile */
+@media (min-width: 320px) and (max-width: 767px) {
+  .admin-shell main{padding:16px 12px 40px}
+  .admin-shell header b{font-size:15px}
+  .admin-shell h1{font-size:22px;line-height:1.15}
+  .admin-shell .title{font-size:26px;line-height:1.1;margin:8px 0}
+  .admin-shell .label{font-size:10px;letter-spacing:.12em}
+  .admin-shell .stat-card{padding:14px!important;border-radius:16px}
+  .admin-shell .stat-card .stat-value{font-size:1.75rem}
+  .admin-shell .glass{border-radius:18px!important}
+  .admin-shell .glass-premium{border-radius:16px}
+  .admin-shell .input{font-size:16px}
+  .admin-shell textarea.input{min-height:48px}
+  .admin-shell .primary,
+  .admin-shell .secondary{min-height:44px;padding:11px 15px}
+  .admin-shell form .primary{width:100%}
+  .admin-shell select.input{max-width:145px}
   .admin-shell table{font-size:12px}
   .admin-shell table th{padding:6px 4px;font-size:8px}
   .admin-shell table td{padding:6px 4px}
-}
-
-@media(max-width:420px){
-  .admin-shell main{padding-left:12px;padding-right:12px}
-  .admin-shell .grid.lg\:grid-cols-4{gap:10px}
+  .admin-shell table td .truncate,
+  .admin-shell table td .line-clamp-2{max-width:100%}
   .admin-shell .p-6{padding:18px!important}
   .admin-shell .p-7{padding:20px!important}
-  .admin-shell .overflow-x-auto{max-width:100%}
+  .admin-shell .grid.sm\:grid-cols-2,
+  .admin-shell .grid.lg\:grid-cols-2,
+  .admin-shell .grid.xl\:grid-cols-2,
+  .admin-shell .grid.lg\:grid-cols-4{gap:12px}
+  .admin-shell .border-b{border-color:rgba(181,204,241,.1)}
+  .admin-shell .bg-white\/\[\.03\]{background:rgba(12,24,43,.5)}
+  .admin-shell .enquiry-actions .action-btn{padding:4px 8px;font-size:11px}
+  .admin-shell .overflow-x-auto{max-width:100%;-webkit-overflow-scrolling:touch}
 }
 
+/* Tablet */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .admin-shell main{padding:24px 20px 48px}
+  .admin-shell h1{font-size:26px}
+  .admin-shell .title{font-size:30px;line-height:1.08;margin:8px 0}
+  .admin-shell .label{font-size:10px;letter-spacing:.12em}
+  .admin-shell .stat-card{padding:18px}
+  .admin-shell .stat-card .stat-value{font-size:2rem}
+  .admin-shell .glass-premium{border-radius:20px}
+  .admin-shell .input{font-size:15px}
+  .admin-shell textarea.input{min-height:48px}
+  .admin-shell table{font-size:13px}
+  .admin-shell table th{padding:10px 8px;font-size:10px}
+  .admin-shell table td{padding:8px 6px}
+  .admin-shell .p-6{padding:20px!important}
+  .admin-shell .p-7{padding:20px!important}
+  .admin-shell .grid.sm\:grid-cols-2,
+  .admin-shell .grid.lg\:grid-cols-2,
+  .admin-shell .grid.xl\:grid-cols-2,
+  .admin-shell .grid.lg\:grid-cols-4{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .admin-shell .grid.lg\:grid-cols-4 .text-4xl{font-size:30px;line-height:1}
+  .admin-shell .border-b{border-color:rgba(181,204,241,.1)}
+  .admin-shell .bg-white\/\[\.03\]{background:rgba(12,24,43,.5)}
+  .admin-shell select.input{max-width:145px}
+  .admin-shell .overflow-x-auto{-webkit-overflow-scrolling:touch}
+}
+
+/* Laptop */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .admin-shell main{max-width:100%;padding:32px 28px 56px}
+  .admin-shell .glass-premium{border-radius:24px}
+  .admin-shell .stat-card .stat-value{font-size:2.25rem}
+}
+
+/* Desktop */
+@media (min-width: 1280px) {
+  .admin-shell main{max-width:100%;padding:40px 32px 64px}
+  .admin-shell .glass-premium{border-radius:24px}
+  .admin-shell .stat-card .stat-value{font-size:2.25rem}
+}
 @media(prefers-reduced-motion:reduce){
   *,*:before,*:after{
     animation-duration:.01ms!important;

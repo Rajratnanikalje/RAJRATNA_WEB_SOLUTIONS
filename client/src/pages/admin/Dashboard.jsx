@@ -686,12 +686,12 @@ function DashboardHeader() {
       <p className="text-slate-400 text-sm lg:text-base">
         Welcome back, Rajratna! Here's what's happening with your website today.
       </p>
-      <div className="flex items-center gap-2 mt-1.5 text-sm text-slate-500">
-        <Calendar size={14} />
-        <span>{dateStr}</span>
-        <span>•</span>
-        <Clock size={14} />
-        <span>{timeStr}</span>
+      <div className="flex items-center gap-2 mt-1.5 text-sm text-slate-500 flex-wrap min-w-0">
+        <Calendar size={14} className="shrink-0" />
+        <span className="truncate min-w-0">{dateStr}</span>
+        <span className="shrink-0">•</span>
+        <Clock size={14} className="shrink-0" />
+        <span className="shrink-0 whitespace-nowrap">{timeStr}</span>
       </div>
     </motion.div>
   );
