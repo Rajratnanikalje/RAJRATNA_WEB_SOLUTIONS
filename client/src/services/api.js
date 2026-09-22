@@ -28,6 +28,7 @@ export const pub = {
 };
 export const admin = {
   login: (d) => api.post("/auth/admin/login", d),
+  updateAccount: (d) => api.put("/auth/admin/account", d),
   dashboard: () => api.get("/dashboard"),
   services: {
     list: () => api.get("/services"),

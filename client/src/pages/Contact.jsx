@@ -9,10 +9,16 @@ const initialState = { name: "", email: "", phone: "", message: "" };
 export default function Contact() {
   const [form, setForm] = useState(initialState);
   const [settings, setSettings] = useState({});
+  const [settingsError, setSettingsError] = useState("");
   const [status, setStatus] = useState({ busy: false, error: "", ok: "" });
 
   const loadContactSettings = useCallback(() => {
-    pub.settings().then((r) => setSettings(r.data.data || {})).catch(() => {});
+    pub.settings()
+      .then((r) => {
+        setSettings(r.data.data || {});
+        setSettingsError("");
+      })
+      .catch(() => setSettingsError("Contact details are temporarily unavailable; you can still send an enquiry."));
   }, []);
 
   useEffect(() => {
@@ -82,6 +88,7 @@ export default function Contact() {
             desc="Tell us what you want to build. Enquiries are stored in MongoDB through the backend API."
           />
         </Reveal>
+        {settingsError && <p className="text-amber-300 text-sm mt-4" role="status">{settingsError}</p>}
 
         <div className="grid lg:grid-cols-[1fr_1.2fr] gap-8 mt-12">
           <Reveal>

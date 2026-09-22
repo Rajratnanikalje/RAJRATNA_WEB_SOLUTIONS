@@ -6,9 +6,15 @@ import useContentRefresh from "../hooks/useContentRefresh";
 
 export default function Footer() {
   const [settings, setSettings] = useState({});
+  const [settingsError, setSettingsError] = useState("");
 
   const loadSettings = useCallback(() => {
-    pub.settings().then((r) => setSettings(r.data.data || {})).catch(() => {});
+    pub.settings()
+      .then((r) => {
+        setSettings(r.data.data || {});
+        setSettingsError("");
+      })
+      .catch(() => setSettingsError("Contact settings could not be loaded."));
   }, []);
 
   useEffect(() => {
@@ -23,6 +29,7 @@ export default function Footer() {
 
   return (
     <footer className="border-t border-white/5 pt-14">
+      {settingsError && <p className="container text-xs text-amber-300" role="status">{settingsError}</p>}
       <div className="container">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
           <div>

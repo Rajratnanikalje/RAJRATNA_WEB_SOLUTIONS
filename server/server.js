@@ -9,6 +9,17 @@ for (const key of requiredEnv) {
   if (!process.env[key]) throw new Error(`${key} is missing`);
 }
 const app = express();
+// Baseline security headers without adding another production dependency.
+app.disable("x-powered-by");
+app.use((req, res, next) => {
+  res.set({
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
+  });
+  next();
+});
 const allowed = (process.env.CLIENT_URL || "http://localhost:5173")
   .split(",")
   .map((x) => x.trim());

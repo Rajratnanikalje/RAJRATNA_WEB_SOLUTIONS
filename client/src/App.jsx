@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { lazy, Suspense, useCallback, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import CustomerLayout from "./layouts/CustomerLayout";
 import Home from "./pages/Home";
@@ -8,15 +8,20 @@ import Portfolio from "./pages/Portfolio";
 import Technologies from "./pages/Technologies";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
-import AdminLogin from "./pages/admin/AdminLogin";
-import AdminLayout from "./layouts/AdminLayout";
-import Dashboard from "./pages/admin/Dashboard";
-import CMS from "./pages/admin/CMS";
-import Enquiries from "./pages/admin/Enquiries";
-import Settings from "./pages/admin/Settings";
-import Protected from "./pages/admin/Protected";
 import { pub } from "./services/api";
 import useContentRefresh from "./hooks/useContentRefresh";
+
+const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
+const AdminLayout = lazy(() => import("./layouts/AdminLayout"));
+const Dashboard = lazy(() => import("./pages/admin/Dashboard"));
+const CMS = lazy(() => import("./pages/admin/CMS"));
+const Enquiries = lazy(() => import("./pages/admin/Enquiries"));
+const Settings = lazy(() => import("./pages/admin/Settings"));
+const Protected = lazy(() => import("./pages/admin/Protected"));
+
+function PageFallback() {
+  return <div className="min-h-screen bg-[#040711]" aria-label="Loading page" />;
+}
 
 export default function App() {
   // Uses the favicon saved in Admin → Settings on the public site.
@@ -44,7 +49,8 @@ export default function App() {
   useContentRefresh(applyFavicon);
 
   return (
-    <Routes>
+    <Suspense fallback={<PageFallback />}>
+      <Routes>
       <Route element={<CustomerLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
@@ -67,6 +73,7 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Route>
       </Route>
-    </Routes>
+      </Routes>
+    </Suspense>
   );
 }

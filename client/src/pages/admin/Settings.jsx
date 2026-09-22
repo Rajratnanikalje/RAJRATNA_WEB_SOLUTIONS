@@ -9,11 +9,17 @@ const keys = [
   "siteTitle",
   "logoUrl",
   "heroImageUrl",
+  "homeHeroTitle",
+  "homeHeroSubtitle",
+  "aboutImageUrl",
+  "aboutTitle",
+  "aboutDescription",
   "phone",
   "email",
   "location",
   "seoTitle",
   "seoDescription",
+  "seoImageUrl",
   "faviconUrl",
 ];
 
@@ -29,6 +35,16 @@ const imageFields = {
     previewHeight: "h-44",
     hint: "Full-width background photo for the home page hero. Landscape 1920×1080 or larger works best.",
   },
+  aboutImageUrl: {
+    label: "About Page Image",
+    previewHeight: "h-44",
+    hint: "Your photo, workspace, or brand image. Shown on the About page in place of the code illustration.",
+  },
+  seoImageUrl: {
+    label: "Social Sharing Image",
+    previewHeight: "h-44",
+    hint: "Shown when your site link is shared on WhatsApp, Facebook, or LinkedIn.",
+  },
   faviconUrl: {
     label: "Favicon",
     previewHeight: "h-24",
@@ -42,6 +58,8 @@ export default function Settings() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(true);
+  const [account, setAccount] = useState({ email: "", currentPassword: "", newPassword: "" });
+  const [accountStatus, setAccountStatus] = useState({ error: "", success: "" });
 
   useEffect(() => {
     admin.settings
@@ -69,6 +87,18 @@ export default function Settings() {
 
   const handleChange = (key, value) => {
     setForm((f) => ({ ...f, [key]: value }));
+  };
+  const saveAccount = async (e) => {
+    e.preventDefault();
+    setAccountStatus({ error: "", success: "" });
+    try {
+      const response = await admin.updateAccount(account);
+      localStorage.removeItem("rws_token");
+      setAccountStatus({ error: "", success: response.data.message });
+      setTimeout(() => window.location.assign("/admin/login"), 1200);
+    } catch (e) {
+      setAccountStatus({ error: e.response?.data?.message || "Could not update account.", success: "" });
+    }
   };
 
   if (loading) {
@@ -119,7 +149,7 @@ export default function Settings() {
                   previewHeight={imageFields[k].previewHeight}
                   hint={imageFields[k].hint}
                 />
-              ) : k === "seoDescription" ? (
+              ) : ["seoDescription", "aboutDescription"].includes(k) ? (
                 <textarea
                   className="input"
                   rows={3}
@@ -142,6 +172,18 @@ export default function Settings() {
             {saving ? "Saving..." : "Save Settings"}
             <Save size={15} />
           </button>
+        </form>
+      </Card>
+      <Card className="p-7 mt-6 max-w-3xl">
+        <h2 className="text-xl font-bold text-slate-100">Admin Account</h2>
+        <p className="muted text-sm mt-1">Change your login email or password. You will be signed out after saving.</p>
+        <form onSubmit={saveAccount} className="grid gap-4 mt-5">
+          <input className="input" type="email" placeholder="New email address (optional)" value={account.email} onChange={(e) => setAccount((a) => ({ ...a, email: e.target.value }))} />
+          <input className="input" type="password" placeholder="New password (optional, minimum 8 characters)" value={account.newPassword} onChange={(e) => setAccount((a) => ({ ...a, newPassword: e.target.value }))} minLength={8} />
+          <input className="input" type="password" placeholder="Current password (required)" value={account.currentPassword} onChange={(e) => setAccount((a) => ({ ...a, currentPassword: e.target.value }))} required />
+          {accountStatus.error && <p className="text-red-300 text-sm">{accountStatus.error}</p>}
+          {accountStatus.success && <p className="text-emerald-300 text-sm">{accountStatus.success}</p>}
+          <button type="submit" className="primary">Update Admin Account</button>
         </form>
       </Card>
     </>

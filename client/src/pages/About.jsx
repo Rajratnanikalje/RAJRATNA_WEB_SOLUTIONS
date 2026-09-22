@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useState } from "react";
 import {
   Code2,
   Database,
@@ -9,6 +10,8 @@ import {
   Zap,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { pub } from "../services/api";
+import useContentRefresh from "../hooks/useContentRefresh";
 import { Card, Reveal, Heading } from "../components/UI";
 
 const features = [
@@ -55,40 +58,50 @@ const techStack = [
   { name: "Git", category: "DevOps" },
 ];
 
-const codeLines = [
-  { text: "function buildWebsite(vision) {", color: "text-[#78a9ff]" },
-  { text: "  const design = createDesign(vision);", color: "text-emerald-400" },
-  { text: "  const code = develop(design);", color: "text-emerald-400" },
-  { text: "  const deploy = launch(code);", color: "text-emerald-400" },
-  { text: "  return deploy.toReality();", color: "text-emerald-400" },
-  { text: "}", color: "text-[#78a9ff]" },
-  { text: "", color: "" },
-  { text: "buildWebsite('Your Vision');", color: "text-pink-400" },
-  { text: "// => Your Vision | Our Code", color: "text-slate-500" },
-];
-
 export default function About() {
+  const [aboutImageUrl, setAboutImageUrl] = useState("");
+  const [content, setContent] = useState({});
+
+  const loadAboutImage = useCallback(() => {
+    pub.settings().then((r) => { const data = r.data?.data || {}; setAboutImageUrl(data.aboutImageUrl || ""); setContent(data); }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    loadAboutImage();
+  }, [loadAboutImage]);
+
+  useContentRefresh(loadAboutImage);
+
   return (
-    <section className="section pt-40">
-      <div className="container">
+    <section className="section pt-40 relative overflow-hidden">
+      {aboutImageUrl && (
+        <div className="absolute inset-0">
+          <img
+            src={aboutImageUrl}
+            alt=""
+            className="w-full h-full object-cover"
+            aria-hidden="true"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#040711]/95 via-[#040711]/85 to-[#040711]/55" />
+        </div>
+      )}
+      <div className="container relative z-10">
         <Reveal>
-          <div className="grid lg:grid-cols-[1fr_1fr] gap-12 items-center">
+          <div className="max-w-3xl">
             <div>
               <div className="label">
                 <span className="eyebrow-line" />
                 About Me
               </div>
               <h1 className="title">
-                Crafting digital <br />
-                <span className="text-gradient">experiences</span> that<br />
-                mean business.
+                {content.aboutTitle || <>Crafting digital <br /><span className="text-gradient">experiences</span> that<br />mean business.</>}
               </h1>
               <p className="muted leading-8 mt-6 text-lg max-w-xl">
-                I'm <b className="text-white">Rajratna Nikalje</b>, a Web
+                {content.aboutDescription || <>I'm <b className="text-white">Rajratna Nikalje</b>, a Web
                 Developer focused on building modern, responsive and
                 practical web experiences. I help businesses turn their vision
                 into clean, secure, high-performing websites and web
-                applications.
+                applications.</>}
               </p>
 
               <div className="mt-8 space-y-3">
@@ -121,30 +134,6 @@ export default function About() {
               </div>
             </div>
 
-            <Reveal delay={0.2}>
-              <div className="laptop">
-                <div className="laptop-screen">
-                  <div className="p-5">
-                    <div className="flex items-center gap-2 pb-3 border-b border-white/10 mb-4">
-                      <span className="w-3 h-3 rounded-full bg-red-400" />
-                      <span className="w-3 h-3 rounded-full bg-yellow-400" />
-                      <span className="w-3 h-3 rounded-full bg-green-400" />
-                    </div>
-                    <div className="font-mono text-sm text-slate-300">
-                      {codeLines.map((line, i) => (
-                        <div key={i} className="flex">
-                          <span className="text-slate-600 w-12 text-right mr-3 select-none">
-                            {i + 1}
-                          </span>
-                          <span className={line.color}>{line.text}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <div className="laptop-base"></div>
-              </div>
-            </Reveal>
           </div>
         </Reveal>
 

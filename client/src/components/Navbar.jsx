@@ -17,12 +17,16 @@ const links = [
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState("");
+  const [settingsError, setSettingsError] = useState("");
 
   const loadLogo = useCallback(() => {
     pub
       .settings()
-      .then((r) => setLogoUrl(r.data?.data?.logoUrl || ""))
-      .catch(() => {});
+      .then((r) => {
+        setLogoUrl(r.data?.data?.logoUrl || "");
+        setSettingsError("");
+      })
+      .catch(() => setSettingsError("Site settings could not be loaded."));
   }, []);
 
   useEffect(() => {
@@ -33,6 +37,7 @@ export default function Navbar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
+      {settingsError && <span className="sr-only" role="status">{settingsError}</span>}
       <div className="container border-b border-white/5">
         <div className="h-[76px] flex items-center justify-between">
           <Link
@@ -101,13 +106,13 @@ export default function Navbar() {
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
           >
-            <nav className="container py-4 flex flex-col gap-1">
+            <nav className="container relative z-10 py-4 flex flex-col gap-1" aria-label="Mobile navigation">
               {links.map(([u, n]) => (
                 <Link
                   key={u}
                   to={u}
                   onClick={() => setOpen(false)}
-                  className="py-3 px-2 text-slate-300 hover:text-white transition-colors"
+                  className="min-h-12 flex items-center py-3 px-3 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 active:bg-[#78a9ff]/10 transition-colors"
                 >
                   {n}
                 </Link>
@@ -115,7 +120,7 @@ export default function Navbar() {
               <Link
                 to="/contact"
                 onClick={() => setOpen(false)}
-                className="primary text-sm justify-center mt-2"
+                className="primary min-h-12 text-sm justify-center mt-2"
               >
                 Get a Quote <ArrowUpRight size={14} />
               </Link>
@@ -126,7 +131,7 @@ export default function Navbar() {
 
       {open && (
         <div
-          className="lg:hidden fixed inset-0 z-[-1]"
+          className="lg:hidden fixed inset-0 z-[-1] touch-none"
           onClick={() => setOpen(false)}
         />
       )}

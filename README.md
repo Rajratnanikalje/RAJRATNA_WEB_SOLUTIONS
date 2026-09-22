@@ -19,6 +19,10 @@ npm run seed
 npm run dev
 ```
 
+`npm run seed` replaces all services, projects and technologies. Never run it
+against production unless you intentionally want to reset that CMS content; in
+production it additionally requires `SEED_CONFIRM=DELETE_AND_RESEED`.
+
 ### Frontend
 ```bash
 cd client

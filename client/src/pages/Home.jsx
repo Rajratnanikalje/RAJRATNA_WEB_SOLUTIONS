@@ -98,6 +98,7 @@ export default function Home() {
   const [technologies, setTechnologies] = useState([]);
   const [counts, setCounts] = useState({ projects: 0, services: 0, tech: 0 });
   const [settings, setSettings] = useState({});
+  const [settingsError, setSettingsError] = useState("");
   const [loading, setLoading] = useState({ services: true, projects: true, tech: true });
 
   const loadHomeContent = useCallback((silent = false) => {
@@ -115,8 +116,11 @@ export default function Home() {
 
     pub
       .settings()
-      .then((r) => setSettings(r.data?.data || {}))
-      .catch(() => {});
+      .then((r) => {
+        setSettings(r.data?.data || {});
+        setSettingsError("");
+      })
+      .catch(() => setSettingsError("Some site content could not be loaded. Please refresh shortly."));
 
     pub
       .services()
@@ -150,6 +154,7 @@ export default function Home() {
     <>
       {/* ===== HERO ===== */}
       <section className="hero-section relative min-h-screen flex flex-col overflow-hidden pt-28">
+        {settingsError && <p className="sr-only" role="status">{settingsError}</p>}
         {/* Full-bleed background — upload via Admin → Settings → Hero Image */}
         <div className="hero-bg">
           {settings.heroImageUrl ? (
@@ -222,13 +227,11 @@ export default function Home() {
               </div>
 
               <h1 className="hero-title-v2 mt-7">
-                <span className="hero-silver">Rajratna</span>
-                <br />
-                <span className="hero-blue">Web Solution</span>
+                {settings.homeHeroTitle || <><span className="hero-silver">Rajratna</span><br /><span className="hero-blue">Web Solution</span></>}
               </h1>
 
               <p className="hero-sub mt-7">
-                Build Your Ideas Into Powerful Digital Experiences
+                {settings.homeHeroSubtitle || "Build Your Ideas Into Powerful Digital Experiences"}
               </p>
 
               <p className="muted text-base md:text-lg leading-8 max-w-xl mt-4">
