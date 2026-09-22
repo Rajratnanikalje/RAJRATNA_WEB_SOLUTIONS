@@ -25,11 +25,39 @@ function PageFallback() {
 
 export default function App() {
   // Uses the favicon saved in Admin → Settings on the public site.
-  const applyFavicon = useCallback(() => {
+  const applySiteSettings = useCallback(() => {
     pub
       .settings()
       .then((r) => {
-        const url = r.data?.data?.faviconUrl;
+        const settings = r.data?.data || {};
+        const title = settings.seoTitle || settings.siteTitle || "Rajratna Web Solutions";
+        const description = settings.seoDescription || "Rajratna Web Solutions — Website Design & Development. Your Vision | Our Code.";
+
+        document.title = title;
+
+        const setMeta = (selector, attribute, value) => {
+          let meta = document.head.querySelector(selector);
+          if (!meta) {
+            meta = document.createElement("meta");
+            const match = selector.match(/\[([^=]+)=\"([^\"]+)\"\]/);
+            if (match) meta.setAttribute(match[1], match[2]);
+            document.head.appendChild(meta);
+          }
+          meta.setAttribute(attribute, value);
+        };
+
+        setMeta('meta[name="description"]', "content", description);
+        setMeta('meta[property="og:title"]', "content", title);
+        setMeta('meta[property="og:description"]', "content", description);
+        setMeta('meta[name="twitter:title"]', "content", title);
+        setMeta('meta[name="twitter:description"]', "content", description);
+
+        if (settings.seoImageUrl) {
+          setMeta('meta[property="og:image"]', "content", settings.seoImageUrl);
+          setMeta('meta[name="twitter:image"]', "content", settings.seoImageUrl);
+        }
+
+        const url = settings.faviconUrl;
         if (!url) return;
         let link = document.querySelector("link[rel='icon']");
         if (!link) {
@@ -43,10 +71,10 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    applyFavicon();
-  }, [applyFavicon]);
+    applySiteSettings();
+  }, [applySiteSettings]);
 
-  useContentRefresh(applyFavicon);
+  useContentRefresh(applySiteSettings);
 
   return (
     <Suspense fallback={<PageFallback />}>

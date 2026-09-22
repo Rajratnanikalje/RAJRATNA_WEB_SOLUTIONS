@@ -8,7 +8,14 @@ const requiredEnv = ["MONGO_URI", "JWT_SECRET"];
 for (const key of requiredEnv) {
   if (!process.env[key]) throw new Error(`${key} is missing`);
 }
+
+if (process.env.NODE_ENV === "production" && !process.env.CLIENT_URL) {
+  throw new Error("CLIENT_URL is required in production");
+}
 const app = express();
+// Most hosts (Render, Railway, etc.) run Express behind a reverse proxy. This
+// makes req.ip reliable for the public endpoint rate limiters.
+if (process.env.NODE_ENV === "production") app.set("trust proxy", 1);
 // Baseline security headers without adding another production dependency.
 app.disable("x-powered-by");
 app.use((req, res, next) => {
