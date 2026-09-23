@@ -68,7 +68,7 @@ function NotificationBell({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute right-0 mt-2 w-[calc(100vw-48px)] sm:w-80 rounded-2xl border border-[#78a9ff]/20 bg-[#0a1429]/90 backdrop-blur-xl shadow-[0_0_30px_rgba(120,169,255,.15)] z-50 overflow-hidden"
+            className="absolute right-[-48px] sm:right-0 mt-2 w-[calc(100vw-32px)] sm:w-80 rounded-2xl border border-[#78a9ff]/20 bg-[#0a1429]/90 backdrop-blur-xl shadow-[0_0_30px_rgba(120,169,255,.15)] z-50 overflow-hidden"
           >
             <div className="p-3 border-b border-white/10 flex justify-between items-center">
               <span className="text-xs font-medium text-slate-400">

@@ -299,9 +299,9 @@ function RecentEnquiriesTable({ enquiries, loading }) {
     return (
       <div
         key={item._id}
-        className="py-3"
+        className="py-3 min-w-0"
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-0">
           <div
             className={`w-2 h-2 rounded-full shrink-0 ${
               isNew
@@ -329,21 +329,21 @@ function RecentEnquiriesTable({ enquiries, loading }) {
             </div>
           )}
         </div>
-        <div className="flex items-center justify-between mt-2.5 gap-2">
+        <div className="flex flex-wrap items-center justify-between mt-2.5 gap-2">
           <span
             className={`text-xs px-2.5 py-1 rounded-full border flex items-center gap-1.5 w-fit whitespace-nowrap shrink-0 ${statusClass}`}
           >
             <Icon size={10} />
             {item.status}
           </span>
-          <div className="flex gap-1 shrink-0">{renderEnquiryActions(item)}</div>
+          <div className="flex flex-wrap justify-end gap-1 shrink-0">{renderEnquiryActions(item)}</div>
         </div>
       </div>
     );
   };
 
   return (
-    <Card className="p-4 sm:p-5">
+    <Card className="p-4 sm:p-5 min-w-0 max-w-full">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Inbox size={17} className="text-[#78a9ff]" />
@@ -359,7 +359,7 @@ function RecentEnquiriesTable({ enquiries, loading }) {
         </Link>
       </div>
 
-      <div className="hidden sm:block">
+      <div className="hidden xl:block">
         <table className="w-full text-sm table-fixed">
           <thead>
             <tr>
@@ -391,7 +391,7 @@ function RecentEnquiriesTable({ enquiries, loading }) {
         </table>
       </div>
 
-      <div className="sm:hidden divide-y divide-white/5">
+      <div className="xl:hidden divide-y divide-white/5 min-w-0">
         {loading ? (
           [1, 2, 3, 4].map((n) => (
             <div key={n} className="h-14 bg-white/5 rounded animate-pulse" />
@@ -438,7 +438,7 @@ function RecentProjectsTable({ projects, loading }) {
       {(item.technologies || []).slice(0, 2).map((tech) => (
         <span
           key={tech}
-          className="text-xs px-2 py-0.5 rounded bg-[#78a9ff]/5 border border-[#78a9ff]/15 text-slate-400"
+          className="text-xs px-2 py-0.5 rounded bg-[#78a9ff]/5 border border-[#78a9ff]/15 text-slate-400 max-w-full truncate"
         >
           {tech}
         </span>
@@ -533,9 +533,9 @@ function RecentProjectsTable({ projects, loading }) {
     return (
       <div
         key={item._id}
-        className="py-3"
+        className="py-3 min-w-0"
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           {renderProjectImage(item)}
           <div className="flex-1 min-w-0">
             <b className="text-slate-200 block truncate" title={item.name}>
@@ -551,16 +551,16 @@ function RecentProjectsTable({ projects, loading }) {
           <div className="mt-2">{renderTechTags(item)}</div>
         )}
 
-        <div className="flex items-center justify-between mt-2.5 gap-2">
+        <div className="flex flex-wrap items-center justify-between mt-2.5 gap-2">
           {renderStatusBadge(item)}
-          <div className="flex gap-1 shrink-0">{renderProjectActions(item)}</div>
+          <div className="flex flex-wrap justify-end gap-1 shrink-0">{renderProjectActions(item)}</div>
         </div>
       </div>
     );
   };
 
   return (
-    <Card className="p-4 sm:p-5">
+    <Card className="p-4 sm:p-5 min-w-0 max-w-full">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <FolderKanban size={17} className="text-[#78a9ff]" />
@@ -576,7 +576,7 @@ function RecentProjectsTable({ projects, loading }) {
         </Link>
       </div>
 
-      <div className="hidden sm:block">
+      <div className="hidden xl:block">
         <table className="w-full text-sm table-fixed">
           <thead>
             <tr>
@@ -608,7 +608,7 @@ function RecentProjectsTable({ projects, loading }) {
         </table>
       </div>
 
-      <div className="sm:hidden divide-y divide-white/5">
+      <div className="xl:hidden divide-y divide-white/5 min-w-0">
         {loading ? (
           [1, 2, 3].map((n) => (
             <div key={n} className="h-14 bg-white/5 rounded animate-pulse" />
