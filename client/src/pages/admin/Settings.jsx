@@ -52,7 +52,9 @@ export default function Settings() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(true);
-  const [account, setAccount] = useState({ email: "", currentPassword: "", newPassword: "" });
+  const [account, setAccount] = useState({ email: "", newPassword: "", otp: "", resetToken: "" });
+  const [accountOtpSent, setAccountOtpSent] = useState(false);
+  const [accountOtpBusy, setAccountOtpBusy] = useState(false);
   const [accountStatus, setAccountStatus] = useState({ error: "", success: "" });
 
   useEffect(() => {
@@ -85,13 +87,47 @@ export default function Settings() {
   const saveAccount = async (e) => {
     e.preventDefault();
     setAccountStatus({ error: "", success: "" });
+    if (!account.resetToken) {
+      setAccountStatus({ error: "Verify the OTP sent to your registered email before updating the account.", success: "" });
+      return;
+    }
     try {
-      const response = await admin.updateAccount(account);
+      const response = await admin.updateAccount({ email: account.email, newPassword: account.newPassword, resetToken: account.resetToken });
       localStorage.removeItem("rws_token");
       setAccountStatus({ error: "", success: response.data.message });
       setTimeout(() => window.location.assign("/admin/login"), 1200);
     } catch (e) {
       setAccountStatus({ error: e.response?.data?.message || "Could not update account.", success: "" });
+    }
+  };
+  const requestAccountOtp = async () => {
+    setAccountOtpBusy(true);
+    setAccountStatus({ error: "", success: "" });
+    try {
+      const response = await admin.requestAccountOtp();
+      setAccountOtpSent(true);
+      setAccountStatus({ error: "", success: response.data.message });
+    } catch (e) {
+      setAccountStatus({ error: e.response?.data?.message || "Could not send OTP.", success: "" });
+    } finally {
+      setAccountOtpBusy(false);
+    }
+  };
+  const verifyAccountOtp = async () => {
+    if (!/^\d{6}$/.test(account.otp)) {
+      setAccountStatus({ error: "Enter the 6-digit OTP from your email.", success: "" });
+      return;
+    }
+    setAccountOtpBusy(true);
+    setAccountStatus({ error: "", success: "" });
+    try {
+      const response = await admin.verifyAccountOtp({ otp: account.otp });
+      setAccount((current) => ({ ...current, resetToken: response.data.resetToken }));
+      setAccountStatus({ error: "", success: "OTP verified. You can now update your account." });
+    } catch (e) {
+      setAccountStatus({ error: e.response?.data?.message || "Could not verify OTP.", success: "" });
+    } finally {
+      setAccountOtpBusy(false);
     }
   };
 
@@ -170,14 +206,21 @@ export default function Settings() {
       </Card>
       <Card className="p-7 mt-6 max-w-3xl">
         <h2 className="text-xl font-bold text-slate-100">Admin Account</h2>
-        <p className="muted text-sm mt-1">Change your login email or password. You will be signed out after saving.</p>
+        <p className="muted text-sm mt-1">Verify an OTP sent to your registered email before changing your login email or password.</p>
         <form onSubmit={saveAccount} className="grid gap-4 mt-5">
           <input className="input" type="email" placeholder="New email address (optional)" value={account.email} onChange={(e) => setAccount((a) => ({ ...a, email: e.target.value }))} />
           <input className="input" type="password" placeholder="New password (optional, minimum 8 characters)" value={account.newPassword} onChange={(e) => setAccount((a) => ({ ...a, newPassword: e.target.value }))} minLength={8} />
-          <input className="input" type="password" placeholder="Current password (required)" value={account.currentPassword} onChange={(e) => setAccount((a) => ({ ...a, currentPassword: e.target.value }))} required />
+          {!accountOtpSent ? (
+            <button type="button" className="secondary" onClick={requestAccountOtp} disabled={accountOtpBusy}> {accountOtpBusy ? "Sending OTP..." : "Send verification OTP"} </button>
+          ) : !account.resetToken ? (
+            <div className="grid gap-3">
+              <input className="input tracking-[.35em] text-center" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} placeholder="6-digit OTP" value={account.otp} onChange={(e) => setAccount((a) => ({ ...a, otp: e.target.value.replace(/\D/g, "") }))} />
+              <div className="flex gap-3"><button type="button" className="secondary flex-1" onClick={requestAccountOtp} disabled={accountOtpBusy}>Resend OTP</button><button type="button" className="primary flex-1" onClick={verifyAccountOtp} disabled={accountOtpBusy}>{accountOtpBusy ? "Verifying..." : "Verify OTP"}</button></div>
+            </div>
+          ) : null}
           {accountStatus.error && <p className="text-red-300 text-sm">{accountStatus.error}</p>}
           {accountStatus.success && <p className="text-emerald-300 text-sm">{accountStatus.success}</p>}
-          <button type="submit" className="primary">Update Admin Account</button>
+          {account.resetToken && <button type="submit" className="primary">Update Admin Account</button>}
         </form>
       </Card>
     </>

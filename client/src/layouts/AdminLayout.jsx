@@ -288,6 +288,8 @@ export default function AdminLayout() {
   const [showNotif, setShowNotif] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const notifRef = useRef(null);
+  const notificationsLoadedRef = useRef(false);
+  const knownNotificationIdsRef = useRef(new Set());
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -313,10 +315,23 @@ export default function AdminLayout() {
       const r = await admin.enquiries.list();
       const all = r.data.data || [];
       const currentNew = all.filter((e) => e.status === "New");
-      const seen = JSON.parse(localStorage.getItem("rws_seen_enquiry_ids") || "[]");
+      let seen = [];
+      try {
+        seen = JSON.parse(localStorage.getItem("rws_seen_enquiry_ids") || "[]");
+      } catch {
+        // A corrupted browser value must not prevent new enquiry alerts.
+      }
       const seenSet = new Set(Array.isArray(seen) ? seen : []);
       const unseen = currentNew.filter((e) => !seenSet.has(e._id));
+      const hasNewNotification = unseen.some((item) => !knownNotificationIdsRef.current.has(item._id));
+      knownNotificationIdsRef.current = new Set(unseen.map((item) => item._id));
       setNotifications(unseen);
+      // Open the notification list immediately when the panel loads with new
+      // enquiries, and again only when a genuinely new enquiry arrives.
+      if (unseen.length && (!notificationsLoadedRef.current || hasNewNotification)) {
+        setShowNotif(true);
+      }
+      notificationsLoadedRef.current = true;
     } catch {
       // Keep the existing notification state if the API is temporarily unavailable.
     }
@@ -325,7 +340,18 @@ export default function AdminLayout() {
   useEffect(() => {
     fetchNotifications();
     const id = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(id);
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") fetchNotifications();
+    };
+    window.addEventListener("focus", fetchNotifications);
+    window.addEventListener("rws:new-enquiry", fetchNotifications);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+    return () => {
+      clearInterval(id);
+      window.removeEventListener("focus", fetchNotifications);
+      window.removeEventListener("rws:new-enquiry", fetchNotifications);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+    };
   }, []);
 
   useEffect(() => {

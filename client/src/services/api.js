@@ -29,7 +29,10 @@ export const pub = {
 export const admin = {
   login: (d) => api.post("/auth/admin/login", d),
   forgotPassword: (d) => api.post("/auth/admin/forgot-password", d),
+  verifyOtp: (d) => api.post("/auth/admin/verify-otp", d),
   resetPassword: (d) => api.post("/auth/admin/reset-password", d),
+  requestAccountOtp: () => api.post("/auth/admin/account/otp"),
+  verifyAccountOtp: (d) => api.post("/auth/admin/account/verify-otp", d),
   updateAccount: (d) => api.put("/auth/admin/account", d),
   dashboard: () => api.get("/dashboard"),
   services: {
