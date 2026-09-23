@@ -90,7 +90,7 @@ export default function Navbar() {
 
           <Link
             to="/contact"
-            className="primary hidden sm:inline-flex text-xs py-3"
+            className="primary hidden lg:inline-flex text-xs py-3"
           >
             Get a Quote <ArrowUpRight size={14} />
           </Link>
