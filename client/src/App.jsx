@@ -12,6 +12,7 @@ import { pub } from "./services/api";
 import useContentRefresh from "./hooks/useContentRefresh";
 
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
+const AdminResetPassword = lazy(() => import("./pages/admin/AdminResetPassword"));
 const AdminLayout = lazy(() => import("./layouts/AdminLayout"));
 const Dashboard = lazy(() => import("./pages/admin/Dashboard"));
 const CMS = lazy(() => import("./pages/admin/CMS"));
@@ -52,11 +53,6 @@ export default function App() {
         setMeta('meta[name="twitter:title"]', "content", title);
         setMeta('meta[name="twitter:description"]', "content", description);
 
-        if (settings.seoImageUrl) {
-          setMeta('meta[property="og:image"]', "content", settings.seoImageUrl);
-          setMeta('meta[name="twitter:image"]', "content", settings.seoImageUrl);
-        }
-
         const url = settings.faviconUrl;
         if (!url) return;
         let link = document.querySelector("link[rel='icon']");
@@ -89,6 +85,7 @@ export default function App() {
         <Route path="*" element={<NotFound />} />
       </Route>
       <Route path="/admin/login" element={<AdminLogin />} />
+      <Route path="/admin/reset-password" element={<AdminResetPassword />} />
       <Route element={<Protected />}>
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Navigate to="dashboard" replace />} />

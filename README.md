@@ -82,6 +82,12 @@ CLIENT_URL=https://www.your-domain.com
 CLOUDINARY_CLOUD_NAME=<Cloudinary value>
 CLOUDINARY_API_KEY=<Cloudinary value>
 CLOUDINARY_API_SECRET=<Cloudinary value>
+SMTP_HOST=<SMTP server hostname>
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=<SMTP username>
+SMTP_PASS=<SMTP password or app password>
+SMTP_FROM=RAJRATNA WEB SOLUTIONS <no-reply@your-domain.com>
 ```
 
 For more than one frontend origin, use a comma-separated `CLIENT_URL` list.
@@ -111,3 +117,4 @@ all unknown routes to serve `index.html`; this keeps direct visits to
 - Create the production admin once with `npm run create-admin` using strong, unique credentials.
 - Do **not** run `npm run seed` on production unless intentionally resetting CMS data.
 - Test contact submission, admin login, image upload, and a refresh on `/admin/login`.
+- Configure the SMTP variables and test the admin **Forgot password?** email end-to-end.

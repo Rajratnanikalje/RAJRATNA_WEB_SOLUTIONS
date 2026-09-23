@@ -26,6 +26,7 @@ export default function Footer() {
   const phone = settings.phone || "+91 9156914227";
   const email = settings.email || "rajratnawebsolutions@gmail.com";
   const location = settings.location || "Buldhana, Maharashtra, India";
+  const siteTitle = settings.siteTitle || "RAJRATNA WEB SOLUTIONS";
 
   return (
     <footer className="border-t border-white/5 pt-14">
@@ -33,9 +34,7 @@ export default function Footer() {
       <div className="container">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
           <div>
-            <span className="text-xl font-bold text-white">
-              RAJRATNA <span className="text-[#78a9ff]">.</span>
-            </span>
+            <span className="text-xl font-bold text-white">{siteTitle}</span>
             <p className="muted text-sm mt-3 leading-7">
               Building modern, responsive and high-performing web experiences.
             </p>

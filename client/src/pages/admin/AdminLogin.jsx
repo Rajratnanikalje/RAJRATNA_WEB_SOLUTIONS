@@ -7,7 +7,9 @@ export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
+  const [forgotMode, setForgotMode] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [busy, setBusy] = useState(false);
   const nav = useNavigate();
 
@@ -30,6 +32,31 @@ export default function AdminLogin() {
     }
   };
 
+  const requestReset = async (e) => {
+    e.preventDefault();
+    if (!email) {
+      setError("Enter your admin email address.");
+      return;
+    }
+    setBusy(true);
+    setError("");
+    setSuccess("");
+    try {
+      const response = await admin.forgotPassword({ email });
+      setSuccess(response.data.message);
+    } catch (z) {
+      setError(z.response?.data?.message || "Could not request a reset link. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const switchMode = () => {
+    setForgotMode((mode) => !mode);
+    setError("");
+    setSuccess("");
+  };
+
   return (
     <div className="admin-shell min-h-screen grid place-items-center px-4 relative overflow-hidden">
       <div className="hero-orb hero-orb--one" />
@@ -43,12 +70,12 @@ export default function AdminLogin() {
           </div>
           <div>
             <div className="label">CONTROL CENTER</div>
-            <h1 className="text-2xl font-bold text-white">Admin Login</h1>
+            <h1 className="text-2xl font-bold text-white">{forgotMode ? "Reset Password" : "Admin Login"}</h1>
           </div>
         </div>
 
-        <form onSubmit={go} className="grid gap-4 mt-6">
-          <div>
+        <form onSubmit={forgotMode ? requestReset : go} className="grid gap-4 mt-6">
+          {!forgotMode && <div>
             <label className="text-xs font-medium text-slate-400 mb-1 block">
               Email
             </label>
@@ -61,7 +88,7 @@ export default function AdminLogin() {
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="username"
             />
-          </div>
+          </div>}
 
           <div>
             <label className="text-xs font-medium text-slate-400 mb-1 block">
@@ -94,11 +121,20 @@ export default function AdminLogin() {
               <span>{error}</span>
             </div>
           )}
+          {success && (
+            <div className="rounded-xl border border-emerald-400/30 bg-emerald-400/10 p-3 text-sm text-emerald-100">
+              {success}
+            </div>
+          )}
 
           <button type="submit" className="primary" disabled={busy}>
-            {busy ? "Signing in..." : "Sign in"}
+            {busy ? (forgotMode ? "Sending..." : "Signing in...") : (forgotMode ? "Send reset link" : "Sign in")}
           </button>
         </form>
+
+        <button type="button" onClick={switchMode} className="mt-4 text-sm text-[#9fc2ff] hover:text-white transition-colors">
+          {forgotMode ? "Back to sign in" : "Forgot password?"}
+        </button>
 
         <div className="text-center mt-6">
           <span className="text-xs text-slate-500">

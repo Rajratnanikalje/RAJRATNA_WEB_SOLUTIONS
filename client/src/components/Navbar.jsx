@@ -13,10 +13,12 @@ const links = [
   ["/technologies", "Technologies"],
   ["/contact", "Contact"],
 ];
+const defaultSiteTitle = "RAJRATNA WEB SOLUTIONS";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState("");
+  const [siteTitle, setSiteTitle] = useState(defaultSiteTitle);
   const [settingsError, setSettingsError] = useState("");
 
   const loadLogo = useCallback(() => {
@@ -24,6 +26,7 @@ export default function Navbar() {
       .settings()
       .then((r) => {
         setLogoUrl(r.data?.data?.logoUrl || "");
+        setSiteTitle(r.data?.data?.siteTitle || defaultSiteTitle);
         setSettingsError("");
       })
       .catch(() => setSettingsError("Site settings could not be loaded."));
@@ -48,18 +51,24 @@ export default function Navbar() {
             {logoUrl && (
               <img
                 src={logoUrl}
-                alt="RAJRATNA WEB SOLUTIONS logo"
+                alt={`${siteTitle} logo`}
                 className="h-11 w-auto max-w-[110px] object-contain shrink-0"
               />
             )}
-            <span>
-              <span className="text-xl font-bold text-white block">
-                RAJRATNA <span className="text-[#78a9ff]">.</span>
+            {siteTitle === defaultSiteTitle ? (
+              <span>
+                <span className="text-xl font-bold text-white block">
+                  RAJRATNA <span className="text-[#78a9ff]">.</span>
+                </span>
+                <span className="block text-[9px] tracking-[.26em] text-slate-500 mt-0.5">
+                  WEB SOLUTIONS
+                </span>
               </span>
-              <span className="block text-[9px] tracking-[.26em] text-slate-500 mt-0.5">
-                WEB SOLUTIONS
+            ) : (
+              <span className="text-xl font-bold text-white block max-w-[190px] truncate">
+                {siteTitle}
               </span>
-            </span>
+            )}
           </Link>
 
           <nav className="hidden lg:flex gap-8 text-[13px] font-medium text-slate-300">

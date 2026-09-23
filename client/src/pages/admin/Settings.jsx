@@ -19,7 +19,6 @@ const keys = [
   "location",
   "seoTitle",
   "seoDescription",
-  "seoImageUrl",
   "faviconUrl",
 ];
 
@@ -39,11 +38,6 @@ const imageFields = {
     label: "About Page Image",
     previewHeight: "h-44",
     hint: "Your photo, workspace, or brand image. Shown on the About page in place of the code illustration.",
-  },
-  seoImageUrl: {
-    label: "Social Sharing Image",
-    previewHeight: "h-44",
-    hint: "Shown when your site link is shared on WhatsApp, Facebook, or LinkedIn.",
   },
   faviconUrl: {
     label: "Favicon",

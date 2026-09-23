@@ -28,6 +28,8 @@ export const pub = {
 };
 export const admin = {
   login: (d) => api.post("/auth/admin/login", d),
+  forgotPassword: (d) => api.post("/auth/admin/forgot-password", d),
+  resetPassword: (d) => api.post("/auth/admin/reset-password", d),
   updateAccount: (d) => api.put("/auth/admin/account", d),
   dashboard: () => api.get("/dashboard"),
   services: {

@@ -177,6 +177,59 @@ body:before{
   background:rgba(120,169,255,.05);
 }
 
+/* Contact form international phone field: country data and formatting come from
+   react-international-phone; these rules only align it with the RWS theme. */
+.contact-phone-field{display:flex;gap:8px;align-items:stretch;position:relative}
+.contact-country-selector{position:relative;flex:0 0 auto}
+.contact-country-trigger{
+  height:100%;min-height:47px;display:flex;align-items:center;gap:7px;padding:0 11px;
+  border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.03);
+  color:#fff;cursor:pointer;transition:border-color .25s,box-shadow .25s,background .25s
+}
+.contact-country-trigger:hover,.contact-country-trigger:focus-visible{
+  border-color:var(--acid);background:rgba(120,169,255,.05);outline:none;
+  box-shadow:0 0 0 4px #78a9ff22
+}
+.contact-country-code{font-size:13px;font-weight:600}.contact-country-chevron{color:#a7b9d8;font-size:16px;line-height:1}
+.contact-country-menu{
+  position:absolute;z-index:30;top:calc(100% + 8px);left:0;width:min(330px,calc(100vw - 40px));
+  padding:8px;border:1px solid rgba(120,169,255,.3);border-radius:13px;background:#10182b;
+  box-shadow:0 18px 45px rgba(0,0,0,.42)
+}
+.contact-country-search{
+  width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:9px;background:#0c1425;
+  color:#fff;outline:none;font-size:13px
+}
+.contact-country-search:focus{border-color:var(--acid);box-shadow:0 0 0 3px #78a9ff22}
+.contact-country-results{max-height:248px;overflow-y:auto;margin-top:7px}
+.contact-country-option{
+  width:100%;display:flex;align-items:center;gap:9px;padding:9px 8px;border:0;border-radius:8px;
+  background:transparent;color:#e7eefc;text-align:left;cursor:pointer;font-size:13px
+}
+.contact-country-option:hover,.contact-country-option:focus-visible,.contact-country-option.is-active{
+  background:rgba(120,169,255,.15);outline:none
+}
+.contact-country-flag{font-size:17px;line-height:1}.contact-country-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.contact-country-option-code{margin-left:auto;color:#a7b9d8;font-variant-numeric:tabular-nums}
+.contact-country-empty{margin:14px 8px;color:#a7b9d8;font-size:13px}
+.contact-phone-input{flex:1;min-width:0}
+.contact-phone-library-selector{display:none}
+.contact-phone-input .react-international-phone-dial-code-preview{
+  border:1px solid var(--line);border-right:0;border-radius:13px 0 0 13px;background:rgba(255,255,255,.03);
+  color:#c9d8f3;font-size:13px
+}
+.contact-phone-input .contact-phone-number-input{
+  width:100%;height:47px;border:1px solid var(--line);border-radius:0 13px 13px 0;
+  background:rgba(255,255,255,.03);color:#fff;font-size:13px
+}
+.contact-phone-input .contact-phone-number-input:focus{
+  border-color:var(--acid);box-shadow:0 0 0 4px #78a9ff22;background:rgba(120,169,255,.05)
+}
+@media (max-width:420px){
+  .contact-phone-field{gap:6px}.contact-country-trigger{padding:0 9px}.contact-country-code{display:none}
+  .contact-country-menu{left:0;width:min(320px,calc(100vw - 32px))}
+}
+
 .hero-orb{position:absolute;border-radius:999px;filter:blur(1px);pointer-events:none}
 .hero-orb--one{
   width:38vw;height:38vw;right:-12vw;top:5%;
