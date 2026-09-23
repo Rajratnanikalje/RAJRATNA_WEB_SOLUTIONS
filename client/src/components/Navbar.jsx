@@ -90,13 +90,13 @@ export default function Navbar() {
 
           <Link
             to="/contact"
-            className="primary hidden lg:inline-flex text-xs py-3"
+            className="primary !hidden lg:!inline-flex text-xs py-3"
           >
             Get a Quote <ArrowUpRight size={14} />
           </Link>
 
           <button
-            className="lg:hidden p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-all"
+            className="lg:hidden inline-flex p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-all"
             onClick={() => setOpen(!open)}
             aria-label="Toggle navigation"
             aria-expanded={open}
