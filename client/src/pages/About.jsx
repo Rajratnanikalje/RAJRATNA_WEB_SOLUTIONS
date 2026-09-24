@@ -2,17 +2,17 @@ import { useCallback, useEffect, useState } from "react";
 import {
   Code2,
   Database,
-  Globe,
   Layout,
-  Server,
   Shield,
   Smartphone,
   Zap,
+  Globe,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { pub } from "../services/api";
 import useContentRefresh from "../hooks/useContentRefresh";
 import { Card, Reveal, Heading } from "../components/UI";
+import { publicPath } from "../content/siteRoutes";
 
 const features = [
   {
@@ -46,24 +46,18 @@ const features = [
     desc: "Lightning-fast websites with clean, efficient code.",
   },
 ];
-
-const techStack = [
-  { name: "React.js", category: "Frontend" },
-  { name: "JavaScript", category: "Language" },
-  { name: "Node.js", category: "Backend" },
-  { name: "Express.js", category: "Backend" },
-  { name: "MongoDB", category: "Database" },
-  { name: "Tailwind CSS", category: "Styling" },
-  { name: "REST API", category: "Architecture" },
-  { name: "Git", category: "DevOps" },
-];
+const featureIcons = { Layout, Smartphone, Database, Code2, Shield, Zap };
 
 export default function About() {
   const [aboutImageUrl, setAboutImageUrl] = useState("");
   const [content, setContent] = useState({});
+  const [cmsTechnologies, setCmsTechnologies] = useState([]);
 
   const loadAboutImage = useCallback(() => {
-    pub.settings().then((r) => { const data = r.data?.data || {}; setAboutImageUrl(data.aboutImageUrl || ""); setContent(data); }).catch(() => {});
+    Promise.allSettled([pub.settings(), pub.technologies()]).then(([settingsResult, technologiesResult]) => {
+      if (settingsResult.status === "fulfilled") { const data = settingsResult.value.data?.data || {}; setAboutImageUrl(data.aboutImageUrl || ""); setContent(data); }
+      if (technologiesResult.status === "fulfilled") setCmsTechnologies(technologiesResult.value.data?.data || []);
+    });
   }, []);
 
   useEffect(() => {
@@ -71,6 +65,12 @@ export default function About() {
   }, [loadAboutImage]);
 
   useContentRefresh(loadAboutImage);
+
+  if (content.aboutPageVisible === false) return null;
+  const highlights = (content.aboutHighlights || features.map(({ title, desc }, displayOrder) => ({ title, description: desc, displayOrder, active: true })))
+    .filter((item) => item.active !== false)
+    .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+  const displayedTechStack = cmsTechnologies.map(({ name, category, iconUrl }) => ({ name, category, iconUrl }));
 
   return (
     <section className="section pt-40 relative overflow-hidden">
@@ -91,22 +91,18 @@ export default function About() {
             <div>
               <div className="label">
                 <span className="eyebrow-line" />
-                About Me
+                {content.aboutEyebrow || "About Rajratna Web Solutions"}
               </div>
               <h1 className="title">
-                {content.aboutTitle || <>Crafting digital <br /><span className="text-gradient">experiences</span> that<br />mean business.</>}
+                {content.aboutTitle || <>Building Digital Experiences That Matter.</>}
               </h1>
               <p className="muted leading-8 mt-6 text-lg max-w-xl">
-                {content.aboutDescription || <>I'm <b className="text-white">Rajratna Nikalje</b>, a Web
-                Developer focused on building modern, responsive and
-                practical web experiences. I help businesses turn their vision
-                into clean, secure, high-performing websites and web
-                applications.</>}
+                {content.aboutDescription || <>Rajratna Web Solutions is a modern web development studio focused on creating responsive websites, full-stack applications and digital solutions for businesses and ideas.</>}
               </p>
 
               <div className="mt-8 space-y-3">
-                {features.map((f, i) => {
-                  const Icon = f.icon;
+                {highlights.map((f, i) => {
+                  const Icon = featureIcons[f.iconKey] || features[i % features.length].icon;
                   return (
                     <div key={f.title} className="flex gap-4">
                       <div className="text-[#78a9ff] font-mono font-bold">
@@ -117,7 +113,7 @@ export default function About() {
                           <Icon size={16} className="text-[#78a9ff]" />
                           <span className="font-semibold">{f.title}</span>
                         </div>
-                        <p className="muted text-sm mt-0.5">{f.desc}</p>
+                        <p className="muted text-sm mt-0.5">{f.description || f.desc}</p>
                       </div>
                     </div>
                   );
@@ -125,11 +121,11 @@ export default function About() {
               </div>
 
               <div className="flex gap-3 mt-8">
-                <Link to="/contact" className="primary">
-                  Get a Free Quote
+                <Link to={publicPath(content.aboutPrimaryCtaRouteKey || "contact", "/contact")} className="primary">
+                  {content.aboutPrimaryCtaText || "Get a Free Quote"}
                 </Link>
-                <Link to="/portfolio" className="secondary">
-                  View Our Work
+                <Link to={publicPath(content.aboutSecondaryCtaRouteKey || "projects", "/portfolio")} className="secondary">
+                  {content.aboutSecondaryCtaText || "View Our Work"}
                 </Link>
               </div>
             </div>
@@ -137,19 +133,19 @@ export default function About() {
           </div>
         </Reveal>
 
-        <Reveal delay={0.3}>
+        {content.aboutTechVisible !== false && <Reveal delay={0.3}>
           <div className="mt-20">
             <Heading
-              label="Tech Stack"
-              title="The tools I build with."
-              desc="A modern toolkit, used with purpose."
+              label={content.aboutTechEyebrow || "Tech Stack"}
+              title={content.aboutTechTitle || "The tools I build with."}
+              desc={content.aboutTechDescription || "A modern toolkit, used with purpose."}
             />
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-12">
-              {techStack.map((t, i) => (
+              {displayedTechStack.map((t, i) => (
                 <Reveal key={t.name} delay={i * 0.04}>
                   <Card className="tech-card group p-6 text-center h-full">
                     <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#78a9ff] to-[#3b82f6] flex items-center justify-center mx-auto mb-3 shadow-[0_0_20px_rgba(120,169,255,.3)]">
-                      <Globe size={22} className="text-slate-900" />
+                      {t.iconUrl ? <img src={t.iconUrl} alt={t.name} loading="lazy" className="w-9 h-9 object-contain" /> : <Globe size={22} className="text-slate-900" />}
                     </div>
                     <div className="tech-name">{t.name}</div>
                     <div className="tech-category">{t.category}</div>
@@ -158,7 +154,7 @@ export default function About() {
               ))}
             </div>
           </div>
-        </Reveal>
+        </Reveal>}
       </div>
     </section>
   );

@@ -6,7 +6,7 @@ export const CONTENT_UPDATED_KEY = "rws_content_updated_at";
 /**
  * Call this from the admin CMS right after a successful save/delete.
  * - Same-tab public pages get a window event.
- * - Other open tabs get a `storage` event (fires only in *other* tabs).
+ * - Other open tabs get a `storage` event (fires only in other tabs).
  */
 export function notifyContentUpdated() {
   try {
@@ -18,22 +18,26 @@ export function notifyContentUpdated() {
 }
 
 /**
- * Re-runs `refetch` whenever fresh content may be available:
- * same-tab admin save, other-tab admin save, back/forward navigation
- * within the SPA, or when the tab becomes visible again.
+ * Re-runs `refetch` after an Admin save, SPA navigation, tab focus/visibility,
+ * or a back/forward cache restore. No continuous polling is needed.
  * `refetch` should update state silently (no loading skeleton flash).
  */
-export default function useContentRefresh(refetch, { pollMs = 30000 } = {}) {
+export default function useContentRefresh(refetch) {
   const cb = useRef(refetch);
   cb.current = refetch;
   const lastRun = useRef(0);
-  const lastSeen = useRef(0);
+  const previousLocation = useRef(null);
   const location = useLocation();
 
-  // Any navigation inside the SPA (public menu, back/forward, or the admin
-  // "View site" link) silently re-fetches, so fresh CMS content appears
-  // without a manual browser refresh.
+  // Existing components fetch once on mount; only re-fetch on later SPA
+  // navigations here to avoid duplicating that initial request.
   useEffect(() => {
+    const currentLocation = `${location.pathname}${location.search}`;
+    if (previousLocation.current === null) {
+      previousLocation.current = currentLocation;
+      return;
+    }
+    previousLocation.current = currentLocation;
     const now = Date.now();
     if (now - lastRun.current < 1500) return;
     lastRun.current = now;
@@ -45,15 +49,9 @@ export default function useContentRefresh(refetch, { pollMs = 30000 } = {}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname, location.search]);
 
-  // Same-tab save, other-tab save, tab focus/visibility, plus a light poll
-  // for pages left open a long time (e.g. a phone keeps /portfolio open
-  // while you save from /admin on a laptop — no browser event can reach it).
+  // Same-tab saves use the custom event, other tabs use the storage event,
+  // and focus/visibility events refresh pages when a user returns to them.
   useEffect(() => {
-    try {
-      lastSeen.current = Number(localStorage.getItem(CONTENT_UPDATED_KEY) || 0);
-    } catch {
-      lastSeen.current = 0;
-    }
     const run = ({ throttle = true } = {}) => {
       const now = Date.now();
       // Focus + visibility events often fire back-to-back after a tab
@@ -78,28 +76,6 @@ export default function useContentRefresh(refetch, { pollMs = 30000 } = {}) {
       // (React Router navigations don't reload, so this never loops).
       if (e.persisted) runNow();
     };
-    let pollId;
-    if (pollMs > 0) {
-      pollId = setInterval(() => {
-        if (document.visibilityState !== "visible") return;
-        let stamp = 0;
-        try {
-          stamp = Number(localStorage.getItem(CONTENT_UPDATED_KEY) || 0);
-        } catch {
-          stamp = 0;
-        }
-        // Same device / same browser profile: pick up saves made from a
-        // private window, another profile quirk, or a missed storage event.
-        if (stamp && stamp !== lastSeen.current) {
-          lastSeen.current = stamp;
-          runNow();
-          return;
-        }
-        // Different device (phone vs laptop): nothing can push to this tab,
-        // so re-fetch quietly on a slow cadence while the page is visible.
-        run();
-      }, pollMs);
-    }
     window.addEventListener("focus", run);
     window.addEventListener("rws:content-updated", runNow);
     window.addEventListener("storage", onStorage);
@@ -111,7 +87,6 @@ export default function useContentRefresh(refetch, { pollMs = 30000 } = {}) {
       window.removeEventListener("storage", onStorage);
       window.removeEventListener("pageshow", onPageShow);
       document.removeEventListener("visibilitychange", onVis);
-      if (pollId) clearInterval(pollId);
     };
-  }, [pollMs]);
+  }, []);
 }

@@ -16,19 +16,40 @@ import {
   ChevronDown,
   Search,
   X,
+  House,
+  UserRound,
+  Workflow,
+  CircleHelp,
+  MessageSquareQuote,
+  FileText,
+  Share2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { admin } from "../services/api";
+import { admin, NEW_ENQUIRY_SIGNAL_KEY } from "../services/api";
 
-const mainLinks = [
-  ["dashboard", "Dashboard", LayoutDashboard],
-  ["services", "Services", Briefcase],
-  ["projects", "Projects", FolderKanban],
-  ["technologies", "Technologies", Cpu],
-  ["enquiries", "Enquiries", Inbox],
+const navGroups = [
+  ["DASHBOARD", [["dashboard", "Dashboard", LayoutDashboard]]],
+  ["WEBSITE", [
+    ["navbar", "Navbar", Settings],
+    ["homepage", "Homepage", House],
+    ["about", "About", UserRound],
+    ["services", "Services", Briefcase],
+    ["projects", "Projects", FolderKanban],
+    ["process", "Process", Workflow],
+    ["technologies", "Technologies", Cpu],
+    ["footer", "Footer", Settings],
+    ["faq", "FAQ", CircleHelp],
+    ["testimonials", "Testimonials", MessageSquareQuote],
+  ]],
+  ["LEADS", [["enquiries", "Enquiries", Inbox]]],
+  ["SETTINGS", [
+    ["website-settings", "Website Settings", Settings],
+    ["contact-social", "Contact & Social", Share2],
+    ["seo", "SEO", Search],
+    ["privacy", "Privacy Policy", FileText],
+    ["terms", "Terms & Conditions", FileText],
+  ]],
 ];
-
-const systemLinks = [["settings", "Settings", Settings]];
 
 function NotificationBell({
   count,
@@ -229,13 +250,10 @@ function ProfileDropdown({ onLogout }) {
 function SidebarNav({ onNavigate }) {
   return (
     <>
-      <div className="px-3 mb-1">
-        <span className="text-xs font-medium text-slate-600 tracking-wider">
-          Navigation
-        </span>
-      </div>
-      <nav className="grid gap-1 px-2">
-        {mainLinks.map(([path, label, Icon]) => (
+      {navGroups.map(([group, links]) => <section key={group || "dashboard"} className={group ? "mt-3" : ""}>
+        {group && <div className="px-3 mb-1"><span className="text-[10px] font-semibold text-slate-600 tracking-wider">{group}</span></div>}
+        <nav className="grid gap-1 px-2">
+        {links.map(([path, label, Icon]) => (
           <NavLink
             key={path}
             to={`/admin/${path}`}
@@ -252,32 +270,8 @@ function SidebarNav({ onNavigate }) {
             {label}
           </NavLink>
         ))}
-      </nav>
-
-      <div className="px-3 mt-4 mb-1">
-        <span className="text-xs font-medium text-slate-600 tracking-wider">
-          System
-        </span>
-      </div>
-      <nav className="grid gap-1 px-2">
-        {systemLinks.map(([path, label, Icon]) => (
-          <NavLink
-            key={path}
-            to={`/admin/${path}`}
-            onClick={onNavigate}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
-                isActive
-                  ? "bg-gradient-to-r from-[#78a9ff]/15 to-[#3b82f6]/10 text-[#78a9ff] border border-[#78a9ff]/30"
-                  : "text-slate-400 hover:text-white hover:bg-[#78a9ff]/5"
-              }`
-            }
-          >
-            <Icon size={16} />
-            {label}
-          </NavLink>
-        ))}
-      </nav>
+        </nav>
+      </section>)}
     </>
   );
 }
@@ -314,7 +308,7 @@ export default function AdminLayout() {
     try {
       const r = await admin.enquiries.list();
       const all = r.data.data || [];
-      const currentNew = all.filter((e) => e.status === "New");
+      const currentNew = all.filter((e) => e.status === "New" || e.status === "NEW");
       let seen = [];
       try {
         seen = JSON.parse(localStorage.getItem("rws_seen_enquiry_ids") || "[]");
@@ -340,16 +334,21 @@ export default function AdminLayout() {
   useEffect(() => {
     fetchNotifications();
     const id = setInterval(fetchNotifications, 30000);
+    const refreshOnStorage = (event) => {
+      if (event.key === NEW_ENQUIRY_SIGNAL_KEY) fetchNotifications();
+    };
     const refreshWhenVisible = () => {
       if (document.visibilityState === "visible") fetchNotifications();
     };
     window.addEventListener("focus", fetchNotifications);
     window.addEventListener("rws:new-enquiry", fetchNotifications);
+    window.addEventListener("storage", refreshOnStorage);
     document.addEventListener("visibilitychange", refreshWhenVisible);
     return () => {
       clearInterval(id);
       window.removeEventListener("focus", fetchNotifications);
       window.removeEventListener("rws:new-enquiry", fetchNotifications);
+      window.removeEventListener("storage", refreshOnStorage);
       document.removeEventListener("visibilitychange", refreshWhenVisible);
     };
   }, []);
@@ -413,37 +412,19 @@ export default function AdminLayout() {
             </div>
           </div>
 
-          <div className="mt-4 flex-1 min-h-0">
+          <div className="admin-sidebar-scroll mt-4 flex-1 min-h-0 overflow-y-auto">
             <SidebarNav onNavigate={() => {}} />
           </div>
 
           {/* Logout */}
           <button
             onClick={logout}
-            className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-[#78a9ff]/5 transition-all mb-3"
+            className="order-last flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-[#78a9ff]/5 transition-all mb-3"
           >
             <LogOut size={16} />
             Logout
           </button>
 
-          {/* Sidebar Promotional Card */}
-          <div className="sidebar-promo rounded-xl p-3">
-            <div className="text-xs font-medium text-[#78a9ff]/60 uppercase tracking-wider mb-1">
-              RWS Studio
-            </div>
-            <div className="text-sm font-medium text-slate-200 mb-2">
-              Build Amazing Web Experiences
-            </div>
-            <motion.a
-              whileHover={{ scale: 1.03 }}
-              href="https://rajratnawebsolutions.com"
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center justify-center text-xs font-semibold text-[#78a9ff] hover:text-blue-200 py-1.5 rounded-lg border border-[#78a9ff]/20 hover:border-[#78a9ff]/40 hover:bg-[#78a9ff]/10 transition-all"
-            >
-              Get a Quote
-            </motion.a>
-          </div>
         </div>
       </aside>
 
@@ -544,7 +525,7 @@ export default function AdminLayout() {
             role="dialog"
             aria-modal="true"
             aria-label="Admin navigation"
-          ><div className="glass-premium rounded-3xl p-3 sm:p-4 w-[280px] sm:w-64 h-[calc(100vh-24px)] sm:h-[calc(100vh-32px)] flex flex-col border border-[#78a9ff]/10 overflow-y-auto">
+          ><div className="admin-sidebar-scroll glass-premium rounded-3xl p-3 sm:p-4 w-[280px] sm:w-64 h-[calc(100vh-24px)] sm:h-[calc(100vh-32px)] flex flex-col border border-[#78a9ff]/10 overflow-y-auto">
                 <div className="flex items-center justify-between p-2 mb-2">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#78a9ff] to-[#3b82f6] flex items-center justify-center">
@@ -569,29 +550,12 @@ export default function AdminLayout() {
 
                 <button
                   onClick={() => { setMobileOpen(false); logout(); }}
-                  className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-[#78a9ff]/5 transition-all mb-4"
+                  className="order-last flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-[#78a9ff]/5 transition-all mb-4"
                 >
                   <LogOut size={16} />
                   Logout
                 </button>
 
-                <div className="sidebar-promo rounded-xl p-3">
-                  <div className="text-xs font-medium text-[#78a9ff]/60 uppercase tracking-wider mb-1">
-                    RWS Studio
-                  </div>
-                  <div className="text-sm font-medium text-slate-200 mb-2">
-                    Build Amazing Web Experiences
-                  </div>
-                  <motion.a
-                    whileHover={{ scale: 1.03 }}
-                    href="https://rajratnawebsolutions.com"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center justify-center text-xs font-semibold text-[#78a9ff] hover:text-blue-200 py-1.5 rounded-lg border border-[#78a9ff]/20 hover:border-[#78a9ff]/40 hover:bg-[#78a9ff]/10 transition-all"
-                  >
-                    Get a Quote
-                  </motion.a>
-                </div>
               </div>
              </aside>
         </>

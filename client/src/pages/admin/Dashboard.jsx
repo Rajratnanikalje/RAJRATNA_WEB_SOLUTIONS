@@ -5,6 +5,7 @@ import {
   Eye,
   FolderKanban,
   Inbox,
+  Cpu,
   TriangleAlert,
   AlertCircle,
   Clock,
@@ -24,6 +25,7 @@ const statCards = [
   { key: "projects", label: "Total Projects", icon: Briefcase, color: "from-purple-500/20 to-blue-500/10" },
   { key: "services", label: "Total Services", icon: BarChart3, color: "from-cyan-500/20 to-blue-500/10" },
   { key: "enquiries", label: "Total Enquiries", icon: Inbox, color: "from-amber-500/20 to-orange-500/10" },
+  { key: "technologies", label: "Total Technologies", icon: Cpu, color: "from-blue-500/20 to-cyan-500/10" },
   { key: "views", label: "Total Views", icon: Eye, color: "from-green-500/20 to-emerald-500/10" },
 ];
 
@@ -111,6 +113,7 @@ function WebsiteOverview({ data, loading }) {
     { label: "Projects", value: stats?.projects ?? 0, Icon: Briefcase, color: "from-purple-500/10 to-blue-500/10" },
     { label: "Services", value: stats?.services ?? 0, Icon: BarChart3, color: "from-cyan-500/10 to-blue-500/10" },
     { label: "Enquiries", value: stats?.enquiries ?? 0, Icon: Inbox, color: "from-amber-500/10 to-orange-500/10" },
+    { label: "Technologies", value: stats?.technologies ?? 0, Icon: Cpu, color: "from-blue-500/10 to-cyan-500/10" },
     { label: "Views", value: stats?.views ?? 0, Icon: Eye, color: "from-green-500/10 to-emerald-500/10" },
   ];
 
@@ -124,13 +127,13 @@ function WebsiteOverview({ data, loading }) {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[1, 2, 3, 4].map((n) => (
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+          {[1, 2, 3, 4, 5].map((n) => (
             <div key={n} className="h-16 bg-white/5 rounded-xl animate-pulse" />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {overviewItems.map((item, i) => (
             <motion.div
               key={item.label}
@@ -154,6 +157,8 @@ function WebsiteOverview({ data, loading }) {
       )}
 
       <div className="mt-3 pt-3 border-t border-white/5 grid grid-cols-2 gap-3 text-xs">
+        <div className="flex justify-between"><span className="text-slate-500">Published Projects</span><span className="text-slate-300 font-medium">{stats?.publishedProjects ?? 0}</span></div>
+        <div className="flex justify-between"><span className="text-slate-500">New Enquiries</span><span className="text-slate-300 font-medium">{stats?.newEnquiries ?? 0}</span></div>
         <div className="flex justify-between">
           <span className="text-slate-500">Recent Enquiries</span>
           <span className="text-slate-300 font-medium">
@@ -774,7 +779,7 @@ export default function Dashboard() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4"
       >
         {statCards.map((stat, i) => (
           <StatCard

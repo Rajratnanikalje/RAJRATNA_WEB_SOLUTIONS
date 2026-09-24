@@ -1,5 +1,16 @@
 import axios from "axios";
 export const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+export const NEW_ENQUIRY_SIGNAL_KEY = "rws_new_enquiry_created";
+
+export function notifyEnquiryCreated() {
+  window.dispatchEvent(new Event("rws:new-enquiry"));
+  try {
+    localStorage.setItem(NEW_ENQUIRY_SIGNAL_KEY, `${Date.now()}-${Math.random()}`);
+  } catch {
+    // The Admin Panel's short-interval refresh remains as a fallback.
+  }
+}
+
 const api = axios.create({ baseURL: API });
 api.interceptors.request.use((c) => {
   const t = localStorage.getItem("rws_token");

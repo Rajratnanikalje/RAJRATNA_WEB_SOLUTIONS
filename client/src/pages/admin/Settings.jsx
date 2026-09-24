@@ -4,23 +4,15 @@ import { admin } from "../../services/api";
 import { notifyContentUpdated } from "../../hooks/useContentRefresh";
 import ImageUploader from "../../components/ImageUploader";
 import { Card } from "../../components/UI";
+import { PUBLIC_ROUTE_OPTIONS } from "../../content/siteRoutes";
 
-const keys = [
-  "siteTitle",
-  "logoUrl",
-  "heroImageUrl",
-  "homeHeroTitle",
-  "homeHeroSubtitle",
-  "aboutImageUrl",
-  "aboutTitle",
-  "aboutDescription",
-  "phone",
-  "email",
-  "location",
-  "seoTitle",
-  "seoDescription",
-  "faviconUrl",
-];
+const keysBySection = {
+  website: ["siteTitle", "faviconUrl"],
+  contact: ["email", "phone", "whatsapp", "location", "socialLinks"],
+  seo: ["seoTitle", "seoDescription", "ogTitle", "ogDescription", "ogImage"],
+};
+
+const seoPageDefaults = PUBLIC_ROUTE_OPTIONS.map(({ value }) => ({ pageKey: value, indexable: true }));
 
 // Image settings use the direct upload control instead of a pasted URL.
 const imageFields = {
@@ -44,9 +36,15 @@ const imageFields = {
     previewHeight: "h-24",
     hint: "Square PNG, 512 x 512 recommended.",
   },
+  ogImage: {
+    label: "Open Graph Image",
+    previewHeight: "h-44",
+    hint: "Image used when a page is shared on social platforms.",
+  },
 };
 
-export default function Settings() {
+export default function Settings({ section = "website" }) {
+  const keys = keysBySection[section] || keysBySection.website;
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -60,7 +58,11 @@ export default function Settings() {
   useEffect(() => {
     admin.settings
       .get()
-      .then((r) => setForm(r.data.data || {}))
+      .then((r) => {
+        const data = r.data.data || {};
+        const pageSeo = seoPageDefaults.map((defaults) => ({ ...defaults, ...(data.pageSeo || []).find((item) => item.pageKey === defaults.pageKey) }));
+        setForm({ ...data, socialLinks: (data.socialLinks || []).join("\n"), footerSocialLinks: (data.footerSocialLinks || []).join("\n"), pageSeo });
+      })
       .catch((e) => setError(e.response?.data?.message || "Could not load settings."))
       .finally(() => setLoading(false));
   }, []);
@@ -71,7 +73,9 @@ export default function Settings() {
     setError("");
     setSuccess("");
     try {
-      await admin.settings.save(form);
+      const payload = Object.fromEntries(keys.map((key) => [key, form[key]]));
+      if (typeof payload.socialLinks === "string") payload.socialLinks = payload.socialLinks.split(/\r?\n/).map((url) => url.trim()).filter(Boolean);
+      await admin.settings.save(payload);
       notifyContentUpdated();
       setSuccess("Settings saved successfully.");
     } catch (e) {
@@ -84,6 +88,7 @@ export default function Settings() {
   const handleChange = (key, value) => {
     setForm((f) => ({ ...f, [key]: value }));
   };
+  const updateSeoPage = (index, key, value) => setForm((current) => ({ ...current, pageSeo: (current.pageSeo || seoPageDefaults).map((page, i) => i === index ? { ...page, [key]: value } : page) }));
   const saveAccount = async (e) => {
     e.preventDefault();
     setAccountStatus({ error: "", success: "" });
@@ -147,13 +152,13 @@ export default function Settings() {
     <>
       <div className="mb-8">
         <div className="label mb-2">CMS</div>
-        <h1 className="text-3xl font-bold text-slate-100">Settings</h1>
+        <h1 className="text-3xl font-bold text-slate-100">{{ website: "Website Settings", contact: "Contact & Social", seo: "SEO" }[section] || "Settings"}</h1>
         <p className="text-slate-500 mt-1 text-sm">
-          Website identity, contact and SEO settings.
+          {section === "website" ? "Manage the website name and favicon. Navbar branding and logo are managed in Navbar." : section === "contact" ? "Manage contact details and social links used by the Contact page." : "Manage titles, descriptions, canonical URLs, social previews, and indexing per public page."}
         </p>
       </div>
 
-      <Card className="p-7 mt-6 max-w-3xl">
+      {section === "website" && <Card className="p-7 mt-6 max-w-3xl">
         {error && (
           <div className="mb-4 rounded-xl border border-red-400/30 bg-red-400/10 p-3 flex gap-2 text-red-100">
             <AlertCircle size={16} className="shrink-0" />
@@ -179,11 +184,11 @@ export default function Settings() {
                   previewHeight={imageFields[k].previewHeight}
                   hint={imageFields[k].hint}
                 />
-              ) : ["seoDescription", "aboutDescription"].includes(k) ? (
+              ) : ["seoDescription", "ogDescription", "socialLinks"].includes(k) ? (
                 <textarea
                   className="input"
-                  rows={3}
-                  placeholder={k}
+                  rows={k === "socialLinks" ? 5 : 3}
+                  placeholder={k === "socialLinks" ? "One https:// social profile URL per line" : k}
                   value={form[k] || ""}
                   onChange={(e) => handleChange(k, e.target.value)}
                 />
@@ -203,7 +208,23 @@ export default function Settings() {
             <Save size={15} />
           </button>
         </form>
-      </Card>
+      </Card>}
+
+      {section === "seo" && <Card className="p-7 mt-6 max-w-4xl">
+        {error && <p className="mb-4 rounded-xl border border-red-400/30 bg-red-400/10 p-3 text-sm text-red-200" role="alert">{error}</p>}
+        {success && <p className="mb-4 rounded-xl border border-green-400/30 bg-green-400/10 p-3 text-sm text-green-200" role="status">{success}</p>}
+        <div className="mb-5"><h2 className="text-xl font-semibold">Per-page SEO</h2><p className="text-sm text-slate-500 mt-1">Edit metadata for each existing public route. Admin routes remain noindex.</p></div>
+        <div className="grid gap-4">{(form.pageSeo || seoPageDefaults).map((page, index) => <details key={page.pageKey} className="rounded-xl border border-white/10 bg-white/[.02] p-4" open={index === 0}>
+          <summary className="cursor-pointer font-semibold text-slate-200">{PUBLIC_ROUTE_OPTIONS.find((route) => route.value === page.pageKey)?.label || page.pageKey}</summary>
+          <div className="grid md:grid-cols-2 gap-4 mt-4">
+            {[ ["title", "Page title", "text"], ["description", "Meta description", "textarea"], ["canonicalUrl", "Canonical URL (optional)", "url"], ["ogTitle", "Open Graph title", "text"], ["ogDescription", "Open Graph description", "textarea"], ["twitterTitle", "Twitter title", "text"], ["twitterDescription", "Twitter description", "textarea"] ].map(([key, label, kind]) => <label key={key} className="grid gap-1 text-xs text-slate-400">{label}{kind === "textarea" ? <textarea className="input" rows={3} value={page[key] || ""} onChange={(e) => updateSeoPage(index, key, e.target.value)}/> : <input type={kind} className="input" value={page[key] || ""} onChange={(e) => updateSeoPage(index, key, e.target.value)}/>}</label>)}
+            <label className="grid gap-1 text-xs text-slate-400">Twitter card type<select className="input" value={page.twitterCard || "summary"} onChange={(e) => updateSeoPage(index, "twitterCard", e.target.value)}><option value="summary">Summary</option><option value="summary_large_image">Summary with large image</option></select></label>
+            {[ ["ogImage", "Open Graph image"], ["twitterImage", "Twitter image"] ].map(([key, label]) => <label key={key} className="grid gap-1 text-xs text-slate-400">{label}<ImageUploader value={page[key] || ""} onChange={(url) => updateSeoPage(index, key, url)} previewHeight="h-28" hint="Use the existing Cloudinary uploader."/></label>)}
+            <label className="flex items-center gap-2 text-sm text-slate-300"><input type="checkbox" checked={page.indexable !== false} onChange={(e) => updateSeoPage(index, "indexable", e.target.checked)}/> Allow search indexing</label>
+          </div>
+        </details>)}</div>
+        <button type="button" className="primary mt-5" onClick={async () => { setSaving(true); setError(""); setSuccess(""); try { await admin.settings.save({ pageSeo: form.pageSeo || seoPageDefaults }); notifyContentUpdated(); setSuccess("Per-page SEO saved successfully."); } catch (e) { setError(e.response?.data?.message || "Could not save page SEO."); } finally { setSaving(false); } }} disabled={saving}>{saving ? "Saving..." : "Save Per-page SEO"}<Save size={15}/></button>
+      </Card>}
       <Card className="p-7 mt-6 max-w-3xl">
         <h2 className="text-xl font-bold text-slate-100">Admin Account</h2>
         <p className="muted text-sm mt-1">Verify an OTP sent to your registered email before changing your login email or password.</p>

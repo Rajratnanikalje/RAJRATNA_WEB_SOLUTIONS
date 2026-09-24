@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Mail, MapPin, Phone, Send } from "lucide-react";
+import { Mail, MapPin, MessageCircle, Phone, Send } from "lucide-react";
 import {
   defaultCountries,
   parseCountry,
   PhoneInput,
 } from "react-international-phone";
 import "react-international-phone/style.css";
-import { pub } from "../services/api";
+import { notifyEnquiryCreated, pub } from "../services/api";
 import useContentRefresh from "../hooks/useContentRefresh";
 import { Card, Reveal, Heading } from "../components/UI";
 
-const initialState = { name: "", email: "", phone: "", message: "" };
+const initialState = { name: "", email: "", phone: "", company: "", service: "", budget: "", message: "" };
 const countries = defaultCountries.map(parseCountry);
 const india = countries.find((country) => country.iso2 === "in");
 
@@ -21,7 +21,7 @@ const countryFlag = (iso2) =>
     .map((character) => String.fromCodePoint(127397 + character.charCodeAt(0)))
     .join("");
 
-function InternationalPhoneField({ value, onChange, country, onCountryChange }) {
+function InternationalPhoneField({ value, onChange, country, onCountryChange, placeholder = "Phone number" }) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
@@ -159,8 +159,9 @@ function InternationalPhoneField({ value, onChange, country, onCountryChange }) 
           "aria-label": "Phone number",
           autoComplete: "tel",
           maxLength: 30,
+          required: true,
         }}
-        placeholder="Phone number"
+        placeholder={placeholder}
       />
     </div>
   );
@@ -172,6 +173,7 @@ export default function Contact() {
   const [settingsError, setSettingsError] = useState("");
   const [status, setStatus] = useState({ busy: false, error: "", ok: "" });
   const [phoneCountry, setPhoneCountry] = useState(india);
+  const [services, setServices] = useState([]);
 
   const loadContactSettings = useCallback(() => {
     pub.settings()
@@ -188,6 +190,14 @@ export default function Contact() {
 
   useContentRefresh(loadContactSettings);
 
+  useEffect(() => {
+    const loadServices = () => pub.services().then((r) => setServices(r.data?.data || [])).catch(() => {});
+    loadServices();
+    const onUpdated = () => loadServices();
+    window.addEventListener("rws:content-updated", onUpdated);
+    return () => window.removeEventListener("rws:content-updated", onUpdated);
+  }, []);
+
   const validate = () => {
     if (!form.name.trim()) return "Name is required.";
     if (!form.email.trim()) return "Email is required.";
@@ -195,7 +205,8 @@ export default function Contact() {
     if (!emailRegex.test(form.email)) return "Please enter a valid email address.";
     const phoneDigits = form.phone.replace(/\D/g, "");
     const hasPhoneNumber = phoneDigits && phoneDigits !== phoneCountry.dialCode;
-    if (hasPhoneNumber && !/^\+[1-9]\d{6,14}$/.test(form.phone)) {
+    if (!hasPhoneNumber) return "Phone number is required.";
+    if (!/^\+[1-9]\d{6,14}$/.test(form.phone)) {
       return "Please enter a valid international phone number.";
     }
     if (!form.message.trim()) return "Message is required.";
@@ -218,10 +229,10 @@ export default function Contact() {
         ...form,
         phone: phoneDigits === phoneCountry.dialCode ? "" : form.phone,
       });
-      window.dispatchEvent(new Event("rws:new-enquiry"));
+      notifyEnquiryCreated();
       setForm(initialState);
       setPhoneCountry(india);
-      setStatus({ busy: false, error: "", ok: "Your enquiry has been received. We'll get back to you soon." });
+      setStatus({ busy: false, error: "", ok: settings.contactSuccessMessage || "Your enquiry has been received. We'll get back to you soon." });
     } catch (x) {
       setStatus({
         busy: false,
@@ -234,29 +245,34 @@ export default function Contact() {
   const contacts = [
     {
       icon: Phone,
-      label: "Phone",
+      label: settings.contactPhoneLabel || "Phone",
       value: settings.phone || "+91 9156914227",
     },
     {
       icon: Mail,
-      label: "Email",
+      label: settings.contactEmailLabel || "Email",
       value: settings.email || "rajratnawebsolutions@gmail.com",
     },
     {
       icon: MapPin,
-      label: "Location",
+      label: settings.contactLocationLabel || "Location",
       value: settings.location || "Buldhana, Maharashtra, India",
     },
   ];
+  const whatsappPhone = (settings.whatsapp || settings.phone || "").replace(/\D/g, "");
+  const whatsappUrl = settings.contactWhatsappUrl || (/^https?:\/\//i.test(settings.whatsapp || "") ? settings.whatsapp : whatsappPhone ? `https://wa.me/${whatsappPhone}` : "");
+  if (whatsappUrl) contacts.push({ icon: MessageCircle, label: settings.contactWhatsappLabel || "WhatsApp", value: whatsappUrl.replace(/^https?:\/\//i, "") });
+  const serviceOptions = [...new Set([...services.map((service) => service.title), settings.contactOtherServiceLabel || "Other"] .filter(Boolean))];
 
   return (
+    settings.contactPageVisible === false ? null :
     <section className="section pt-40">
       <div className="container">
         <Reveal>
           <Heading
-            label="CONTACT"
-            title="Let's Build Something Great"
-            desc="Tell us what you want to build. Enquiries are stored in MongoDB through the backend API."
+            label={settings.contactEyebrow || "CONTACT"}
+            title={settings.contactTitle || "Send Us a Message"}
+            desc={settings.contactDescription || "Tell us what you need and our team will get back to you."}
           />
         </Reveal>
         {settingsError && <p className="text-amber-300 text-sm mt-4" role="status">{settingsError}</p>}
@@ -276,13 +292,12 @@ export default function Contact() {
                         <b className="block text-sm text-slate-400">
                           {c.label}
                         </b>
-                        <span className="muted text-sm mt-1 break-words">
-                          {c.value}
-                        </span>
+                        {c.icon === MessageCircle ? <a href={whatsappUrl} target="_blank" rel="noreferrer" className="muted text-sm mt-1 break-words block">{c.value}</a> : <span className="muted text-sm mt-1 break-words">{c.value}</span>}
                       </div>
                     </div>
                   );
                 })}
+                {!!settings.socialLinks?.length && <div className="border-t border-white/10 pt-5"><b className="block text-sm text-slate-400 mb-3">{settings.contactSocialLabel || "Social"}</b><div className="flex flex-wrap gap-3">{settings.socialLinks.filter((url) => /^https?:\/\//i.test(url)).map((url) => { let label = "Social"; try { label = new URL(url).hostname.replace(/^www\./, ""); } catch {} return <a key={url} href={url} target="_blank" rel="noreferrer" className="text-sm text-[#78a9ff] hover:text-white">{label}</a>; })}</div></div>}
               </Card>
             </div>
           </Reveal>
@@ -292,13 +307,14 @@ export default function Contact() {
               <form onSubmit={submit} className="grid gap-4">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-medium text-slate-400 mb-1 block">
-                      Name
+                    <label htmlFor="contact-name" className="text-xs font-medium text-slate-400 mb-1 block">
+                      {settings.contactNameLabel || "Full Name"} <span className="text-red-300">*</span>
                     </label>
                     <input
+                      id="contact-name"
                       required
                       className="input"
-                      placeholder="Your name"
+                      placeholder={settings.contactNamePlaceholder || "Your full name"}
                       value={form.name}
                       onChange={(e) =>
                         setForm({ ...form, name: e.target.value })
@@ -307,14 +323,15 @@ export default function Contact() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-slate-400 mb-1 block">
-                      Email
+                    <label htmlFor="contact-email" className="text-xs font-medium text-slate-400 mb-1 block">
+                      {settings.contactEmailFieldLabel || "Email Address"} <span className="text-red-300">*</span>
                     </label>
                     <input
+                      id="contact-email"
                       required
                       type="email"
                       className="input"
-                      placeholder="you@example.com"
+                      placeholder={settings.contactEmailPlaceholder || "you@example.com"}
                       value={form.email}
                       onChange={(e) =>
                         setForm({ ...form, email: e.target.value })
@@ -326,25 +343,52 @@ export default function Contact() {
 
                 <div>
                   <label htmlFor="contact-phone" className="text-xs font-medium text-slate-400 mb-1 block">
-                    Phone
+                    {settings.contactPhoneFieldLabel || "Phone Number"} <span className="text-red-300">*</span>
                   </label>
                   <InternationalPhoneField
                     value={form.phone}
                     onChange={(phone) => setForm((current) => ({ ...current, phone }))}
                     country={phoneCountry}
                     onCountryChange={setPhoneCountry}
+                    placeholder={settings.contactPhonePlaceholder || "Phone number"}
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-slate-400 mb-1 block">
-                    Message
+                  <label htmlFor="contact-company" className="text-xs font-medium text-slate-400 mb-1 block">{settings.contactCompanyLabel || "Business / Company"}</label>
+                  <input id="contact-company" className="input" placeholder={settings.contactCompanyPlaceholder || "Business or company name (optional)"} value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} maxLength={120} />
+                </div>
+
+                <div>
+                  <label htmlFor="contact-service" className="text-xs font-medium text-slate-400 mb-1 block">
+                    {settings.contactServiceLabel || "Service Interested In"}
+                  </label>
+                  <select
+                    id="contact-service"
+                    className="input"
+                    value={form.service}
+                    onChange={(e) => setForm({ ...form, service: e.target.value })}
+                  >
+                    <option value="">{settings.contactServicePlaceholder || "Select a service"}</option>
+                    {serviceOptions.map((service) => <option key={service} value={service}>{service}</option>)}
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="contact-budget" className="text-xs font-medium text-slate-400 mb-1 block">{settings.contactBudgetLabel || "Budget"} <span className="text-slate-500">({settings.contactOptionalLabel || "Optional"})</span></label>
+                  <input id="contact-budget" className="input" placeholder={settings.contactBudgetPlaceholder || "Your estimated budget (optional)"} value={form.budget} onChange={(e) => setForm({ ...form, budget: e.target.value })} maxLength={80} />
+                </div>
+
+                <div>
+                  <label htmlFor="contact-message" className="text-xs font-medium text-slate-400 mb-1 block">
+                    {settings.contactMessageLabel || "Project Details"} <span className="text-red-300">*</span>
                   </label>
                   <textarea
+                    id="contact-message"
                     required
                     rows={7}
                     className="input"
-                    placeholder="How can we help with your project?"
+                    placeholder={settings.contactMessagePlaceholder || "How can we help with your project?"}
                     value={form.message}
                     onChange={(e) =>
                       setForm({ ...form, message: e.target.value })
@@ -366,10 +410,10 @@ export default function Contact() {
                   disabled={status.busy}
                 >
                   {status.busy ? (
-                    "Sending..."
+                    settings.contactSendingLabel || "Sending..."
                   ) : (
                     <>
-                      Send Message <Send size={15} />
+                      {settings.contactSubmitLabel || "Send Message"} <Send size={15} />
                     </>
                   )}
                 </button>

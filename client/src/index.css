@@ -176,6 +176,11 @@ body:before{
   box-shadow:0 0 0 4px #78a9ff22;
   background:rgba(120,169,255,.05);
 }
+/* Keep native dropdown choices readable in the site's dark theme. */
+.input option{
+  background:#0f172a;
+  color:#f8fafc;
+}
 
 /* Contact form international phone field: country data and formatting come from
    react-international-phone; these rules only align it with the RWS theme. */
@@ -277,7 +282,7 @@ body:before{
 }
 .hero-title-v2{
   font-family:'Montserrat',var(--font-sans);font-weight:900;
-  font-size:clamp(44px,7vw,104px);line-height:.98;letter-spacing:.01em;
+  font-size:clamp(38px,6.4vw,84px);line-height:.98;letter-spacing:.01em;
   text-transform:uppercase;
 }
 .hero-silver{
@@ -318,12 +323,18 @@ body:before{
   transform:rotate(-5deg);
   text-shadow:0 2px 26px rgba(59,130,246,.55);
 }
-@media (max-width:1279px){.hero-script{display:none}}
+@media (max-width:1279px){
+  .hero-script{display:block;top:auto;right:24px;bottom:20px;font-size:clamp(24px,3.2vw,36px)}
+  .hero-copy{max-width:min(72%,640px)}
+}
 .hero-swoosh{
   position:absolute;left:-4%;bottom:-5%;z-index:1;pointer-events:none;
   width:min(56%,740px);height:auto;opacity:.85;
 }
 @media (max-width:767px){
+  .hero-title-v2{font-size:clamp(34px,11vw,44px);line-height:1}
+  .hero-copy{max-width:100%;padding-bottom:112px}
+  .hero-script{right:18px;bottom:16px;font-size:24px;line-height:1.02}
   .hero-shade{
     background:linear-gradient(180deg,rgba(4,10,20,.9) 0%,rgba(4,10,20,.8) 45%,rgba(4,10,20,.96) 100%);
   }
@@ -463,13 +474,43 @@ body:before{
 }
 
 .cta-panel{
-  background:linear-gradient(135deg,#3b82f6,#78a9ff);
-  color:#08111f;
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  border:1px solid rgba(154,181,255,.18);
+  background:
+    radial-gradient(ellipse at 88% 12%,rgba(112,105,255,.2),transparent 38%),
+    linear-gradient(118deg,#13264b 0%,#1b2555 54%,#111a37 100%);
+  color:#f4f7ff;
+  box-shadow:0 24px 70px rgba(3,8,24,.28);
 }
-.cta-panel .label{color:#263d75}
+.cta-panel::after{
+  content:"";
+  position:absolute;
+  z-index:0;
+  top:0;
+  right:0;
+  bottom:0;
+  width:48%;
+  pointer-events:none;
+  opacity:.42;
+  background:
+    radial-gradient(circle at 68% 45%,rgba(102,166,255,.34),transparent 31%),
+    radial-gradient(circle at 84% 74%,rgba(133,112,255,.24),transparent 34%),
+    linear-gradient(135deg,transparent 49.7%,rgba(185,205,255,.12) 50%,transparent 50.3%),
+    linear-gradient(45deg,transparent 49.7%,rgba(185,205,255,.09) 50%,transparent 50.3%),
+    repeating-linear-gradient(135deg,transparent 0 25px,rgba(185,205,255,.07) 26px,transparent 27px 51px);
+  mask-image:linear-gradient(90deg,transparent 0%,#000 38%,#000 100%);
+}
+.cta-panel > div{position:relative;z-index:1}
+.cta-panel .label{color:#b8ceff}
 .cta-arrow{
   background:#08111f;color:#dbe9ff;
   box-shadow:0 0 20px rgba(0,0,0,.3);
+}
+
+@media(max-width:640px){
+  .cta-panel::after{width:42%;opacity:.27}
 }
 
 .cursor-blink{
@@ -538,6 +579,12 @@ body:before{
   box-shadow:0 0 30px rgba(120,169,255,.12)!important;
 }
 .glass-premium Strong,.glass-premium b{color:#f4f7ff}
+
+.admin-sidebar-scroll{
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+.admin-sidebar-scroll::-webkit-scrollbar{display:none}
 
 /* Sidebar promo link */
 .sidebar-promo{

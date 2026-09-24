@@ -17,6 +17,7 @@ export default function Technologies() {
   const [techs, setTechs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [settings, setSettings] = useState({});
 
   const loadTechs = useCallback((silent = false) => {
     if (!silent) setLoading(true);
@@ -35,18 +36,21 @@ export default function Technologies() {
 
   useEffect(() => {
     loadTechs();
+    pub.settings().then((r) => setSettings(r.data?.data || {})).catch(() => {});
   }, [loadTechs]);
 
-  useContentRefresh(() => loadTechs(true));
+  useContentRefresh(() => { loadTechs(true); pub.settings().then((r) => setSettings(r.data?.data || {})).catch(() => {}); });
+
+  if (settings.technologiesPageVisible === false) return null;
 
   return (
     <section className="section pt-40">
       <div className="container">
         <Reveal>
           <Heading
-            label="Technologies"
-            title="A modern stack, used with purpose."
-            desc="Frontend, backend, database and product engineering tools."
+            label={settings.technologiesPageEyebrow || "Technologies"}
+            title={settings.technologiesPageTitle || "A modern stack, used with purpose."}
+            desc={settings.technologiesPageDescription || "Frontend, backend, database and product engineering tools."}
           />
         </Reveal>
 

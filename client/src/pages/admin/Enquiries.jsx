@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import {
   Mail,
   Phone,
@@ -9,11 +9,12 @@ import {
   AlertCircle,
   Search,
 } from "lucide-react";
-import { admin } from "../../services/api";
+import { admin, NEW_ENQUIRY_SIGNAL_KEY } from "../../services/api";
 import { Card } from "../../components/UI";
 
 const statusIcons = {
   New: AlertCircle,
+  NEW: AlertCircle,
   "In Progress": Clock,
   Resolved: CheckCircle,
 };
@@ -29,26 +30,51 @@ export default function Enquiries() {
   const [error, setError] = useState("");
   const [flashId, setFlashId] = useState(null);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const highlightRefs = useRef({});
+  const requestInFlight = useRef(false);
+  const refreshQueued = useRef(false);
+  const mounted = useRef(false);
 
-  const load = () => {
-    setLoading(true);
+  const load = useCallback((silent = false) => {
+    if (requestInFlight.current) {
+      refreshQueued.current = true;
+      return;
+    }
+    requestInFlight.current = true;
+    if (!silent) setLoading(true);
     admin
       .enquiries
       .list()
-      .then((r) => setItems(r.data.data || []))
-      .catch((e) => setError(e.response?.data?.message || "Could not load enquiries."))
-      .finally(() => setLoading(false));
-  };
+      .then((r) => {
+        if (!mounted.current) return;
+        setItems(r.data.data || []);
+        setError("");
+      })
+      .catch((e) => {
+        if (mounted.current) setError(e.response?.data?.message || "Could not load enquiries.");
+      })
+      .finally(() => {
+        requestInFlight.current = false;
+        if (!mounted.current) return;
+        setLoading(false);
+        if (refreshQueued.current) {
+          refreshQueued.current = false;
+          load(true);
+        }
+      });
+  }, []);
 
   useEffect(() => {
+    mounted.current = true;
     load();
     const id = sessionStorage.getItem("flashEnquiryId");
+    let highlightTimeout;
     if (id) {
       setFlashId(id);
       sessionStorage.removeItem("flashEnquiryId");
-      setTimeout(() => {
+      highlightTimeout = setTimeout(() => {
         const el = highlightRefs.current[id];
         if (el) {
           el.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -61,17 +87,31 @@ export default function Enquiries() {
         }
       }, 300);
     }
-  }, []);
+    const refresh = () => {
+      if (document.visibilityState === "visible") load(true);
+    };
+    const onStorage = (event) => {
+      if (event.key === NEW_ENQUIRY_SIGNAL_KEY) refresh();
+    };
+    const intervalId = window.setInterval(refresh, 15000);
+    window.addEventListener("rws:new-enquiry", refresh);
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      mounted.current = false;
+      window.clearInterval(intervalId);
+      if (highlightTimeout) clearTimeout(highlightTimeout);
+      window.removeEventListener("rws:new-enquiry", refresh);
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [load]);
 
-  useEffect(() => {
-    const handleNew = () => load();
-    window.addEventListener("rws:new-enquiry", handleNew);
-    return () => window.removeEventListener("rws:new-enquiry", handleNew);
-  }, []);
-
-  const update = async (id, status) => {
+  const update = async (id, data) => {
     try {
-      await admin.enquiries.update(id, { status });
+      await admin.enquiries.update(id, data);
       load();
     } catch (e) {
       setError(e.response?.data?.message || "Could not update enquiry.");
@@ -90,8 +130,14 @@ export default function Enquiries() {
 
   const filtered = items.filter(
     (i) =>
+      (statusFilter === "all" || i.status === statusFilter) &&
+      (
       i.name.toLowerCase().includes(search.toLowerCase()) ||
-      i.email.toLowerCase().includes(search.toLowerCase())
+      i.email.toLowerCase().includes(search.toLowerCase()) ||
+      (i.company || "").toLowerCase().includes(search.toLowerCase()) ||
+      (i.message || "").toLowerCase().includes(search.toLowerCase()) ||
+      (i.status || "").toLowerCase().includes(search.toLowerCase())
+      )
   );
 
   const formatPhone = (p) => (p ? p.replace(/[\s\-()]/g, "") : "");
@@ -128,6 +174,10 @@ export default function Enquiries() {
             className="input pl-10 w-full sm:w-72"
           />
         </div>
+        <select aria-label="Filter enquiries by status" className="input w-full sm:w-52" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+          <option value="all">All statuses</option>
+          {[...new Set(items.map((item) => item.status))].map((status) => <option key={status} value={status}>{status}</option>)}
+        </select>
         <span
           className={`text-xs px-3 py-1 rounded-full border ${
             statusColors[
@@ -231,6 +281,9 @@ export default function Enquiries() {
                       {item.phone && ` · ${item.phone}`}
                     </div>
 
+                    {(item.company || item.budget) && <div className="muted text-sm mt-2">{item.company && <span>Business: {item.company}</span>}{item.company && item.budget && <span> · </span>}{item.budget && <span>Budget: {item.budget}</span>}</div>}
+                    {item.service && <p className="text-sm text-[#9fc2ff] mt-3">Service: {item.service}</p>}
+
                     <p className="mt-4 leading-6 break-words whitespace-pre-wrap">
                       {item.message}
                     </p>
@@ -264,12 +317,15 @@ export default function Enquiries() {
                       aria-label={`Status for ${item.name}`}
                       className="input !w-auto min-w-32"
                       value={item.status}
-                      onChange={(e) => update(item._id, e.target.value)}
+                      onChange={(e) => update(item._id, { status: e.target.value })}
                     >
-                      <option>New</option>
-                      <option>In Progress</option>
-                      <option>Resolved</option>
+                      {["New", "In Progress", "Resolved", "NEW", "CONTACTED", "DISCUSSION", "QUOTED", "CONVERTED", "CLOSED"].map((status) => <option key={status}>{status}</option>)}
                     </select>
+
+                    <label className="grid gap-1 w-full text-xs font-medium text-slate-400">
+                      Internal note
+                      <textarea className="input min-w-48" rows={2} maxLength={5000} defaultValue={item.internalNote || ""} placeholder="Private note for your team" onBlur={(e) => { if (e.target.value !== (item.internalNote || "")) update(item._id, { internalNote: e.target.value }); }} />
+                    </label>
 
                     <button
                       type="button"

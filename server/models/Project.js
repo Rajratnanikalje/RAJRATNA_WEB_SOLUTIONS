@@ -1,1 +1,18 @@
-import mongoose from"mongoose";export default mongoose.model("Project",new mongoose.Schema({name:{type:String,required:true},category:String,title:{type:String,required:true},description:{type:String,required:true},technologies:[String],url:{type:String,required:true},imageUrl:String,published:{type:Boolean,default:true}},{timestamps:true}));
+import mongoose from "mongoose";
+
+const schema = new mongoose.Schema({
+  name: { type: String, required: true },
+  category: String,
+  title: String,
+  description: { type: String, required: true },
+  fullDescription: String,
+  technologies: [String],
+  url: String,
+  githubUrl: String,
+  imageUrl: String,
+  published: { type: Boolean, default: true },
+  featured: { type: Boolean, default: false },
+  displayOrder: { type: Number, default: 0 },
+}, { timestamps: true });
+
+export default mongoose.model("Project", schema);

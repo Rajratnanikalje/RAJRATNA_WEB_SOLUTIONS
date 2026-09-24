@@ -1,194 +1,88 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  ArrowRight,
-  ArrowUpRight,
-  Cloud,
-  Code,
-  Globe,
-  Layout,
-  Palette,
-  Rocket,
-  Shield,
-  Smartphone,
-  Star,
-  Zap,
+  ArrowRight, ArrowUpRight, Braces, Code2, Database, Github, Layers3,
+  MessageCircle, MonitorSmartphone, ShieldCheck, Zap,
 } from "lucide-react";
 import { pub } from "../services/api";
 import useContentRefresh from "../hooks/useContentRefresh";
 import { Card, Reveal, Heading } from "../components/UI";
+import ProcessSection from "../components/ProcessSection";
+import { publicPath, routeKeyFromPath } from "../content/siteRoutes";
 
-const techStack = [
-  "React", "Node.js", "MongoDB", "Express", "Tailwind",
-  "JavaScript", "TypeScript", "Cloudinary", "Git", "CSS3",
+const reasons = [
+  [Layers3, "Custom-Built Solutions", "Features and interfaces shaped around the project requirements."],
+  [Code2, "Modern Technology", "Current frontend and backend tools chosen to suit the work."],
+  [MonitorSmartphone, "Responsive Design", "Layouts designed to work across phones, tablets and larger screens."],
+  [Braces, "Clean Architecture", "Organised components and code that are easier to maintain."],
+  [ShieldCheck, "Secure Development", "Validation and established security practices built into delivery."],
+  [Zap, "Performance Focused", "Lean pages and considered assets for a smoother experience."],
+  [Database, "Scalable Solutions", "A foundation that can grow with features and content needs."],
+  [MessageCircle, "Post-Launch Support", "Help with launch follow-up and ongoing website improvements."],
 ];
 
-const metrics = [
-  ["Projects", "delivered"],
-  ["Services", "available"],
-  ["Technologies", "in the stack"],
-];
-
-const whyChoose = [
-  {
-    icon: Rocket,
-    title: "Modern Design",
-    desc: "Clean, conversion-focused interfaces built with modern UX principles.",
-  },
-  {
-    icon: Zap,
-    title: "Fast Performance",
-    desc: "Optimised websites with fast load times and search-friendly foundations.",
-  },
-  {
-    icon: Smartphone,
-    title: "Responsive Design",
-    desc: "Flawless experiences across desktop, tablet and mobile devices.",
-  },
-  {
-    icon: Shield,
-    title: "Secure & Reliable",
-    desc: "Built-in security best practices and dependable infrastructure.",
-  },
-  {
-    icon: Layout,
-    title: "Clean Code",
-    desc: "Maintainable, well-structured code that scales with your business.",
-  },
-  {
-    icon: Palette,
-    title: "Pixel Perfect",
-    desc: "Attention to detail in every element, from typography to spacing.",
-  },
-];
-
-const steps = [
-  {
-    num: "01",
-    title: "Strategy",
-    desc: "We map your goals into a clear technical roadmap.",
-  },
-  {
-    num: "02",
-    title: "Design",
-    desc: "High-fidelity designs that balance aesthetics and performance.",
-  },
-  {
-    num: "03",
-    title: "Develop",
-    desc: "Clean, scalable code built with modern technologies.",
-  },
-  {
-    num: "04",
-    title: "Launch",
-    desc: "Deployed, tested and optimised for real-world success.",
-  },
-];
-
-const heroFeatures = [
-  { icon: Code, title: "Web Development", sub: "Modern & Scalable" },
-  { icon: Smartphone, title: "Responsive Design", sub: "All Devices" },
-  { icon: Cloud, title: "API Integration", sub: "Seamless & Secure" },
-  { icon: Rocket, title: "Ongoing Support", sub: "Always With You" },
+const faqs = [
+  ["What type of websites do you build?", "Business websites, portfolios, e-commerce experiences and custom web applications."],
+  ["Do you build full-stack applications?", "Yes. Projects can include a React frontend, backend APIs and database integration."],
+  ["Can you create e-commerce websites?", "Yes. E-commerce features can be planned around the products and shopping flow you need."],
+  ["Can you build custom admin dashboards?", "Yes. Custom dashboards and content management tools can be built for project workflows."],
+  ["Do you provide website maintenance?", "Maintenance and follow-up support can be discussed based on your website and needs."],
+  ["Can you integrate APIs and third-party services?", "Yes. API and service integrations can be included when they fit the project requirements."],
+  ["Do you provide deployment and hosting support?", "Deployment and hosting setup support are available for web projects."],
 ];
 
 export default function Home() {
-  const [services, setServices] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [cmsServices, setCmsServices] = useState([]);
   const [technologies, setTechnologies] = useState([]);
-  const [counts, setCounts] = useState({ projects: 0, services: 0, tech: 0 });
   const [settings, setSettings] = useState({});
-  const [settingsError, setSettingsError] = useState("");
-  const [loading, setLoading] = useState({ services: true, projects: true, tech: true });
+  const [loadingProjects, setLoadingProjects] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
-  const loadHomeContent = useCallback((silent = false) => {
-    if (!silent) {
-      setLoading({ services: true, projects: true, tech: true });
-    }
-    pub
-      .projects()
-      .then((r) => {
-        const d = r.data.data || [];
-        setProjects(d);
-        setCounts((c) => ({ ...c, projects: d.length }));
-      })
-      .finally(() => setLoading((l) => ({ ...l, projects: false })));
-
-    pub
-      .settings()
-      .then((r) => {
-        setSettings(r.data?.data || {});
-        setSettingsError("");
-      })
-      .catch(() => setSettingsError("Some site content could not be loaded. Please refresh shortly."));
-
-    pub
-      .services()
-      .then((r) => {
-        const d = r.data.data || [];
-        setServices(d);
-        setCounts((c) => ({ ...c, services: d.length }));
-      })
-      .finally(() => setLoading((l) => ({ ...l, services: false })));
-
-    pub
-      .technologies()
-      .then((r) => {
-        const d = r.data.data || [];
-        setTechnologies(d);
-        setCounts((c) => ({ ...c, tech: d.length }));
-      })
-      .finally(() => setLoading((l) => ({ ...l, tech: false })));
+  const loadContent = useCallback(() => {
+    Promise.allSettled([pub.services(), pub.projects(), pub.technologies(), pub.settings()]).then(([serviceResult, projectResult, technologyResult, settingsResult]) => {
+      if (serviceResult.status === "fulfilled") setCmsServices(serviceResult.value.data?.data || []);
+      if (projectResult.status === "fulfilled") setProjects(projectResult.value.data?.data || []);
+      else setLoadError("Some site content could not be loaded. Please try again shortly.");
+      if (technologyResult.status === "fulfilled") setTechnologies(technologyResult.value.data?.data || []);
+      if (settingsResult.status === "fulfilled") setSettings(settingsResult.value.data?.data || {});
+      setLoadingProjects(false);
+    });
   }, []);
 
   useEffect(() => {
-    loadHomeContent();
+    loadContent();
     pub.view().catch(() => {});
-  }, [loadHomeContent]);
+  }, [loadContent]);
 
-  // Re-fetch silently when the admin saves new content (same tab, other
-  // tab, or when this tab becomes visible again) — no manual refresh needed.
-  useContentRefresh(() => loadHomeContent(true));
+  useContentRefresh(loadContent);
+
+  const whatsappPhone = (settings.phone || "").replace(/\D/g, "");
+  const whatsappHref = whatsappPhone ? `https://wa.me/${whatsappPhone}` : "";
+  const featuredProjects = projects.filter((project) => project.featured);
+  const homeProjects = featuredProjects.length ? featuredProjects : projects;
+  const activeTestimonials = (settings.testimonials || []).filter((item) => item.active !== false);
+  const featuredTestimonials = activeTestimonials.filter((item) => item.featured);
+  const homeTestimonials = featuredTestimonials.length ? featuredTestimonials : activeTestimonials;
+  const legacyHeroLines = typeof settings.homeHeroTitle === "string"
+    ? settings.homeHeroTitle.replace(/\\n/g, "\n").split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
+    : [];
+  const heroMainTitle = legacyHeroLines.length > 1 ? legacyHeroLines[0] : settings.homeHeroTitle || "RAJRATNA .";
+  const heroSecondTitle = settings.homeHeroSecondaryTitle || legacyHeroLines[1] || "WEB";
+  const heroThirdTitle = settings.homeHeroThirdTitle || legacyHeroLines[2] || "SOLUTION";
+  const heroWords = (settings.homeHeroVerticalWords || ["Design", "Develop", "Deploy", "Grow"].map((label) => ({ label, visible: true }))).filter((item) => item.visible !== false).sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
 
   return (
     <>
-      {/* ===== HERO ===== */}
-      <section className="hero-section relative min-h-screen flex flex-col overflow-hidden pt-28">
-        {settingsError && <p className="sr-only" role="status">{settingsError}</p>}
-        {/* Full-bleed background — upload via Admin → Settings → Hero Image */}
-        <div className="hero-bg">
-          {settings.heroImageUrl ? (
-            <img
-              src={settings.heroImageUrl}
-              alt="Rajratna Web Solutions — modern workspace"
-            />
-          ) : (
-            <div className="hero-bg-fallback" />
-          )}
-          <div className="hero-orb hero-orb--two" />
-          <div className="hero-orb hero-orb--three" />
-          <div className="hero-shade" />
+      {settings.heroVisible !== false && <section className="hero-section relative min-h-[min(100svh,820px)] flex items-center overflow-hidden pt-20 sm:pt-24">
+        <div className="hero-bg" aria-hidden="true">
+          {settings.heroImageUrl ? <img src={settings.heroImageUrl} alt="" fetchPriority="high" /> : <div className="hero-bg-fallback" />}
+          <div className="hero-orb hero-orb--two" /><div className="hero-orb hero-orb--three" /><div className="hero-shade" />
         </div>
 
-        {/* Handwritten accent — top right */}
-        <div className="hero-script" aria-hidden="true">
-          Design
-          <br />
-          Develop
-          <br />
-          Deploy
-          <br />
-          Grow
-        </div>
+        {settings.homeHeroVerticalVisible !== false && <div className="hero-script" aria-hidden="true">{heroWords.map((item) => <span key={item.label} className="block">{item.label}</span>)}</div>}
 
-        {/* Blue swoosh curves — bottom left */}
-        <svg
-          className="hero-swoosh hidden sm:block"
-          viewBox="0 0 900 320"
-          fill="none"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
+        <svg className="hero-swoosh hidden sm:block" viewBox="0 0 900 320" fill="none" preserveAspectRatio="none" aria-hidden="true">
           <defs>
             <linearGradient id="swooshA" x1="0" y1="0" x2="1" y2="0">
               <stop offset="0" stopColor="#0a3f8f" stopOpacity="0.95" />
@@ -199,435 +93,108 @@ export default function Home() {
               <stop offset="1" stopColor="#78a9ff" stopOpacity="0" />
             </linearGradient>
           </defs>
-          <path
-            d="M-60 290 C 210 150, 470 95, 950 30"
-            stroke="url(#swooshA)"
-            strokeWidth="90"
-            strokeLinecap="round"
-            opacity="0.5"
-          />
-          <path
-            d="M-60 315 C 230 175, 490 125, 950 75"
-            stroke="url(#swooshB)"
-            strokeWidth="24"
-            strokeLinecap="round"
-          />
+          <path d="M-60 290 C 210 150, 470 95, 950 30" stroke="url(#swooshA)" strokeWidth="90" strokeLinecap="round" opacity="0.5" />
+          <path d="M-60 315 C 230 175, 490 125, 950 75" stroke="url(#swooshB)" strokeWidth="24" strokeLinecap="round" />
         </svg>
 
-        {/* Main content — left */}
-        <div className="container relative z-10 flex-1 flex items-center">
+        <div className="container relative z-10 py-8 sm:py-10 lg:py-12">
           <Reveal>
-            <div className="max-w-2xl pb-10">
-              <div className="hero-tagline">
-                <span>Your Vision</span>
-                <span className="hero-dot" />
-                <span>Our Code</span>
-                <span className="hero-dot" />
-                <span>Digital Success</span>
-              </div>
-
-              <h1 className="hero-title-v2 mt-7">
-                {settings.homeHeroTitle || <><span className="hero-silver">Rajratna</span><br /><span className="hero-blue">Web Solution</span></>}
+            <div className="hero-copy max-w-2xl">
+              <p className="hero-tagline">{(settings.homeHeroEyebrow || "YOUR VISION • OUR CODE • DIGITAL SUCCESS").split("•").map((part, index, parts) => <span key={`${part}-${index}`} className="inline-flex items-center gap-3">{part.trim()}{index < parts.length - 1 && <span className="hero-dot"/>}</span>)}</p>
+              <h1 className="hero-title-v2 mt-5 md:mt-6">
+                <span className="hero-silver">{heroMainTitle}</span><br />
+                <span className="hero-blue">{heroSecondTitle}</span><br />
+                <span className="hero-blue">{heroThirdTitle}</span>
               </h1>
-
-              <p className="hero-sub mt-7">
+              <p className="hero-sub mt-5 md:mt-6">
                 {settings.homeHeroSubtitle || "Build Your Ideas Into Powerful Digital Experiences"}
               </p>
-
-              <p className="muted text-base md:text-lg leading-8 max-w-xl mt-4">
-                We create modern websites, powerful web applications and
-                digital solutions that help your business grow in the digital
-                world.
+              <p className="muted text-base md:text-lg leading-7 max-w-xl mt-4">
+                {settings.homeHeroDescription || "We create modern websites, powerful web applications and digital solutions that help your business grow in the digital world."}
               </p>
-
-              <div className="mt-9">
-                <Link to="/contact" className="hero-cta">
-                  Let&rsquo;s Build Together
-                  <span className="hero-cta-arrow">
-                    <ArrowRight size={16} strokeWidth={2.4} />
-                  </span>
-                </Link>
-              </div>
+              {settings.heroCtaVisible !== false && <div className="mt-6">
+                {/^(https?:\/\/)/i.test(settings.homeHeroCtaUrl || "") && !settings.homeHeroCtaRouteKey ? <a href={settings.homeHeroCtaUrl} target="_blank" rel="noreferrer" className="hero-cta">{settings.homeHeroCtaText || "Let's Build Together"}<span className="hero-cta-arrow"><ArrowRight size={16} strokeWidth={2.4} /></span></a> : <Link to={publicPath(settings.homeHeroCtaRouteKey || routeKeyFromPath(settings.homeHeroCtaUrl || "/contact"), "/contact")} className="hero-cta">{settings.homeHeroCtaText || "Let's Build Together"}<span className="hero-cta-arrow"><ArrowRight size={16} strokeWidth={2.4} /></span></Link>}
+              </div>}
             </div>
           </Reveal>
         </div>
+      </section>}
 
-        {/* Feature strip — bottom */}
-        <div className="container relative z-10 pb-12">
-          <Reveal delay={0.15}>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-8">
-              {heroFeatures.map((f) => (
-                <div className="hero-feature" key={f.title}>
-                  <f.icon size={22} className="text-[#78a9ff]" />
-                  <div className="mt-2.5 text-sm font-bold text-white">
-                    {f.title}
-                  </div>
-                  <div className="text-xs text-slate-400 mt-1">{f.sub}</div>
-                </div>
-              ))}
-            </div>
-          </Reveal>
-        </div>
-      </section>
+      {settings.aboutVisible !== false && <section id="about" className="section pt-0 scroll-mt-24">
+        <div className="container"><Reveal><Card className="p-8 md:p-12 lg:p-16"><div className="max-w-3xl"><div className="label">{settings.homeAboutEyebrow || "About RWS"}</div><h2 className="title">{settings.homeAboutTitle || settings.aboutTitle || "Building Digital Experiences That Matter."}</h2><p className="muted text-base md:text-lg leading-8 mt-6">{settings.homeAboutDescription || settings.aboutDescription || "Rajratna Web Solutions is a modern web development studio focused on creating responsive websites, full-stack applications and digital solutions for businesses and ideas."}</p><Link to={publicPath(settings.homeAboutCtaRouteKey || "about", "/about")} className="secondary mt-7">{settings.homeAboutCtaText || "More about RWS"} <ArrowUpRight size={15} /></Link></div></Card></Reveal></div>
+      </section>}
 
-      {/* ===== MARQUEE ===== */}
-      <div className="marquee">
-        <div className="marquee-track">
-          {techStack.map((text, i) => (
-            <span className="marquee-item" key={i}>
-              {text}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* ===== METRICS ===== */}
-      <section className="section pt-0">
+      {settings.servicesVisible !== false && <section id="services" className="section scroll-mt-24">
         <div className="container">
-          <Reveal>
-            <Heading
-              label="Results"
-              title="Numbers that speak."
-              desc="A track record built on real client outcomes."
-            />
-          </Reveal>
-          <div className="grid sm:grid-cols-3 gap-4 mt-12">
-            {metrics.map(([number, label], i) => (
-              <Reveal key={label} delay={i * 0.06}>
-                <Card className="metric-card p-7 md:p-9 min-h-44 text-center">
-                  <div className="font-['Playfair_Display'] text-4xl font-bold text-gradient">
-                    {number === "Projects"
-                      ? counts.projects
-                      : number === "Services"
-                      ? counts.services
-                      : counts.tech}
-                  </div>
-                  <p className="muted text-sm leading-6 mt-3">{label}</p>
-                </Card>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== TECHNOLOGY SHOWCASE ===== */}
-      <section className="section pt-0">
-        <div className="container">
-          <Reveal>
-            <Heading
-              label="Technology Stack"
-              title="Tools I build with."
-              desc="A modern toolkit, used with purpose."
-            />
-          </Reveal>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mt-10">
-            {(loading.tech ? techStack : technologies.map((t) => t.name)).map(
-              (name, i) => (
-                <Reveal key={name || i} delay={i * 0.02}>
-                  <div
-                    className="tech-card group"
-                  >
-                    <div className="tech-icon mx-auto mb-2 flex items-center justify-center">
-                      <Code size={18} className="text-slate-900" />
-                    </div>
-                    <div className="tech-name text-sm font-medium group-hover:text-[#78a9ff] transition-colors">
-                      {name}
-                    </div>
-                  </div>
-                </Reveal>
-              )
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== ABOUT PREVIEW ===== */}
-      <section className="section pt-0">
-        <div className="container">
-          <div className="grid lg:grid-cols-[1fr_1fr] gap-12 items-center">
-            <Reveal>
-              <div>
-                <div className="label">
-                  <span className="eyebrow-line" />
-                  About Rajratna
-                </div>
-                <h2 className="title">
-                  Crafting websites that mean business.
-                </h2>
-                <p className="muted leading-8 mt-6">
-                  I'm Rajratna Nikalje, a full-stack web developer building
-                  responsive, secure and high-performing websites for clients
-                  across India.
-                </p>
-                <div className="mt-8 space-y-3">
-                  {steps.map((step) => (
-                    <div key={step.num} className="flex gap-4">
-                      <div className="text-[#78a9ff] font-mono font-bold">
-                        {step.num}
-                      </div>
-                      <div>
-                        <div className="font-semibold">{step.title}</div>
-                        <p className="muted text-sm">{step.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <Link to="/about" className="secondary mt-8 inline-flex">
-                  Learn more <ArrowUpRight size={15} />
-                </Link>
-              </div>
-            </Reveal>
-            <Reveal delay={0.2}>
-              <div className="grid grid-cols-2 gap-4">
-                <Card className="stat-card p-6 text-center min-h-36">
-                  <Star size={24} className="mx-auto text-[#78a9ff]" />
-                  <div className="text-3xl font-bold text-gradient mt-2">
-                    {counts.services}
-                  </div>
-                  <p className="muted text-xs mt-1">Service areas</p>
-                </Card>
-                <Card className="stat-card p-6 text-center min-h-36">
-                  <Globe size={24} className="mx-auto text-[#78a9ff]" />
-                  <div className="text-3xl font-bold text-gradient mt-2">
-                    {counts.tech}
-                  </div>
-                  <p className="muted text-xs mt-1">Tech tools</p>
-                </Card>
-                <Card className="stat-card p-6 text-center min-h-36">
-                  <Rocket size={24} className="mx-auto text-[#78a9ff]" />
-                  <div className="text-3xl font-bold text-gradient mt-2">
-                    {counts.projects}
-                  </div>
-                  <p className="muted text-xs mt-1">Projects built</p>
-                </Card>
-                <Card className="stat-card p-6 text-center min-h-36">
-                  <Shield size={24} className="mx-auto text-[#78a9ff]" />
-                  <div className="text-3xl font-bold text-gradient mt-2">
-                    100%
-                  </div>
-                  <p className="muted text-xs mt-1">Client-focused</p>
-                </Card>
-              </div>
-            </Reveal>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== SERVICES ===== */}
-      <section className="section pt-0">
-        <div className="container">
-          <Reveal>
-            <Heading
-              label="Services"
-              title="Web solutions for every stage of growth."
-              desc="Choose a focused service or combine them into a custom build."
-            />
-          </Reveal>
-          {loading.services && services.length === 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mt-12">
-              {[1, 2, 3, 4].map((n) => (
-                <Card key={n} className="p-7 h-56">
-                  <div className="h-6 w-3/4 bg-white/5 rounded mb-3" />
-                  <div className="h-4 w-full bg-white/5 rounded mb-2" />
-                  <div className="h-4 w-5/6 bg-white/5 rounded" />
-                </Card>
-              ))}
-            </div>
-          ) : services.length === 0 ? (
-            <p className="muted text-center py-12">No services available at the moment.</p>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mt-12">
-              {services.map((s, i) => (
-                <Reveal key={s._id || i} delay={i * 0.06}>
-                  <Card className="service-card p-7 h-full group">
-                    {s.imageUrl ? (
-                      <img
-                        src={s.imageUrl}
-                        alt={s.title}
-                        className="w-full h-40 object-cover rounded-2xl border border-white/10 mb-6"
-                      />
-                    ) : (
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#78a9ff] to-[#3b82f6] flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(120,169,255,.3)]">
-                      <Code size={20} className="text-slate-900" />
-                    </div>
-                    )}
-                    <div className="text-xs text-slate-500 font-mono">
-                      0{i + 1}
-                    </div>
-                    <h3 className="text-xl font-bold mt-3 group-hover:text-[#78a9ff] transition-colors">
-                      {s.title}
-                    </h3>
-                    <p className="muted text-sm leading-6 mt-3">
-                      {s.description}
-                    </p>
-                    <ArrowUpRight
-                      className="text-[#78a9ff] mt-5 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform"
-                      size={18}
-                    />
-                  </Card>
-                </Reveal>
-              ))}
-            </div>
-          )}
-          <div className="text-center mt-12">
-            <Link to="/services" className="secondary">
-              View all services <ArrowUpRight size={15} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== WHY CHOOSE US ===== */}
-      <section className="section pt-0">
-        <div className="container">
-          <Reveal>
-            <Heading
-              label="Why Choose Us"
-              title="What sets us apart."
-              desc="Quality, speed and reliability baked into every project."
-            />
-          </Reveal>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-12">
-            {whyChoose.map((item, i) => {
-              const Icon = item.icon;
+          <Reveal><Heading label={settings.homeServicesEyebrow || "Services"} title={settings.homeServicesTitle || "What We Build"} desc={settings.homeServicesDescription || "Digital solutions designed around your business goals."} /></Reveal>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-12">
+            {cmsServices.map(({ title, description, imageUrl }, index) => {
+              const Icon = Code2;
               return (
-                <Reveal key={item.title} delay={i * 0.06}>
-                  <Card className="p-7 h-full group">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#78a9ff] to-[#3b82f6] flex items-center justify-center mb-5 shadow-[0_0_20px_rgba(120,169,255,.3)]">
-                      <Icon size={20} className="text-slate-900" />
-                    </div>
-                    <h3 className="text-xl font-bold group-hover:text-[#78a9ff] transition-colors">
-                      {item.title}
-                    </h3>
-                    <p className="muted text-sm leading-6 mt-2">
-                      {item.desc}
-                    </p>
-                  </Card>
-                </Reveal>
+              <Reveal key={title} delay={index * 0.035}><Card className="p-6 h-full group">
+                {imageUrl ? <img src={imageUrl} alt={title} loading="lazy" className="w-11 h-11 rounded-xl object-cover mb-5" /> : <div className="w-11 h-11 rounded-xl bg-[#78a9ff]/10 border border-[#78a9ff]/20 flex items-center justify-center mb-5"><Icon size={20} className="text-[#78a9ff]" /></div>}
+                <h3 className="font-bold text-lg group-hover:text-[#78a9ff] transition-colors">{title}</h3>
+                <p className="muted text-sm leading-6 mt-2">{description}</p>
+              </Card></Reveal>
               );
             })}
+            {!cmsServices.length && <p className="muted col-span-full text-center py-8">No services are currently available.</p>}
           </div>
+          <div className="text-center mt-10"><Link to={publicPath(settings.homeServicesCtaRouteKey || "services", "/services")} className="secondary">{settings.homeServicesCtaText || "Explore services"} <ArrowUpRight size={15}/></Link></div>
         </div>
-      </section>
+      </section>}
 
-      {/* ===== FEATURED PROJECTS ===== */}
-      <section className="section pt-0">
+      {settings.projectsVisible !== false && <section id="projects" className="section pt-0 scroll-mt-24">
         <div className="container">
-          <Reveal>
-            <Heading
-              label="Portfolio"
-              title="Selected builds."
-              desc="Real projects built with modern frontend, backend and database technologies."
-            />
-          </Reveal>
-
-          {loading.projects && projects.length === 0 ? (
+          <Reveal><Heading label={settings.homeProjectsEyebrow || "Portfolio"} title={settings.homeProjectsTitle || "Featured Projects"} desc={settings.homeProjectsDescription || "Real products and digital experiences built with modern technologies."} /></Reveal>
+          {loadingProjects ? <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-12" aria-label="Loading projects">{[1, 2, 3].map((n) => <Card key={n} className="h-72 animate-pulse bg-white/5" />)}</div> : homeProjects.length ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-12">
-              {[1, 2, 3].map((n) => (
-                <Card key={n} className="overflow-hidden">
-                  <div className="h-56 bg-white/5 animate-pulse" />
-                  <div className="p-6 space-y-2">
-                    <div className="h-4 w-3/4 bg-white/5 rounded" />
-                    <div className="h-3 w-full bg-white/5 rounded" />
-                    <div className="h-3 w-5/6 bg-white/5 rounded" />
-                  </div>
-                </Card>
-              ))}
-            </div>
-          ) : projects.length === 0 ? (
-            <p className="muted text-center py-12">No projects to display yet.</p>
-          ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-12">
-              {projects.slice(0, 6).map((p, i) => (
-                <Reveal key={p._id || i} delay={i * 0.06}>
-                  <Card className="portfolio-card group overflow-hidden h-full">
-                    <div className="h-56 bg-gradient-to-br from-[#1a2a4a]/50 to-[#0a1429]/50 flex items-center justify-center overflow-hidden">
-                      {p.imageUrl ? (
-                        <img
-                          src={p.imageUrl}
-                          alt={p.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                        />
-                      ) : (
-                        <span className="text-6xl text-white/5 font-bold">
-                          RWS
-                        </span>
-                      )}
-                    </div>
-                    <div className="p-6 flex-1 flex flex-col">
-                      <div className="text-[#78a9ff] text-xs font-mono">
-                        {p.category || "Project"}
-                      </div>
-                      <h3 className="font-bold text-lg mt-2 line-clamp-2 group-hover:text-[#78a9ff] transition-colors">
-                        {p.name}
-                      </h3>
-                      <p className="muted text-sm leading-6 mt-2 line-clamp-2">
-                        {p.description}
-                      </p>
-                      {p.technologies && p.technologies.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mt-3">
-                          {p.technologies.slice(0, 4).map((t) => (
-                            <span
-                              key={t}
-                              className="text-[10px] px-2 py-1 rounded-full bg-white/5 border border-white/10 text-slate-300"
-                            >
-                              {t}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                      <div className="mt-auto pt-5">
-                        <a
-                          href={p.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="secondary text-xs w-full group-hover:border-[#78a9ff] transition-colors"
-                        >
-                          View Project <ArrowUpRight size={13} />
-                        </a>
-                      </div>
-                    </div>
-                  </Card>
-                </Reveal>
-              ))}
-            </div>
-          )}
-          <div className="text-center mt-12">
-            <Link to="/portfolio" className="secondary">
-              View all projects <ArrowUpRight size={15} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== CONTACT CTA ===== */}
-      <section className="section pt-0">
-        <div className="container">
-          <Reveal>
-            <div className="cta-panel rounded-[30px] p-7 sm:p-12 lg:p-16">
-              <div className="grid lg:grid-cols-[1fr_auto] gap-8 items-end">
-                <div>
-                  <div className="label">Your next chapter</div>
-                  <h2 className="font-['Playfair_Display'] text-[clamp(36px,5.5vw,64px)] leading-[.92] tracking-[-.04em] mt-4 max-w-2xl">
-                    Good digital work starts with a good conversation.
-                  </h2>
-                  <p className="mt-4 text-sm opacity-80 max-w-lg">
-                    Let's talk about your project and get a free, no-obligation
-                    quote from Rajratna Web Solutions.
-                  </p>
+              {homeProjects.slice(0, 6).map((project, index) => <Reveal key={project._id || project.name} delay={index * 0.05}><Card className="portfolio-card group overflow-hidden h-full">
+                <div className="h-52 bg-gradient-to-br from-[#1a2a4a]/70 to-[#0a1429]/80 overflow-hidden">
+                  {project.imageUrl ? <img src={project.imageUrl} alt={`${project.name} project preview`} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" /> : <div className="w-full h-full flex items-center justify-center"><span className="text-6xl font-bold text-white/10">RWS</span></div>}
                 </div>
-                <Link
-                  to="/contact"
-                  className="cta-arrow inline-flex items-center justify-center w-16 h-16 rounded-full hover:scale-110 transition-transform"
-                  aria-label="Start a project"
-                >
-                  <ArrowUpRight size={27} />
-                </Link>
-              </div>
+                <div className="p-6 flex flex-col h-[calc(100%-13rem)]">
+                  <span className="text-[#78a9ff] text-xs font-mono">{project.category || "Project"}</span>
+                  <h3 className="font-bold text-xl mt-2">{project.name}</h3>
+                  {project.title && <p className="muted text-sm mt-1">{project.title}</p>}
+                  <p className="muted text-sm leading-6 mt-3">{project.description}</p>
+                  {project.fullDescription && <details className="mt-3"><summary className="cursor-pointer text-xs text-[#78a9ff]">{settings.projectDetailsLabel || "More project details"}</summary><p className="muted text-sm leading-6 mt-2 whitespace-pre-line">{project.fullDescription}</p></details>}
+                  {!!project.technologies?.length && <div className="flex flex-wrap gap-1.5 mt-4">{project.technologies.slice(0, 5).map((technology) => <span key={technology} className="text-[10px] px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-slate-300">{technology}</span>)}</div>}
+                  <div className="flex flex-wrap gap-2 mt-auto pt-5">{project.url && <a href={project.url} target="_blank" rel="noreferrer" className="secondary text-xs">{settings.projectDemoLabel || "View Project"} <ArrowUpRight size={13} /></a>}{project.githubUrl && <a href={project.githubUrl} target="_blank" rel="noreferrer" aria-label={`${project.name} GitHub repository`} className="secondary text-xs"><Github size={13}/> {settings.projectGithubLabel || "GitHub"}</a>}</div>
+                </div>
+              </Card></Reveal>)}
             </div>
-          </Reveal>
+          ) : <p className="muted text-center py-12 mt-4">Projects will appear here as they are added to the portfolio.</p>}
+          {loadError && <p className="text-amber-300 text-sm mt-5" role="status">{loadError}</p>}
+          <div className="text-center mt-10"><Link to={publicPath(settings.homeProjectsCtaRouteKey || "projects", "/portfolio")} className="secondary">{settings.homeProjectsCtaText || "Explore all projects"} <ArrowUpRight size={15} /></Link></div>
         </div>
-      </section>
+      </section>}
+
+      {settings.technologiesVisible !== false && <section id="technologies" className="section pt-0">
+        <div className="container"><Reveal><Heading label={settings.homeTechnologiesEyebrow || "Technology"} title={settings.homeTechnologiesTitle || "Technologies We Use"} desc={settings.homeTechnologiesDescription || "A practical stack selected to fit the needs of each project."} /></Reveal>
+          {technologies.length ? <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mt-10">{technologies.map((tech, index) => <Reveal key={tech._id || tech.name} delay={index * 0.02}><div className="tech-card group min-h-24 flex flex-col items-center justify-center gap-2">{tech.iconUrl ? <img src={tech.iconUrl} alt="" loading="lazy" className="w-7 h-7 object-contain" /> : <Code2 size={20} className="text-[#78a9ff]" />}<span className="tech-name text-sm">{tech.name}</span></div></Reveal>)}</div> : <p className="muted mt-8">Technology details are being updated.</p>}
+        </div>
+      </section>}
+
+      {settings.whyVisible !== false && <section className="section pt-0">
+        <div className="container"><Reveal><Heading label={settings.homeWhyEyebrow || "Why RWS"} title={settings.whyTitle || "Why Choose Rajratna Web Solutions?"} desc={settings.whyDescription || "A thoughtful approach to building and supporting your digital product."} /></Reveal>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-12">{(settings.whyItems || reasons.map(([icon, title, description], displayOrder) => ({ icon: icon.displayName, title, description, displayOrder, active: true }))).filter((item) => item.active !== false).sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0)).map((item, index) => { const iconByTitle = { "Custom-Built Solutions": Layers3, "Modern Technology": Code2, "Responsive Design": MonitorSmartphone, "Clean Architecture": Braces, "Secure Development": ShieldCheck, "Performance Focused": Zap, "Scalable Solutions": Database, "Post-Launch Support": MessageCircle }; const iconByKey = { Layers3, Code2, MonitorSmartphone, Braces, ShieldCheck, Zap, Database, MessageCircle }; const Icon = iconByKey[item.iconKey] || iconByTitle[item.title] || Code2; return <Reveal key={item.title} delay={index * 0.035}><Card className="p-6 h-full"><Icon size={22} className="text-[#78a9ff] mb-4" /><h3 className="font-bold">{item.title}</h3><p className="muted text-sm leading-6 mt-2">{item.description}</p></Card></Reveal>; })}</div>
+        </div>
+      </section>}
+
+      {settings.processVisible !== false && <ProcessSection settings={settings} />}
+
+      {settings.faqVisible !== false && <section className="section pt-0">
+        <div className="container"><Reveal><Heading label={settings.homeFaqEyebrow || "FAQ"} title={settings.homeFaqTitle || "A Few Common Questions"} desc={settings.homeFaqDescription || "Some details that help make the first conversation easier."} /></Reveal>
+          <div className="grid md:grid-cols-2 gap-3 mt-10">{(settings.faqItems || faqs.map(([question, answer], displayOrder) => ({ question, answer, displayOrder, active: true }))).filter((item) => item.active !== false).sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0)).map((item, index) => <Reveal key={item.question} delay={index * 0.025}><details className="glass rounded-2xl p-5 group"><summary className="cursor-pointer list-none font-semibold flex items-center justify-between gap-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#78a9ff]">{item.question}<span className="text-[#78a9ff] group-open:rotate-45 transition-transform" aria-hidden="true">+</span></summary><p className="muted text-sm leading-6 mt-4">{item.answer}</p></details></Reveal>)}</div>
+        </div>
+      </section>}
+
+      {settings.testimonialsVisible !== false && homeTestimonials.length > 0 && <section className="section pt-0"><div className="container"><Reveal><Heading label={settings.homeTestimonialsEyebrow || "Testimonials"} title={settings.homeTestimonialsTitle || "Client Feedback"} desc={settings.homeTestimonialsDescription || "Experiences shared by clients."} /></Reveal><div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mt-10">{homeTestimonials.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0)).map((item, index) => <Reveal key={`${item.clientName}-${index}`}><Card className="p-6 h-full">{item.profileImageUrl && <img src={item.profileImageUrl} alt="" loading="lazy" className="w-12 h-12 rounded-full object-cover mb-4"/>}<p className="muted text-sm leading-6">“{item.testimonial}”</p><p className="font-semibold mt-4">{item.clientName}</p>{item.company && <p className="muted text-xs mt-1">{item.company}</p>}</Card></Reveal>)}</div></div></section>}
+
+      {settings.finalCtaVisible !== false && <section className="section pt-0">
+        <div className="container"><Reveal><div className="cta-panel rounded-[30px] p-8 sm:p-12 lg:p-16"><div className="max-w-3xl"><div className="label">{settings.finalCtaEyebrow || "A good place to start"}</div><h2 className="font-['Playfair_Display'] text-[clamp(36px,5.5vw,64px)] leading-[.98] tracking-[-.04em] mt-4">{settings.finalCtaTitle || "Let's Build Something Great Together."}</h2><p className="mt-4 text-sm sm:text-base opacity-80">{settings.finalCtaDescription || "Explore the project approach, or tell us a little about what you have in mind."}</p><div className="flex flex-wrap gap-3 mt-7"><Link to={publicPath(settings.finalCtaButtonRouteKey || "contact", "/contact")} className="primary">{settings.finalCtaButtonText || "Have a Project in Mind?"} <ArrowRight size={15} /></Link>{whatsappHref && <a href={whatsappHref} target="_blank" rel="noreferrer" className="secondary"><MessageCircle size={15} /> {settings.finalCtaWhatsappText || "WhatsApp Us"}</a>}</div></div></div></Reveal></div>
+      </section>}
     </>
   );
 }
