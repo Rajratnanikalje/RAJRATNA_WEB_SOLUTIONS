@@ -260,14 +260,29 @@ export default function Contact() {
       value: settings.location || "Buldhana, Maharashtra, India",
     },
   ];
-  const whatsappPhone = (settings.whatsapp || settings.phone || "").replace(/\D/g, "");
-  const whatsappUrl = withWhatsAppMessage(settings.contactWhatsappUrl || (/^https?:\/\//i.test(settings.whatsapp || "") ? settings.whatsapp : whatsappPhone));
-  if (whatsappUrl) contacts.push({ icon: MessageCircle, label: settings.contactWhatsappLabel || "WhatsApp", value: whatsappUrl.replace(/^https?:\/\//i, "") });
+  const whatsappSetting = settings.whatsapp || settings.phone || "+91 9156914227";
+  const whatsappPhone = whatsappSetting.replace(/\D/g, "");
+  const whatsappUrl = withWhatsAppMessage(settings.contactWhatsappUrl || (/^https?:\/\//i.test(whatsappSetting) ? whatsappSetting : whatsappPhone));
+  let whatsappDisplaySource = whatsappSetting;
+  if (/^https?:\/\//i.test(whatsappDisplaySource)) {
+    try {
+      whatsappDisplaySource = new URL(whatsappDisplaySource).pathname.split("/").filter(Boolean).pop() || settings.phone || "+91 9156914227";
+    } catch {
+      whatsappDisplaySource = settings.phone || "+91 9156914227";
+    }
+  }
+  const whatsappDisplayDigits = whatsappDisplaySource.replace(/\D/g, "");
+  const whatsappDisplayNumber = whatsappDisplayDigits.length === 12 && whatsappDisplayDigits.startsWith("91")
+    ? `+91 ${whatsappDisplayDigits.slice(2)}`
+    : whatsappDisplayDigits.length === 10
+      ? `+91 ${whatsappDisplayDigits}`
+      : whatsappDisplayDigits ? `+${whatsappDisplayDigits}` : "+91 9156914227";
+  if (whatsappUrl) contacts.push({ icon: MessageCircle, label: settings.contactWhatsappLabel || "WhatsApp", value: whatsappDisplayNumber });
   const serviceOptions = [...new Set([...services.map((service) => service.title), settings.contactOtherServiceLabel || "Other"] .filter(Boolean))];
 
   return (
     settings.contactPageVisible === false ? null :
-    <section className="section pt-40">
+    <section className="section contact-section pt-40">
       <div className="container">
         <Reveal>
           <Heading
@@ -278,10 +293,10 @@ export default function Contact() {
         </Reveal>
         {settingsError && <p className="text-amber-300 text-sm mt-4" role="status">{settingsError}</p>}
 
-        <div className="grid lg:grid-cols-[1fr_1.2fr] gap-8 mt-12">
+        <div className="grid lg:grid-cols-[1fr_1.2fr] gap-8 mt-12 contact-grid">
           <Reveal>
             <div className="space-y-5">
-              <Card className="p-7 space-y-6">
+              <Card className="p-7 space-y-6 contact-info-card">
                 {contacts.map((c) => {
                   const Icon = c.icon;
                   return (
@@ -289,7 +304,7 @@ export default function Contact() {
                       <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#78a9ff] to-[#3b82f6] flex items-center justify-center flex-shrink-0">
                         <Icon size={18} className="text-slate-900" />
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <b className="block text-sm text-slate-400">
                           {c.label}
                         </b>
@@ -304,8 +319,8 @@ export default function Contact() {
           </Reveal>
 
           <Reveal delay={0.2}>
-            <Card className="p-7">
-              <form onSubmit={submit} className="grid gap-4">
+            <Card className="p-7 contact-form-card">
+              <form onSubmit={submit} className="grid gap-4 contact-form">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="contact-name" className="text-xs font-medium text-slate-400 mb-1 block">

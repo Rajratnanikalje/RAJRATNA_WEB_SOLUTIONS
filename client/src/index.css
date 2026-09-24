@@ -230,7 +230,34 @@ body:before{
 .contact-phone-input .contact-phone-number-input:focus{
   border-color:var(--acid);box-shadow:0 0 0 4px #78a9ff22;background:rgba(120,169,255,.05)
 }
+.contact-section{padding:clamp(64px,8vw,104px) 0}
+.contact-section .contact-grid{
+  grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);align-items:start;
+  gap:clamp(20px,3vw,36px);margin-top:clamp(28px,4vw,48px)
+}
+.contact-section .contact-grid>div{min-width:0}
+.contact-section .contact-info-card,.contact-section .contact-form-card{
+  width:100%;padding:clamp(20px,3vw,30px);border-radius:22px
+}
+.contact-section .contact-info-card:hover,.contact-section .contact-form-card:hover{
+  transform:none
+}
+.contact-section .contact-info-card{height:100%;gap:22px}
+.contact-section .contact-info-card>div{min-width:0}
+.contact-section .contact-form{gap:20px}
+.contact-section .contact-form label{margin-bottom:8px}
+.contact-section .contact-form .input{min-height:48px;font-size:14px}
+.contact-section .contact-form textarea.input{min-height:160px;resize:vertical}
+.contact-section .contact-country-trigger{min-height:48px}
+@media(max-width:960px){
+  .contact-section .contact-grid{grid-template-columns:minmax(0,1fr);max-width:720px;margin-inline:auto}
+  .contact-section .contact-info-card{height:auto}
+}
 @media (max-width:420px){
+  .contact-section{padding:56px 0}
+  .contact-section .contact-grid{margin-top:26px;gap:18px}
+  .contact-section .contact-info-card,.contact-section .contact-form-card{padding:18px;border-radius:18px}
+  .contact-section .contact-form{gap:16px}
   .contact-phone-field{gap:6px}.contact-country-trigger{padding:0 9px}.contact-country-code{display:none}
   .contact-country-menu{left:0;width:min(320px,calc(100vw - 32px))}
 }
@@ -871,6 +898,8 @@ body:before{
   .admin-shell .glass-premium{border-radius:24px}
   .admin-shell .stat-card .stat-value{font-size:2.25rem}
 }
+@media(max-width:700px){.contact-section{padding:64px 0}}
+@media(max-width:420px){.contact-section{padding:56px 0}}
 @media(prefers-reduced-motion:reduce){
   *,*:before,*:after{
     animation-duration:.01ms!important;
