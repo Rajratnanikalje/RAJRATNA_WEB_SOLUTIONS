@@ -6,6 +6,7 @@ import {
   PhoneInput,
 } from "react-international-phone";
 import "react-international-phone/style.css";
+import { withWhatsAppMessage } from "../utils/whatsapp";
 import { notifyEnquiryCreated, pub } from "../services/api";
 import useContentRefresh from "../hooks/useContentRefresh";
 import { Card, Reveal, Heading } from "../components/UI";
@@ -260,7 +261,7 @@ export default function Contact() {
     },
   ];
   const whatsappPhone = (settings.whatsapp || settings.phone || "").replace(/\D/g, "");
-  const whatsappUrl = settings.contactWhatsappUrl || (/^https?:\/\//i.test(settings.whatsapp || "") ? settings.whatsapp : whatsappPhone ? `https://wa.me/${whatsappPhone}` : "");
+  const whatsappUrl = withWhatsAppMessage(settings.contactWhatsappUrl || (/^https?:\/\//i.test(settings.whatsapp || "") ? settings.whatsapp : whatsappPhone));
   if (whatsappUrl) contacts.push({ icon: MessageCircle, label: settings.contactWhatsappLabel || "WhatsApp", value: whatsappUrl.replace(/^https?:\/\//i, "") });
   const serviceOptions = [...new Set([...services.map((service) => service.title), settings.contactOtherServiceLabel || "Other"] .filter(Boolean))];
 

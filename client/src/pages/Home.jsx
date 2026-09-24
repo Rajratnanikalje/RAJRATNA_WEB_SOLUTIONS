@@ -9,6 +9,7 @@ import useContentRefresh from "../hooks/useContentRefresh";
 import { Card, Reveal, Heading } from "../components/UI";
 import ProcessSection from "../components/ProcessSection";
 import { publicPath, routeKeyFromPath } from "../content/siteRoutes";
+import { withWhatsAppMessage } from "../utils/whatsapp";
 
 const reasons = [
   [Layers3, "Custom-Built Solutions", "Features and interfaces shaped around the project requirements."],
@@ -58,7 +59,7 @@ export default function Home() {
   useContentRefresh(loadContent);
 
   const whatsappPhone = (settings.phone || "").replace(/\D/g, "");
-  const whatsappHref = whatsappPhone ? `https://wa.me/${whatsappPhone}` : "";
+  const whatsappHref = withWhatsAppMessage(whatsappPhone);
   const featuredProjects = projects.filter((project) => project.featured);
   const homeProjects = featuredProjects.length ? featuredProjects : projects;
   const activeTestimonials = (settings.testimonials || []).filter((item) => item.active !== false);
