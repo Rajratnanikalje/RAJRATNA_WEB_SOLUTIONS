@@ -29,17 +29,29 @@ export default function Technologies() {
         setError("");
       })
       .catch((e) => {
-        setError(e.response?.data?.message || "Could not load technologies. Please try again.");
+        setError(
+          e.response?.data?.message ||
+            "Could not load technologies. Please try again.",
+        );
       })
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
     loadTechs();
-    pub.settings().then((r) => setSettings(r.data?.data || {})).catch(() => {});
+    pub
+      .settings()
+      .then((r) => setSettings(r.data?.data || {}))
+      .catch(() => {});
   }, [loadTechs]);
 
-  useContentRefresh(() => { loadTechs(true); pub.settings().then((r) => setSettings(r.data?.data || {})).catch(() => {}); });
+  useContentRefresh(() => {
+    loadTechs(true);
+    pub
+      .settings()
+      .then((r) => setSettings(r.data?.data || {}))
+      .catch(() => {});
+  });
 
   if (settings.technologiesPageVisible === false) return null;
 
@@ -49,8 +61,14 @@ export default function Technologies() {
         <Reveal>
           <Heading
             label={settings.technologiesPageEyebrow || "Technologies"}
-            title={settings.technologiesPageTitle || "A modern stack, used with purpose."}
-            desc={settings.technologiesPageDescription || "Frontend, backend, database and product engineering tools."}
+            title={
+              settings.technologiesPageTitle ||
+              "A modern stack, used with purpose."
+            }
+            desc={
+              settings.technologiesPageDescription ||
+              "Frontend, backend, database and product engineering tools."
+            }
           />
         </Reveal>
 
@@ -76,7 +94,9 @@ export default function Technologies() {
                     />
                   ) : (
                     <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#78a9ff] to-[#3b82f6] flex items-center justify-center mx-auto mb-3 shadow-[0_0_20px_rgba(120,169,255,.3)]">
-                      {categoryIcons[t.category] || <Code size={24} className="text-slate-900" />}
+                      {categoryIcons[t.category] || (
+                        <Code size={24} className="text-slate-900" />
+                      )}
                     </div>
                   )}
                   <div className="tech-name group-hover:text-[#78a9ff] transition-colors">

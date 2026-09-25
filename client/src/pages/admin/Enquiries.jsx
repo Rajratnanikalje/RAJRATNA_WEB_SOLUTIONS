@@ -44,8 +44,7 @@ export default function Enquiries() {
     }
     requestInFlight.current = true;
     if (!silent) setLoading(true);
-    admin
-      .enquiries
+    admin.enquiries
       .list()
       .then((r) => {
         if (!mounted.current) return;
@@ -53,7 +52,8 @@ export default function Enquiries() {
         setError("");
       })
       .catch((e) => {
-        if (mounted.current) setError(e.response?.data?.message || "Could not load enquiries.");
+        if (mounted.current)
+          setError(e.response?.data?.message || "Could not load enquiries.");
       })
       .finally(() => {
         requestInFlight.current = false;
@@ -82,7 +82,7 @@ export default function Enquiries() {
             "ring-2",
             "ring-[#78a9ff]",
             "ring-offset-2",
-            "ring-offset-slate-900"
+            "ring-offset-slate-900",
           );
         }
       }, 300);
@@ -131,13 +131,11 @@ export default function Enquiries() {
   const filtered = items.filter(
     (i) =>
       (statusFilter === "all" || i.status === statusFilter) &&
-      (
-      i.name.toLowerCase().includes(search.toLowerCase()) ||
-      i.email.toLowerCase().includes(search.toLowerCase()) ||
-      (i.company || "").toLowerCase().includes(search.toLowerCase()) ||
-      (i.message || "").toLowerCase().includes(search.toLowerCase()) ||
-      (i.status || "").toLowerCase().includes(search.toLowerCase())
-      )
+      (i.name.toLowerCase().includes(search.toLowerCase()) ||
+        i.email.toLowerCase().includes(search.toLowerCase()) ||
+        (i.company || "").toLowerCase().includes(search.toLowerCase()) ||
+        (i.message || "").toLowerCase().includes(search.toLowerCase()) ||
+        (i.status || "").toLowerCase().includes(search.toLowerCase())),
   );
 
   const formatPhone = (p) => (p ? p.replace(/[\s\-()]/g, "") : "");
@@ -147,7 +145,9 @@ export default function Enquiries() {
       <div className="flex flex-wrap justify-between gap-4 items-end mb-8">
         <div>
           <div className="label mb-2">CMS</div>
-          <h1 className="text-3xl font-bold text-slate-100">Messages / Enquiries</h1>
+          <h1 className="text-3xl font-bold text-slate-100">
+            Messages / Enquiries
+          </h1>
           <p className="text-slate-500 mt-1 text-sm">
             Review and update customer enquiries.
           </p>
@@ -174,15 +174,22 @@ export default function Enquiries() {
             className="input pl-10 w-full sm:w-72"
           />
         </div>
-        <select aria-label="Filter enquiries by status" className="input w-full sm:w-52" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+        <select
+          aria-label="Filter enquiries by status"
+          className="input w-full sm:w-52"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
           <option value="all">All statuses</option>
-          {[...new Set(items.map((item) => item.status))].map((status) => <option key={status} value={status}>{status}</option>)}
+          {[...new Set(items.map((item) => item.status))].map((status) => (
+            <option key={status} value={status}>
+              {status}
+            </option>
+          ))}
         </select>
         <span
           className={`text-xs px-3 py-1 rounded-full border ${
-            statusColors[
-              items.find((i) => i.status === "New")?.status || "New"
-            ]
+            statusColors[items.find((i) => i.status === "New")?.status || "New"]
           }`}
         >
           {items.filter((i) => i.status === "New").length} new
@@ -199,9 +206,7 @@ export default function Enquiries() {
             </Card>
           ))
         ) : !filtered.length ? (
-          <Card className="p-7 muted text-center">
-            No enquiries yet.
-          </Card>
+          <Card className="p-7 muted text-center">No enquiries yet.</Card>
         ) : (
           filtered.map((item) => {
             const Icon = statusIcons[item.status] || AlertCircle;
@@ -222,7 +227,7 @@ export default function Enquiries() {
             });
             if (item.phone) {
               const waText = encodeURIComponent(
-                `Hello ${item.name}, this is Rajratna Web Solutions regarding your enquiry.`
+                `Hello ${item.name}, this is Rajratna Web Solutions regarding your enquiry.`,
               );
               actions.push({
                 label: "WhatsApp",
@@ -254,8 +259,8 @@ export default function Enquiries() {
                           item.status === "New"
                             ? "text-[#78a9ff]"
                             : item.status === "In Progress"
-                            ? "text-amber-300"
-                            : "text-green-300"
+                              ? "text-amber-300"
+                              : "text-green-300"
                         }`}
                       />
                       <b
@@ -281,8 +286,18 @@ export default function Enquiries() {
                       {item.phone && ` · ${item.phone}`}
                     </div>
 
-                    {(item.company || item.budget) && <div className="muted text-sm mt-2">{item.company && <span>Business: {item.company}</span>}{item.company && item.budget && <span> · </span>}{item.budget && <span>Budget: {item.budget}</span>}</div>}
-                    {item.service && <p className="text-sm text-[#9fc2ff] mt-3">Service: {item.service}</p>}
+                    {(item.company || item.budget) && (
+                      <div className="muted text-sm mt-2">
+                        {item.company && <span>Business: {item.company}</span>}
+                        {item.company && item.budget && <span> · </span>}
+                        {item.budget && <span>Budget: {item.budget}</span>}
+                      </div>
+                    )}
+                    {item.service && (
+                      <p className="text-sm text-[#9fc2ff] mt-3">
+                        Service: {item.service}
+                      </p>
+                    )}
 
                     <p className="mt-4 leading-6 break-words whitespace-pre-wrap">
                       {item.message}
@@ -297,9 +312,7 @@ export default function Enquiries() {
                             href={a.href}
                             target="_blank"
                             rel="noreferrer"
-                            className={`action-btn action-${
-                              a.label.toLowerCase()
-                            }`}
+                            className={`action-btn action-${a.label.toLowerCase()}`}
                           >
                             <Ai size={14} />
                             {a.label}
@@ -317,14 +330,38 @@ export default function Enquiries() {
                       aria-label={`Status for ${item.name}`}
                       className="input !w-auto min-w-32"
                       value={item.status}
-                      onChange={(e) => update(item._id, { status: e.target.value })}
+                      onChange={(e) =>
+                        update(item._id, { status: e.target.value })
+                      }
                     >
-                      {["New", "In Progress", "Resolved", "NEW", "CONTACTED", "DISCUSSION", "QUOTED", "CONVERTED", "CLOSED"].map((status) => <option key={status}>{status}</option>)}
+                      {[
+                        "New",
+                        "In Progress",
+                        "Resolved",
+                        "NEW",
+                        "CONTACTED",
+                        "DISCUSSION",
+                        "QUOTED",
+                        "CONVERTED",
+                        "CLOSED",
+                      ].map((status) => (
+                        <option key={status}>{status}</option>
+                      ))}
                     </select>
 
                     <label className="grid gap-1 w-full text-xs font-medium text-slate-400">
                       Internal note
-                      <textarea className="input min-w-48" rows={2} maxLength={5000} defaultValue={item.internalNote || ""} placeholder="Private note for your team" onBlur={(e) => { if (e.target.value !== (item.internalNote || "")) update(item._id, { internalNote: e.target.value }); }} />
+                      <textarea
+                        className="input min-w-48"
+                        rows={2}
+                        maxLength={5000}
+                        defaultValue={item.internalNote || ""}
+                        placeholder="Private note for your team"
+                        onBlur={(e) => {
+                          if (e.target.value !== (item.internalNote || ""))
+                            update(item._id, { internalNote: e.target.value });
+                        }}
+                      />
                     </label>
 
                     <button

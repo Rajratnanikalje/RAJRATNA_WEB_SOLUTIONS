@@ -29,26 +29,32 @@ import { admin, NEW_ENQUIRY_SIGNAL_KEY } from "../services/api";
 
 const navGroups = [
   ["DASHBOARD", [["dashboard", "Dashboard", LayoutDashboard]]],
-  ["WEBSITE", [
-    ["navbar", "Navbar", Settings],
-    ["homepage", "Homepage", House],
-    ["about", "About", UserRound],
-    ["services", "Services", Briefcase],
-    ["projects", "Projects", FolderKanban],
-    ["process", "Process", Workflow],
-    ["technologies", "Technologies", Cpu],
-    ["footer", "Footer", Settings],
-    ["faq", "FAQ", CircleHelp],
-    ["testimonials", "Testimonials", MessageSquareQuote],
-  ]],
+  [
+    "WEBSITE",
+    [
+      ["navbar", "Navbar", Settings],
+      ["homepage", "Homepage", House],
+      ["about", "About", UserRound],
+      ["services", "Services", Briefcase],
+      ["projects", "Projects", FolderKanban],
+      ["process", "Process", Workflow],
+      ["technologies", "Technologies", Cpu],
+      ["footer", "Footer", Settings],
+      ["faq", "FAQ", CircleHelp],
+      ["testimonials", "Testimonials", MessageSquareQuote],
+    ],
+  ],
   ["LEADS", [["enquiries", "Enquiries", Inbox]]],
-  ["SETTINGS", [
-    ["website-settings", "Website Settings", Settings],
-    ["contact-social", "Contact & Social", Share2],
-    ["seo", "SEO", Search],
-    ["privacy", "Privacy Policy", FileText],
-    ["terms", "Terms & Conditions", FileText],
-  ]],
+  [
+    "SETTINGS",
+    [
+      ["website-settings", "Website Settings", Settings],
+      ["contact-social", "Contact & Social", Share2],
+      ["seo", "SEO", Search],
+      ["privacy", "Privacy Policy", FileText],
+      ["terms", "Terms & Conditions", FileText],
+    ],
+  ],
 ];
 
 function NotificationBell({
@@ -71,7 +77,10 @@ function NotificationBell({
         aria-label="Notifications"
       >
         {count > 0 ? (
-          <BellRing size={20} className="text-[#78a9ff] group-hover:animate-pulse" />
+          <BellRing
+            size={20}
+            className="text-[#78a9ff] group-hover:animate-pulse"
+          />
         ) : (
           <Bell size={20} />
         )}
@@ -144,9 +153,9 @@ function NotificationBell({
                         <a
                           href={`https://wa.me/${n.phone.replace(
                             /[\s\-()]/g,
-                            ""
+                            "",
                           )}?text=${encodeURIComponent(
-                            `Hello ${n.name}, this is Rajratna Web Solutions regarding your enquiry.`
+                            `Hello ${n.name}, this is Rajratna Web Solutions regarding your enquiry.`,
                           )}`}
                           target="_blank"
                           rel="noreferrer"
@@ -250,28 +259,36 @@ function ProfileDropdown({ onLogout }) {
 function SidebarNav({ onNavigate }) {
   return (
     <>
-      {navGroups.map(([group, links]) => <section key={group || "dashboard"} className={group ? "mt-3" : ""}>
-        {group && <div className="px-3 mb-1"><span className="text-[10px] font-semibold text-slate-600 tracking-wider">{group}</span></div>}
-        <nav className="grid gap-1 px-2">
-        {links.map(([path, label, Icon]) => (
-          <NavLink
-            key={path}
-            to={`/admin/${path}`}
-            onClick={onNavigate}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
-                isActive
-                  ? "bg-gradient-to-r from-[#78a9ff]/15 to-[#3b82f6]/10 text-[#78a9ff] border border-[#78a9ff]/30 shadow-[0_0_12px_rgba(120,169,255,.15)]"
-                  : "text-slate-400 hover:text-white hover:bg-[#78a9ff]/5"
-              }`
-            }
-          >
-            <Icon size={16} />
-            {label}
-          </NavLink>
-        ))}
-        </nav>
-      </section>)}
+      {navGroups.map(([group, links]) => (
+        <section key={group || "dashboard"} className={group ? "mt-3" : ""}>
+          {group && (
+            <div className="px-3 mb-1">
+              <span className="text-[10px] font-semibold text-slate-600 tracking-wider">
+                {group}
+              </span>
+            </div>
+          )}
+          <nav className="grid gap-1 px-2">
+            {links.map(([path, label, Icon]) => (
+              <NavLink
+                key={path}
+                to={`/admin/${path}`}
+                onClick={onNavigate}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
+                    isActive
+                      ? "bg-gradient-to-r from-[#78a9ff]/15 to-[#3b82f6]/10 text-[#78a9ff] border border-[#78a9ff]/30 shadow-[0_0_12px_rgba(120,169,255,.15)]"
+                      : "text-slate-400 hover:text-white hover:bg-[#78a9ff]/5"
+                  }`
+                }
+              >
+                <Icon size={16} />
+                {label}
+              </NavLink>
+            ))}
+          </nav>
+        </section>
+      ))}
     </>
   );
 }
@@ -308,7 +325,9 @@ export default function AdminLayout() {
     try {
       const r = await admin.enquiries.list();
       const all = r.data.data || [];
-      const currentNew = all.filter((e) => e.status === "New" || e.status === "NEW");
+      const currentNew = all.filter(
+        (e) => e.status === "New" || e.status === "NEW",
+      );
       let seen = [];
       try {
         seen = JSON.parse(localStorage.getItem("rws_seen_enquiry_ids") || "[]");
@@ -317,12 +336,17 @@ export default function AdminLayout() {
       }
       const seenSet = new Set(Array.isArray(seen) ? seen : []);
       const unseen = currentNew.filter((e) => !seenSet.has(e._id));
-      const hasNewNotification = unseen.some((item) => !knownNotificationIdsRef.current.has(item._id));
+      const hasNewNotification = unseen.some(
+        (item) => !knownNotificationIdsRef.current.has(item._id),
+      );
       knownNotificationIdsRef.current = new Set(unseen.map((item) => item._id));
       setNotifications(unseen);
       // Open the notification list immediately when the panel loads with new
       // enquiries, and again only when a genuinely new enquiry arrives.
-      if (unseen.length && (!notificationsLoadedRef.current || hasNewNotification)) {
+      if (
+        unseen.length &&
+        (!notificationsLoadedRef.current || hasNewNotification)
+      ) {
         setShowNotif(true);
       }
       notificationsLoadedRef.current = true;
@@ -365,16 +389,24 @@ export default function AdminLayout() {
 
   const handleNotifClick = (enquiry) => {
     setShowNotif(false);
-    const seen = JSON.parse(localStorage.getItem("rws_seen_enquiry_ids") || "[]");
-    const nextSeen = Array.from(new Set([...(Array.isArray(seen) ? seen : []), enquiry._id]));
+    const seen = JSON.parse(
+      localStorage.getItem("rws_seen_enquiry_ids") || "[]",
+    );
+    const nextSeen = Array.from(
+      new Set([...(Array.isArray(seen) ? seen : []), enquiry._id]),
+    );
     localStorage.setItem("rws_seen_enquiry_ids", JSON.stringify(nextSeen));
-    setNotifications((items) => items.filter((item) => item._id !== enquiry._id));
+    setNotifications((items) =>
+      items.filter((item) => item._id !== enquiry._id),
+    );
     sessionStorage.setItem("flashEnquiryId", enquiry._id);
     navigate("/admin/enquiries");
   };
 
   const markAllRead = () => {
-    const seen = JSON.parse(localStorage.getItem("rws_seen_enquiry_ids") || "[]");
+    const seen = JSON.parse(
+      localStorage.getItem("rws_seen_enquiry_ids") || "[]",
+    );
     const nextSeen = Array.from(
       new Set([
         ...(Array.isArray(seen) ? seen : []),
@@ -424,7 +456,6 @@ export default function AdminLayout() {
             <LogOut size={16} />
             Logout
           </button>
-
         </div>
       </aside>
 
@@ -525,39 +556,42 @@ export default function AdminLayout() {
             role="dialog"
             aria-modal="true"
             aria-label="Admin navigation"
-          ><div className="admin-sidebar-scroll glass-premium rounded-3xl p-3 sm:p-4 w-[280px] sm:w-64 h-[calc(100vh-24px)] sm:h-[calc(100vh-32px)] flex flex-col border border-[#78a9ff]/10 overflow-y-auto">
-                <div className="flex items-center justify-between p-2 mb-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#78a9ff] to-[#3b82f6] flex items-center justify-center">
-                      <Sparkles size={16} className="text-slate-900" />
-                    </div>
-                    <b className="text-xl text-slate-300">
-                      RAJRATNA <span className="text-[#78a9ff]">CMS</span>
-                    </b>
+          >
+            <div className="admin-sidebar-scroll glass-premium rounded-3xl p-3 sm:p-4 w-[280px] sm:w-64 h-[calc(100vh-24px)] sm:h-[calc(100vh-32px)] flex flex-col border border-[#78a9ff]/10 overflow-y-auto">
+              <div className="flex items-center justify-between p-2 mb-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#78a9ff] to-[#3b82f6] flex items-center justify-center">
+                    <Sparkles size={16} className="text-slate-900" />
                   </div>
-                  <button
-              onClick={() => setMobileOpen(false)}
-              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-[#78a9ff]/5 transition-all"
-                    aria-label="Close menu"
-                  >
-                    <X size={18} />
-                  </button>
+                  <b className="text-xl text-slate-300">
+                    RAJRATNA <span className="text-[#78a9ff]">CMS</span>
+                  </b>
                 </div>
-
-                <div className="mt-2 flex-1 min-h-0">
-                  <SidebarNav onNavigate={() => setMobileOpen(false)} />
-                </div>
-
                 <button
-                  onClick={() => { setMobileOpen(false); logout(); }}
-                  className="order-last flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-[#78a9ff]/5 transition-all mb-4"
+                  onClick={() => setMobileOpen(false)}
+                  className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-[#78a9ff]/5 transition-all"
+                  aria-label="Close menu"
                 >
-                  <LogOut size={16} />
-                  Logout
+                  <X size={18} />
                 </button>
-
               </div>
-             </aside>
+
+              <div className="mt-2 flex-1 min-h-0">
+                <SidebarNav onNavigate={() => setMobileOpen(false)} />
+              </div>
+
+              <button
+                onClick={() => {
+                  setMobileOpen(false);
+                  logout();
+                }}
+                className="order-last flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-[#78a9ff]/5 transition-all mb-4"
+              >
+                <LogOut size={16} />
+                Logout
+              </button>
+            </div>
+          </aside>
         </>
       )}
     </div>

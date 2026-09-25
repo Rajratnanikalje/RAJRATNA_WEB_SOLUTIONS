@@ -5,7 +5,10 @@ export const NEW_ENQUIRY_SIGNAL_KEY = "rws_new_enquiry_created";
 export function notifyEnquiryCreated() {
   window.dispatchEvent(new Event("rws:new-enquiry"));
   try {
-    localStorage.setItem(NEW_ENQUIRY_SIGNAL_KEY, `${Date.now()}-${Math.random()}`);
+    localStorage.setItem(
+      NEW_ENQUIRY_SIGNAL_KEY,
+      `${Date.now()}-${Math.random()}`,
+    );
   } catch {
     // The Admin Panel's short-interval refresh remains as a fallback.
   }
@@ -32,7 +35,8 @@ api.interceptors.response.use(
 export const pub = {
   services: () => api.get("/services/public", { params: { _t: Date.now() } }),
   projects: () => api.get("/projects/public", { params: { _t: Date.now() } }),
-  technologies: () => api.get("/technologies/public", { params: { _t: Date.now() } }),
+  technologies: () =>
+    api.get("/technologies/public", { params: { _t: Date.now() } }),
   settings: () => api.get("/settings/public", { params: { _t: Date.now() } }),
   enquiry: (d) => api.post("/enquiries", d),
   view: () => api.post("/dashboard/view"),

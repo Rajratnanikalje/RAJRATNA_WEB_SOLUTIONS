@@ -54,10 +54,17 @@ export default function About() {
   const [cmsTechnologies, setCmsTechnologies] = useState([]);
 
   const loadAboutImage = useCallback(() => {
-    Promise.allSettled([pub.settings(), pub.technologies()]).then(([settingsResult, technologiesResult]) => {
-      if (settingsResult.status === "fulfilled") { const data = settingsResult.value.data?.data || {}; setAboutImageUrl(data.aboutImageUrl || ""); setContent(data); }
-      if (technologiesResult.status === "fulfilled") setCmsTechnologies(technologiesResult.value.data?.data || []);
-    });
+    Promise.allSettled([pub.settings(), pub.technologies()]).then(
+      ([settingsResult, technologiesResult]) => {
+        if (settingsResult.status === "fulfilled") {
+          const data = settingsResult.value.data?.data || {};
+          setAboutImageUrl(data.aboutImageUrl || "");
+          setContent(data);
+        }
+        if (technologiesResult.status === "fulfilled")
+          setCmsTechnologies(technologiesResult.value.data?.data || []);
+      },
+    );
   }, []);
 
   useEffect(() => {
@@ -67,10 +74,20 @@ export default function About() {
   useContentRefresh(loadAboutImage);
 
   if (content.aboutPageVisible === false) return null;
-  const highlights = (content.aboutHighlights || features.map(({ title, desc }, displayOrder) => ({ title, description: desc, displayOrder, active: true })))
+  const highlights = (
+    content.aboutHighlights ||
+    features.map(({ title, desc }, displayOrder) => ({
+      title,
+      description: desc,
+      displayOrder,
+      active: true,
+    }))
+  )
     .filter((item) => item.active !== false)
     .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
-  const displayedTechStack = cmsTechnologies.map(({ name, category, iconUrl }) => ({ name, category, iconUrl }));
+  const displayedTechStack = cmsTechnologies.map(
+    ({ name, category, iconUrl }) => ({ name, category, iconUrl }),
+  );
 
   return (
     <section className="section pt-40 relative overflow-hidden">
@@ -94,15 +111,25 @@ export default function About() {
                 {content.aboutEyebrow || "About Rajratna Web Solutions"}
               </div>
               <h1 className="title">
-                {content.aboutTitle || <>Building Digital Experiences That Matter.</>}
+                {content.aboutTitle || (
+                  <>Building Digital Experiences That Matter.</>
+                )}
               </h1>
               <p className="muted leading-8 mt-6 text-lg max-w-xl">
-                {content.aboutDescription || <>Rajratna Web Solutions is a modern web development studio focused on creating responsive websites, full-stack applications and digital solutions for businesses and ideas.</>}
+                {content.aboutDescription || (
+                  <>
+                    Rajratna Web Solutions is a modern web development studio
+                    focused on creating responsive websites, full-stack
+                    applications and digital solutions for businesses and ideas.
+                  </>
+                )}
               </p>
 
               <div className="mt-8 space-y-3">
                 {highlights.map((f, i) => {
-                  const Icon = featureIcons[f.iconKey] || features[i % features.length].icon;
+                  const Icon =
+                    featureIcons[f.iconKey] ||
+                    features[i % features.length].icon;
                   return (
                     <div key={f.title} className="flex gap-4">
                       <div className="text-[#78a9ff] font-mono font-bold">
@@ -113,7 +140,9 @@ export default function About() {
                           <Icon size={16} className="text-[#78a9ff]" />
                           <span className="font-semibold">{f.title}</span>
                         </div>
-                        <p className="muted text-sm mt-0.5">{f.description || f.desc}</p>
+                        <p className="muted text-sm mt-0.5">
+                          {f.description || f.desc}
+                        </p>
                       </div>
                     </div>
                   );
@@ -121,40 +150,65 @@ export default function About() {
               </div>
 
               <div className="flex gap-3 mt-8">
-                <Link to={publicPath(content.aboutPrimaryCtaRouteKey || "contact", "/contact")} className="primary">
+                <Link
+                  to={publicPath(
+                    content.aboutPrimaryCtaRouteKey || "contact",
+                    "/contact",
+                  )}
+                  className="primary"
+                >
                   {content.aboutPrimaryCtaText || "Get a Free Quote"}
                 </Link>
-                <Link to={publicPath(content.aboutSecondaryCtaRouteKey || "projects", "/portfolio")} className="secondary">
+                <Link
+                  to={publicPath(
+                    content.aboutSecondaryCtaRouteKey || "projects",
+                    "/portfolio",
+                  )}
+                  className="secondary"
+                >
                   {content.aboutSecondaryCtaText || "View Our Work"}
                 </Link>
               </div>
             </div>
-
           </div>
         </Reveal>
 
-        {content.aboutTechVisible !== false && <Reveal delay={0.3}>
-          <div className="mt-20">
-            <Heading
-              label={content.aboutTechEyebrow || "Tech Stack"}
-              title={content.aboutTechTitle || "The tools I build with."}
-              desc={content.aboutTechDescription || "A modern toolkit, used with purpose."}
-            />
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-12">
-              {displayedTechStack.map((t, i) => (
-                <Reveal key={t.name} delay={i * 0.04}>
-                  <Card className="tech-card group p-6 text-center h-full">
-                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#78a9ff] to-[#3b82f6] flex items-center justify-center mx-auto mb-3 shadow-[0_0_20px_rgba(120,169,255,.3)]">
-                      {t.iconUrl ? <img src={t.iconUrl} alt={t.name} loading="lazy" className="w-9 h-9 object-contain" /> : <Globe size={22} className="text-slate-900" />}
-                    </div>
-                    <div className="tech-name">{t.name}</div>
-                    <div className="tech-category">{t.category}</div>
-                  </Card>
-                </Reveal>
-              ))}
+        {content.aboutTechVisible !== false && (
+          <Reveal delay={0.3}>
+            <div className="mt-20">
+              <Heading
+                label={content.aboutTechEyebrow || "Tech Stack"}
+                title={content.aboutTechTitle || "The tools I build with."}
+                desc={
+                  content.aboutTechDescription ||
+                  "A modern toolkit, used with purpose."
+                }
+              />
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-12">
+                {displayedTechStack.map((t, i) => (
+                  <Reveal key={t.name} delay={i * 0.04}>
+                    <Card className="tech-card group p-6 text-center h-full">
+                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#78a9ff] to-[#3b82f6] flex items-center justify-center mx-auto mb-3 shadow-[0_0_20px_rgba(120,169,255,.3)]">
+                        {t.iconUrl ? (
+                          <img
+                            src={t.iconUrl}
+                            alt={t.name}
+                            loading="lazy"
+                            className="w-9 h-9 object-contain"
+                          />
+                        ) : (
+                          <Globe size={22} className="text-slate-900" />
+                        )}
+                      </div>
+                      <div className="tech-name">{t.name}</div>
+                      <div className="tech-category">{t.category}</div>
+                    </Card>
+                  </Reveal>
+                ))}
+              </div>
             </div>
-          </div>
-        </Reveal>}
+          </Reveal>
+        )}
       </div>
     </section>
   );

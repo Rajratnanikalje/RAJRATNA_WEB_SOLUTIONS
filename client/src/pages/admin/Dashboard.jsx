@@ -22,11 +22,36 @@ import { Card } from "../../components/UI";
 import { Link } from "react-router-dom";
 
 const statCards = [
-  { key: "projects", label: "Total Projects", icon: Briefcase, color: "from-purple-500/20 to-blue-500/10" },
-  { key: "services", label: "Total Services", icon: BarChart3, color: "from-cyan-500/20 to-blue-500/10" },
-  { key: "enquiries", label: "Total Enquiries", icon: Inbox, color: "from-amber-500/20 to-orange-500/10" },
-  { key: "technologies", label: "Total Technologies", icon: Cpu, color: "from-blue-500/20 to-cyan-500/10" },
-  { key: "views", label: "Total Views", icon: Eye, color: "from-green-500/20 to-emerald-500/10" },
+  {
+    key: "projects",
+    label: "Total Projects",
+    icon: Briefcase,
+    color: "from-purple-500/20 to-blue-500/10",
+  },
+  {
+    key: "services",
+    label: "Total Services",
+    icon: BarChart3,
+    color: "from-cyan-500/20 to-blue-500/10",
+  },
+  {
+    key: "enquiries",
+    label: "Total Enquiries",
+    icon: Inbox,
+    color: "from-amber-500/20 to-orange-500/10",
+  },
+  {
+    key: "technologies",
+    label: "Total Technologies",
+    icon: Cpu,
+    color: "from-blue-500/20 to-cyan-500/10",
+  },
+  {
+    key: "views",
+    label: "Total Views",
+    icon: Eye,
+    color: "from-green-500/20 to-emerald-500/10",
+  },
 ];
 
 const statusIcons = {
@@ -50,15 +75,18 @@ function CountUp({ value, duration = 1.5 }) {
     }
     let start = 0;
     const step = value / (duration * 60);
-    const timer = setInterval(() => {
-      start += step;
-      if (start >= value) {
-        setDisplay(value);
-        clearInterval(timer);
-      } else {
-        setDisplay(Math.floor(start));
-      }
-    }, (duration * 1000) / 60);
+    const timer = setInterval(
+      () => {
+        start += step;
+        if (start >= value) {
+          setDisplay(value);
+          clearInterval(timer);
+        } else {
+          setDisplay(Math.floor(start));
+        }
+      },
+      (duration * 1000) / 60,
+    );
     return () => clearInterval(timer);
   }, [value, duration]);
 
@@ -110,11 +138,36 @@ function WebsiteOverview({ data, loading }) {
   const stats = data?.stats;
 
   const overviewItems = [
-    { label: "Projects", value: stats?.projects ?? 0, Icon: Briefcase, color: "from-purple-500/10 to-blue-500/10" },
-    { label: "Services", value: stats?.services ?? 0, Icon: BarChart3, color: "from-cyan-500/10 to-blue-500/10" },
-    { label: "Enquiries", value: stats?.enquiries ?? 0, Icon: Inbox, color: "from-amber-500/10 to-orange-500/10" },
-    { label: "Technologies", value: stats?.technologies ?? 0, Icon: Cpu, color: "from-blue-500/10 to-cyan-500/10" },
-    { label: "Views", value: stats?.views ?? 0, Icon: Eye, color: "from-green-500/10 to-emerald-500/10" },
+    {
+      label: "Projects",
+      value: stats?.projects ?? 0,
+      Icon: Briefcase,
+      color: "from-purple-500/10 to-blue-500/10",
+    },
+    {
+      label: "Services",
+      value: stats?.services ?? 0,
+      Icon: BarChart3,
+      color: "from-cyan-500/10 to-blue-500/10",
+    },
+    {
+      label: "Enquiries",
+      value: stats?.enquiries ?? 0,
+      Icon: Inbox,
+      color: "from-amber-500/10 to-orange-500/10",
+    },
+    {
+      label: "Technologies",
+      value: stats?.technologies ?? 0,
+      Icon: Cpu,
+      color: "from-blue-500/10 to-cyan-500/10",
+    },
+    {
+      label: "Views",
+      value: stats?.views ?? 0,
+      Icon: Eye,
+      color: "from-green-500/10 to-emerald-500/10",
+    },
   ];
 
   return (
@@ -149,7 +202,9 @@ function WebsiteOverview({ data, loading }) {
               </div>
               <div className="flex flex-col min-w-0">
                 <span className="text-slate-500 text-xs">{item.label}</span>
-                <span className="text-slate-200 font-bold text-lg">{item.value}</span>
+                <span className="text-slate-200 font-bold text-lg">
+                  {item.value}
+                </span>
               </div>
             </motion.div>
           ))}
@@ -157,8 +212,18 @@ function WebsiteOverview({ data, loading }) {
       )}
 
       <div className="mt-3 pt-3 border-t border-white/5 grid grid-cols-2 gap-3 text-xs">
-        <div className="flex justify-between"><span className="text-slate-500">Published Projects</span><span className="text-slate-300 font-medium">{stats?.publishedProjects ?? 0}</span></div>
-        <div className="flex justify-between"><span className="text-slate-500">New Enquiries</span><span className="text-slate-300 font-medium">{stats?.newEnquiries ?? 0}</span></div>
+        <div className="flex justify-between">
+          <span className="text-slate-500">Published Projects</span>
+          <span className="text-slate-300 font-medium">
+            {stats?.publishedProjects ?? 0}
+          </span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-slate-500">New Enquiries</span>
+          <span className="text-slate-300 font-medium">
+            {stats?.newEnquiries ?? 0}
+          </span>
+        </div>
         <div className="flex justify-between">
           <span className="text-slate-500">Recent Enquiries</span>
           <span className="text-slate-300 font-medium">
@@ -177,8 +242,7 @@ function WebsiteOverview({ data, loading }) {
 }
 
 function RecentEnquiriesTable({ enquiries, loading }) {
-  const formatPhone = (p) =>
-    p ? p.replace(/[\s\-()]/g, "") : "";
+  const formatPhone = (p) => (p ? p.replace(/[\s\-()]/g, "") : "");
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
@@ -218,7 +282,7 @@ function RecentEnquiriesTable({ enquiries, loading }) {
         {item.phone && (
           <a
             href={`https://wa.me/${phone}?text=${encodeURIComponent(
-              `Hello ${item.name}, this is Rajratna Web Solutions regarding your enquiry.`
+              `Hello ${item.name}, this is Rajratna Web Solutions regarding your enquiry.`,
             )}`}
             target="_blank"
             rel="noreferrer"
@@ -236,8 +300,7 @@ function RecentEnquiriesTable({ enquiries, loading }) {
   const renderEnquiryTableRow = (item) => {
     const Icon = statusIcons[item.status] || AlertCircle;
     const isNew = item.status === "New";
-    const statusClass =
-      statusColors[item.status] || statusColors["New"];
+    const statusClass = statusColors[item.status] || statusColors["New"];
 
     return (
       <tr
@@ -298,14 +361,10 @@ function RecentEnquiriesTable({ enquiries, loading }) {
   const renderEnquiryCard = (item) => {
     const Icon = statusIcons[item.status] || AlertCircle;
     const isNew = item.status === "New";
-    const statusClass =
-      statusColors[item.status] || statusColors["New"];
+    const statusClass = statusColors[item.status] || statusColors["New"];
 
     return (
-      <div
-        key={item._id}
-        className="py-3 min-w-0"
-      >
+      <div key={item._id} className="py-3 min-w-0">
         <div className="flex items-center gap-2 min-w-0">
           <div
             className={`w-2 h-2 rounded-full shrink-0 ${
@@ -341,7 +400,9 @@ function RecentEnquiriesTable({ enquiries, loading }) {
             <Icon size={10} />
             {item.status}
           </span>
-          <div className="flex flex-wrap justify-end gap-1 shrink-0">{renderEnquiryActions(item)}</div>
+          <div className="flex flex-wrap justify-end gap-1 shrink-0">
+            {renderEnquiryActions(item)}
+          </div>
         </div>
       </div>
     );
@@ -415,7 +476,20 @@ function RecentProjectsTable({ projects, loading }) {
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
     const d = new Date(dateStr);
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
     return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
   };
 
@@ -536,10 +610,7 @@ function RecentProjectsTable({ projects, loading }) {
 
   const renderProjectCard = (item) => {
     return (
-      <div
-        key={item._id}
-        className="py-3 min-w-0"
-      >
+      <div key={item._id} className="py-3 min-w-0">
         <div className="flex items-center gap-3 min-w-0">
           {renderProjectImage(item)}
           <div className="flex-1 min-w-0">
@@ -558,7 +629,9 @@ function RecentProjectsTable({ projects, loading }) {
 
         <div className="flex flex-wrap items-center justify-between mt-2.5 gap-2">
           {renderStatusBadge(item)}
-          <div className="flex flex-wrap justify-end gap-1 shrink-0">{renderProjectActions(item)}</div>
+          <div className="flex flex-wrap justify-end gap-1 shrink-0">
+            {renderProjectActions(item)}
+          </div>
         </div>
       </div>
     );
@@ -586,7 +659,9 @@ function RecentProjectsTable({ projects, loading }) {
           <thead>
             <tr>
               <th className="text-left whitespace-nowrap w-[32%]">Project</th>
-              <th className="text-left whitespace-nowrap w-[28%]">Technologies</th>
+              <th className="text-left whitespace-nowrap w-[28%]">
+                Technologies
+              </th>
               <th className="text-left whitespace-nowrap w-[22%]">Status</th>
               <th className="text-right whitespace-nowrap">Actions</th>
             </tr>
@@ -639,9 +714,7 @@ function QuickActions() {
     <Card className="p-4 sm:p-5">
       <div className="flex items-center gap-2 mb-4">
         <Calendar size={17} className="text-[#78a9ff]" />
-        <h3 className="text-lg font-semibold text-slate-200">
-          Quick Actions
-        </h3>
+        <h3 className="text-lg font-semibold text-slate-200">Quick Actions</h3>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {actions.map(({ label, icon: Icon, to }) => (
@@ -650,7 +723,10 @@ function QuickActions() {
             to={to}
             className="flex flex-col items-center justify-center gap-2 py-4 px-3 rounded-xl border border-[#78a9ff]/15 text-center text-sm font-medium text-slate-300 hover:text-white hover:bg-[#78a9ff]/5 hover:border-[#78a9ff]/30 transition-all group"
           >
-            <Icon size={18} className="text-[#78a9ff] group-hover:scale-110 transition-transform" />
+            <Icon
+              size={18}
+              className="text-[#78a9ff] group-hover:scale-110 transition-transform"
+            />
             {label}
           </Link>
         ))}
@@ -731,7 +807,7 @@ export default function Dashboard() {
 
       if (dashRes.status === "rejected") {
         throw new Error(
-          dashRes.reason?.response?.data?.message || "Dashboard data failed"
+          dashRes.reason?.response?.data?.message || "Dashboard data failed",
         );
       }
       setState("ready");
@@ -739,7 +815,7 @@ export default function Dashboard() {
       setState("error");
       setError(
         e.message ||
-          "Dashboard data could not be loaded. Check that the API server is running."
+          "Dashboard data could not be loaded. Check that the API server is running.",
       );
     }
   }, []);

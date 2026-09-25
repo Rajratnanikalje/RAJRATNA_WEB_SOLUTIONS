@@ -19,17 +19,29 @@ export default function Portfolio() {
         setError("");
       })
       .catch((e) =>
-        setError(e.response?.data?.message || "Could not load projects. Please try again.")
+        setError(
+          e.response?.data?.message ||
+            "Could not load projects. Please try again.",
+        ),
       )
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
     loadProjects();
-    pub.settings().then((r) => setSettings(r.data?.data || {})).catch(() => {});
+    pub
+      .settings()
+      .then((r) => setSettings(r.data?.data || {}))
+      .catch(() => {});
   }, [loadProjects]);
 
-  useContentRefresh(() => { loadProjects(true); pub.settings().then((r) => setSettings(r.data?.data || {})).catch(() => {}); });
+  useContentRefresh(() => {
+    loadProjects(true);
+    pub
+      .settings()
+      .then((r) => setSettings(r.data?.data || {}))
+      .catch(() => {});
+  });
 
   if (settings.portfolioPageVisible === false) return null;
 
@@ -40,7 +52,10 @@ export default function Portfolio() {
           <Heading
             label={settings.portfolioPageEyebrow || "Portfolio"}
             title={settings.portfolioPageTitle || "Selected builds."}
-            desc={settings.portfolioPageDescription || "Real projects built with modern frontend, backend and database technologies."}
+            desc={
+              settings.portfolioPageDescription ||
+              "Real projects built with modern frontend, backend and database technologies."
+            }
           />
         </Reveal>
 
@@ -94,7 +109,17 @@ export default function Portfolio() {
                     <p className="muted text-sm leading-6 mt-2 line-clamp-2">
                       {p.description}
                     </p>
-                    {p.fullDescription && <details className="mt-3"><summary className="cursor-pointer text-xs text-[#78a9ff]">{settings.projectDetailsLabel || "More project details"}</summary><p className="muted text-sm leading-6 mt-2 whitespace-pre-line">{p.fullDescription}</p></details>}
+                    {p.fullDescription && (
+                      <details className="mt-3">
+                        <summary className="cursor-pointer text-xs text-[#78a9ff]">
+                          {settings.projectDetailsLabel ||
+                            "More project details"}
+                        </summary>
+                        <p className="muted text-sm leading-6 mt-2 whitespace-pre-line">
+                          {p.fullDescription}
+                        </p>
+                      </details>
+                    )}
                     {p.technologies && p.technologies.length > 0 && (
                       <div className="flex flex-wrap gap-1.5 mt-4">
                         {p.technologies.map((t) => (
@@ -115,12 +140,20 @@ export default function Portfolio() {
                           rel="noreferrer"
                           className="secondary text-xs flex-1 justify-center group-hover:border-[#78a9ff] transition-colors"
                         >
-                          {settings.projectDemoLabel || "View Project"} <ExternalLink size={13} />
+                          {settings.projectDemoLabel || "View Project"}{" "}
+                          <ExternalLink size={13} />
                         </a>
                       )}
                       {p.githubUrl && (
-                        <a href={p.githubUrl} target="_blank" rel="noreferrer" aria-label={`${p.name} GitHub repository`} className="secondary text-xs justify-center">
-                          <Github size={13} /> {settings.projectGithubLabel || "GitHub"}
+                        <a
+                          href={p.githubUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          aria-label={`${p.name} GitHub repository`}
+                          className="secondary text-xs justify-center"
+                        >
+                          <Github size={13} />{" "}
+                          {settings.projectGithubLabel || "GitHub"}
                         </a>
                       )}
                     </div>

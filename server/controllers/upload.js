@@ -46,7 +46,9 @@ export async function uploadImage(req, res) {
     console.error("Cloudinary upload failed:", error?.message || error);
     return res
       .status(502)
-      .json({ message: "Image upload failed at the image service. Please try again." });
+      .json({
+        message: "Image upload failed at the image service. Please try again.",
+      });
   }
 
   res.status(201).json({

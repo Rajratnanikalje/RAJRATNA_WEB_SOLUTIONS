@@ -17,9 +17,10 @@ export function rateLimit({ windowMs, max, key = (req) => req.ip }) {
     }
     const client = key(req) || "unknown";
     const entry = hits.get(client);
-    const current = !entry || now >= entry.resetAt
-      ? { count: 1, resetAt: now + windowMs }
-      : { ...entry, count: entry.count + 1 };
+    const current =
+      !entry || now >= entry.resetAt
+        ? { count: 1, resetAt: now + windowMs }
+        : { ...entry, count: entry.count + 1 };
 
     hits.set(client, current);
     res.set("RateLimit-Policy", `${max};w=${Math.ceil(windowMs / 1000)}`);
@@ -27,7 +28,9 @@ export function rateLimit({ windowMs, max, key = (req) => req.ip }) {
 
     if (current.count > max) {
       res.set("Retry-After", String(Math.ceil((current.resetAt - now) / 1000)));
-      return res.status(429).json({ message: "Too many requests. Please try again shortly." });
+      return res
+        .status(429)
+        .json({ message: "Too many requests. Please try again shortly." });
     }
     next();
   };

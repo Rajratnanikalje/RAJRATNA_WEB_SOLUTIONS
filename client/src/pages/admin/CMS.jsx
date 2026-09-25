@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
-import { Edit, Trash2, Save, X, Plus, AlertCircle, CheckCircle } from "lucide-react";
+import {
+  Edit,
+  Trash2,
+  Save,
+  X,
+  Plus,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
 import { admin } from "../../services/api";
 import { notifyContentUpdated } from "../../hooks/useContentRefresh";
 import ImageUploader from "../../components/ImageUploader";
@@ -11,10 +19,30 @@ const cfg = {
     title: "Services",
     singular: "Service",
     fields: [
-      { key: "title", label: "Title", type: "text", placeholder: "Service title" },
-      { key: "description", label: "Description", type: "textarea", placeholder: "Brief description of this service" },
-      { key: "imageUrl", label: "Service Image", type: "image", imageHint: "JPG, JPEG, PNG or WEBP up to 8 MB." },
-      { key: "displayOrder", label: "Display Order", type: "number", placeholder: "0" },
+      {
+        key: "title",
+        label: "Title",
+        type: "text",
+        placeholder: "Service title",
+      },
+      {
+        key: "description",
+        label: "Description",
+        type: "textarea",
+        placeholder: "Brief description of this service",
+      },
+      {
+        key: "imageUrl",
+        label: "Service Image",
+        type: "image",
+        imageHint: "JPG, JPEG, PNG or WEBP up to 8 MB.",
+      },
+      {
+        key: "displayOrder",
+        label: "Display Order",
+        type: "number",
+        placeholder: "0",
+      },
     ],
   },
   projects: {
@@ -22,25 +50,92 @@ const cfg = {
     singular: "Project",
     fields: [
       { key: "name", label: "Name", type: "text", placeholder: "Project name" },
-      { key: "category", label: "Category", type: "text", placeholder: "Web App / E-commerce / Portfolio" },
-      { key: "title", label: "Headline (optional)", type: "text", placeholder: "Project headline" },
-      { key: "description", label: "Description", type: "textarea", placeholder: "Project description" },
-      { key: "fullDescription", label: "Full Description", type: "textarea", placeholder: "Optional additional project details" },
-      { key: "url", label: "Live Demo URL (optional)", type: "url", placeholder: "https://..." },
-      { key: "githubUrl", label: "GitHub URL (optional)", type: "url", placeholder: "https://github.com/..." },
-      { key: "technologies", label: "Tech Stack (comma separated)", type: "text", placeholder: "React, Node.js, MongoDB" },
-      { key: "imageUrl", label: "Project Image", type: "image", imageHint: "JPG, JPEG, PNG or WEBP up to 8 MB. Shown on the public Portfolio and home page." },
-      { key: "displayOrder", label: "Display Order", type: "number", placeholder: "0" },
+      {
+        key: "category",
+        label: "Category",
+        type: "text",
+        placeholder: "Web App / E-commerce / Portfolio",
+      },
+      {
+        key: "title",
+        label: "Headline (optional)",
+        type: "text",
+        placeholder: "Project headline",
+      },
+      {
+        key: "description",
+        label: "Description",
+        type: "textarea",
+        placeholder: "Project description",
+      },
+      {
+        key: "fullDescription",
+        label: "Full Description",
+        type: "textarea",
+        placeholder: "Optional additional project details",
+      },
+      {
+        key: "url",
+        label: "Live Demo URL (optional)",
+        type: "url",
+        placeholder: "https://...",
+      },
+      {
+        key: "githubUrl",
+        label: "GitHub URL (optional)",
+        type: "url",
+        placeholder: "https://github.com/...",
+      },
+      {
+        key: "technologies",
+        label: "Tech Stack (comma separated)",
+        type: "text",
+        placeholder: "React, Node.js, MongoDB",
+      },
+      {
+        key: "imageUrl",
+        label: "Project Image",
+        type: "image",
+        imageHint:
+          "JPG, JPEG, PNG or WEBP up to 8 MB. Shown on the public Portfolio and home page.",
+      },
+      {
+        key: "displayOrder",
+        label: "Display Order",
+        type: "number",
+        placeholder: "0",
+      },
     ],
   },
   technologies: {
     title: "Technologies",
     singular: "Technology",
     fields: [
-      { key: "name", label: "Name", type: "text", placeholder: "Technology name" },
-      { key: "category", label: "Category", type: "text", placeholder: "Frontend / Backend / Database" },
-      { key: "iconUrl", label: "Technology Icon", type: "image", imageHint: "Square transparent PNG works best. JPG, JPEG, PNG or WEBP up to 8 MB." },
-      { key: "displayOrder", label: "Display Order", type: "number", placeholder: "0" },
+      {
+        key: "name",
+        label: "Name",
+        type: "text",
+        placeholder: "Technology name",
+      },
+      {
+        key: "category",
+        label: "Category",
+        type: "text",
+        placeholder: "Frontend / Backend / Database",
+      },
+      {
+        key: "iconUrl",
+        label: "Technology Icon",
+        type: "image",
+        imageHint:
+          "Square transparent PNG works best. JPG, JPEG, PNG or WEBP up to 8 MB.",
+      },
+      {
+        key: "displayOrder",
+        label: "Display Order",
+        type: "number",
+        placeholder: "0",
+      },
     ],
   },
 };
@@ -57,19 +152,66 @@ export default function CMS({ type }) {
   const [loading, setLoading] = useState(true);
   const [pageSettings, setPageSettings] = useState({});
   const [pageSaving, setPageSaving] = useState(false);
-  const pageFields = {
-    services: [
-      { key: "servicesPageVisible", label: "Page visible", type: "checkbox" }, { key: "servicesPageEyebrow", label: "Page eyebrow", type: "text" }, { key: "servicesPageTitle", label: "Page heading", type: "text" }, { key: "servicesPageDescription", label: "Page description", type: "textarea" },
-      { key: "serviceCardCtaText", label: "Service card CTA", type: "text" }, { key: "serviceCardCtaRouteKey", label: "Service card CTA destination", type: "select" }, { key: "servicesCtaText", label: "Bottom CTA", type: "text" }, { key: "servicesCtaRouteKey", label: "Bottom CTA destination", type: "select" },
-    ],
-    projects: [
-      { key: "portfolioPageVisible", label: "Page visible", type: "checkbox" }, { key: "portfolioPageEyebrow", label: "Page eyebrow", type: "text" }, { key: "portfolioPageTitle", label: "Page heading", type: "text" }, { key: "portfolioPageDescription", label: "Page description", type: "textarea" },
-      { key: "projectDemoLabel", label: "Demo link label", type: "text" }, { key: "projectGithubLabel", label: "GitHub link label", type: "text" }, { key: "projectDetailsLabel", label: "Details toggle label", type: "text" },
-    ],
-    technologies: [
-      { key: "technologiesPageVisible", label: "Page visible", type: "checkbox" }, { key: "technologiesPageEyebrow", label: "Page eyebrow", type: "text" }, { key: "technologiesPageTitle", label: "Page heading", type: "text" }, { key: "technologiesPageDescription", label: "Page description", type: "textarea" },
-    ],
-  }[type] || [];
+  const pageFields =
+    {
+      services: [
+        { key: "servicesPageVisible", label: "Page visible", type: "checkbox" },
+        { key: "servicesPageEyebrow", label: "Page eyebrow", type: "text" },
+        { key: "servicesPageTitle", label: "Page heading", type: "text" },
+        {
+          key: "servicesPageDescription",
+          label: "Page description",
+          type: "textarea",
+        },
+        { key: "serviceCardCtaText", label: "Service card CTA", type: "text" },
+        {
+          key: "serviceCardCtaRouteKey",
+          label: "Service card CTA destination",
+          type: "select",
+        },
+        { key: "servicesCtaText", label: "Bottom CTA", type: "text" },
+        {
+          key: "servicesCtaRouteKey",
+          label: "Bottom CTA destination",
+          type: "select",
+        },
+      ],
+      projects: [
+        {
+          key: "portfolioPageVisible",
+          label: "Page visible",
+          type: "checkbox",
+        },
+        { key: "portfolioPageEyebrow", label: "Page eyebrow", type: "text" },
+        { key: "portfolioPageTitle", label: "Page heading", type: "text" },
+        {
+          key: "portfolioPageDescription",
+          label: "Page description",
+          type: "textarea",
+        },
+        { key: "projectDemoLabel", label: "Demo link label", type: "text" },
+        { key: "projectGithubLabel", label: "GitHub link label", type: "text" },
+        {
+          key: "projectDetailsLabel",
+          label: "Details toggle label",
+          type: "text",
+        },
+      ],
+      technologies: [
+        {
+          key: "technologiesPageVisible",
+          label: "Page visible",
+          type: "checkbox",
+        },
+        { key: "technologiesPageEyebrow", label: "Page eyebrow", type: "text" },
+        { key: "technologiesPageTitle", label: "Page heading", type: "text" },
+        {
+          key: "technologiesPageDescription",
+          label: "Page description",
+          type: "textarea",
+        },
+      ],
+    }[type] || [];
 
   const load = () => {
     setLoading(true);
@@ -90,19 +232,31 @@ export default function CMS({ type }) {
     setError("");
     setSuccess("");
     load();
-    admin.settings.get().then((r) => setPageSettings(r.data.data || {})).catch(() => {});
+    admin.settings
+      .get()
+      .then((r) => setPageSettings(r.data.data || {}))
+      .catch(() => {});
   }, [type]);
 
   const savePageSettings = async (event) => {
     event.preventDefault();
     setPageSaving(true);
     try {
-      await admin.settings.save(Object.fromEntries(pageFields.map(({ key }) => [key, pageSettings[key] ?? (key.endsWith("Visible") ? true : "")] )));
+      await admin.settings.save(
+        Object.fromEntries(
+          pageFields.map(({ key }) => [
+            key,
+            pageSettings[key] ?? (key.endsWith("Visible") ? true : ""),
+          ]),
+        ),
+      );
       setSuccess("Page content saved and published.");
       notifyContentUpdated();
     } catch (e) {
       setError(e.response?.data?.message || "Page content could not be saved.");
-    } finally { setPageSaving(false); }
+    } finally {
+      setPageSaving(false);
+    }
   };
 
   const startEdit = (item) => {
@@ -119,9 +273,9 @@ export default function CMS({ type }) {
     setEditId(null);
     setForm(
       c.fields.reduce((acc, f) => {
-      acc[f.key] = f.type === "number" ? 0 : "";
+        acc[f.key] = f.type === "number" ? 0 : "";
         return acc;
-      }, {})
+      }, {}),
     );
     setError("");
     setSuccess("");
@@ -142,7 +296,8 @@ export default function CMS({ type }) {
       }
       d.published = d.published !== false;
       if (type === "projects") d.featured = d.featured === true;
-      if (d.displayOrder !== undefined) d.displayOrder = Number(d.displayOrder) || 0;
+      if (d.displayOrder !== undefined)
+        d.displayOrder = Number(d.displayOrder) || 0;
       await A.save(editId, d);
       setSuccess(editId ? "Updated successfully." : "Created successfully.");
       setForm({});
@@ -200,7 +355,16 @@ export default function CMS({ type }) {
         />
       );
     }
-    if (f.type === "checkbox") return <input key={f.key} type="checkbox" checked={Boolean(value)} onChange={(e) => handleChange(f.key, e.target.checked)} className="h-4 w-4 accent-blue-400"/>;
+    if (f.type === "checkbox")
+      return (
+        <input
+          key={f.key}
+          type="checkbox"
+          checked={Boolean(value)}
+          onChange={(e) => handleChange(f.key, e.target.checked)}
+          className="h-4 w-4 accent-blue-400"
+        />
+      );
     return (
       <input
         key={f.key}
@@ -232,7 +396,88 @@ export default function CMS({ type }) {
         </button>
       </div>
 
-      {!!pageFields.length && <Card className="p-6 mb-6"><form onSubmit={savePageSettings} className="grid md:grid-cols-2 gap-4"><h2 className="md:col-span-2 text-xl font-semibold">Public page content</h2>{pageFields.map((field) => <label key={field.key} className="grid gap-1 text-xs text-slate-400">{field.label}{field.type === "checkbox" ? <span className="flex items-center gap-2 text-sm text-slate-300"><input type="checkbox" checked={pageSettings[field.key] !== false} onChange={(e) => setPageSettings((current) => ({ ...current, [field.key]: e.target.checked }))}/> Visible on public site</span> : field.type === "select" ? <select className="input" value={pageSettings[field.key] || "contact"} onChange={(e) => setPageSettings((current) => ({ ...current, [field.key]: e.target.value }))}>{PUBLIC_ROUTE_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select> : field.type === "textarea" ? <textarea className="input" rows={3} value={pageSettings[field.key] || ""} onChange={(e) => setPageSettings((current) => ({ ...current, [field.key]: e.target.value }))}/> : <input className="input" value={pageSettings[field.key] || ""} onChange={(e) => setPageSettings((current) => ({ ...current, [field.key]: e.target.value }))}/>}</label>)}<button className="primary md:col-span-2 justify-center" disabled={pageSaving}>{pageSaving ? "Saving..." : "Save Page Content"}<Save size={15}/></button></form></Card>}
+      {!!pageFields.length && (
+        <Card className="p-6 mb-6">
+          <form
+            onSubmit={savePageSettings}
+            className="grid md:grid-cols-2 gap-4"
+          >
+            <h2 className="md:col-span-2 text-xl font-semibold">
+              Public page content
+            </h2>
+            {pageFields.map((field) => (
+              <label
+                key={field.key}
+                className="grid gap-1 text-xs text-slate-400"
+              >
+                {field.label}
+                {field.type === "checkbox" ? (
+                  <span className="flex items-center gap-2 text-sm text-slate-300">
+                    <input
+                      type="checkbox"
+                      checked={pageSettings[field.key] !== false}
+                      onChange={(e) =>
+                        setPageSettings((current) => ({
+                          ...current,
+                          [field.key]: e.target.checked,
+                        }))
+                      }
+                    />{" "}
+                    Visible on public site
+                  </span>
+                ) : field.type === "select" ? (
+                  <select
+                    className="input"
+                    value={pageSettings[field.key] || "contact"}
+                    onChange={(e) =>
+                      setPageSettings((current) => ({
+                        ...current,
+                        [field.key]: e.target.value,
+                      }))
+                    }
+                  >
+                    {PUBLIC_ROUTE_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                ) : field.type === "textarea" ? (
+                  <textarea
+                    className="input"
+                    rows={3}
+                    value={pageSettings[field.key] || ""}
+                    onChange={(e) =>
+                      setPageSettings((current) => ({
+                        ...current,
+                        [field.key]: e.target.value,
+                      }))
+                    }
+                  />
+                ) : (
+                  <input
+                    className="input"
+                    value={pageSettings[field.key] || ""}
+                    onChange={(e) =>
+                      setPageSettings((current) => ({
+                        ...current,
+                        [field.key]: e.target.value,
+                      }))
+                    }
+                  />
+                )}
+              </label>
+            ))}
+            <button
+              className="primary md:col-span-2 justify-center"
+              disabled={pageSaving}
+            >
+              {pageSaving ? "Saving..." : "Save Page Content"}
+              <Save size={15} />
+            </button>
+          </form>
+        </Card>
+      )}
 
       {error && (
         <div className="mb-4 rounded-xl border border-red-400/30 bg-red-400/10 p-3 flex gap-2 text-red-100">
@@ -268,7 +513,16 @@ export default function CMS({ type }) {
               />
               Published on public website
             </label>
-            {type === "projects" && <label className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[.03] p-3 text-sm text-slate-300 cursor-pointer"><input type="checkbox" checked={Boolean(form.featured)} onChange={(e) => handleChange("featured", e.target.checked)}/> Featured project</label>}
+            {type === "projects" && (
+              <label className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[.03] p-3 text-sm text-slate-300 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={Boolean(form.featured)}
+                  onChange={(e) => handleChange("featured", e.target.checked)}
+                />{" "}
+                Featured project
+              </label>
+            )}
             <div className="flex gap-3">
               <button
                 type="submit"
@@ -316,9 +570,15 @@ export default function CMS({ type }) {
                 <thead>
                   <tr>
                     <th className="text-left whitespace-nowrap w-[38%]">
-                      {type === "projects" ? "Name" : type === "services" ? "Title" : "Name"}
+                      {type === "projects"
+                        ? "Name"
+                        : type === "services"
+                          ? "Title"
+                          : "Name"}
                     </th>
-                    <th className="text-left whitespace-nowrap w-[42%]">Details</th>
+                    <th className="text-left whitespace-nowrap w-[42%]">
+                      Details
+                    </th>
                     <th className="text-right whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
@@ -336,8 +596,16 @@ export default function CMS({ type }) {
                           {item.title || item.name}
                         </b>
                         <div className="flex flex-wrap gap-1.5 mt-1">
-                          <span className={`text-[10px] rounded-full px-2 py-0.5 border ${item.published ? "border-emerald-400/20 text-emerald-300" : "border-amber-400/20 text-amber-300"}`}>{item.published ? "Published" : "Draft"}</span>
-                          {item.featured && <span className="text-[10px] rounded-full px-2 py-0.5 border border-[#78a9ff]/20 text-[#78a9ff]">Featured</span>}
+                          <span
+                            className={`text-[10px] rounded-full px-2 py-0.5 border ${item.published ? "border-emerald-400/20 text-emerald-300" : "border-amber-400/20 text-amber-300"}`}
+                          >
+                            {item.published ? "Published" : "Draft"}
+                          </span>
+                          {item.featured && (
+                            <span className="text-[10px] rounded-full px-2 py-0.5 border border-[#78a9ff]/20 text-[#78a9ff]">
+                              Featured
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td className="muted text-xs py-3">

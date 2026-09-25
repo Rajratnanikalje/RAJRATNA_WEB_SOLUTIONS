@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { AlertCircle, CheckCircle, ImagePlus, Loader2, Trash2 } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle,
+  ImagePlus,
+  Loader2,
+  Trash2,
+} from "lucide-react";
 import { admin } from "../services/api";
 
 export const IMAGE_ACCEPT = "image/jpeg,image/jpg,image/png,image/webp";
@@ -60,7 +66,9 @@ export default function ImageUploader({
 
     if (!ALLOWED_TYPES.includes(file.type)) {
       dropPreview();
-      setError("Unsupported file. Please choose a JPG, JPEG, PNG or WEBP image.");
+      setError(
+        "Unsupported file. Please choose a JPG, JPEG, PNG or WEBP image.",
+      );
       return;
     }
     if (file.size > IMAGE_MAX_BYTES) {

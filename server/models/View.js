@@ -1,1 +1,8 @@
-import mongoose from"mongoose";export default mongoose.model("View",new mongoose.Schema({day:{type:String,unique:true,required:true},count:{type:Number,default:0}}));
+import mongoose from "mongoose";
+export default mongoose.model(
+  "View",
+  new mongoose.Schema({
+    day: { type: String, unique: true, required: true },
+    count: { type: Number, default: 0 },
+  }),
+);

@@ -12,7 +12,11 @@ export function withWhatsAppMessage(value) {
   const input = String(value).trim();
   let url;
   try {
-    url = new URL(/^https?:\/\//i.test(input) ? input : `https://wa.me/${input.replace(/\D/g, "")}`);
+    url = new URL(
+      /^https?:\/\//i.test(input)
+        ? input
+        : `https://wa.me/${input.replace(/\D/g, "")}`,
+    );
   } catch {
     return "";
   }
