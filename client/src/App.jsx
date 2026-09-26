@@ -146,7 +146,7 @@ function applyRouteMetadata(pathname, settings = {}) {
         "The requested page could not be found on Rajratna Web Solutions.");
   const canonicalUrl = page
     ? pageSettings.canonicalUrl ||
-      `https://rajratna-web-solutions.vercel.app${path === "/" ? "/" : path}`
+      `https://rajratnawebsolutions.com${path === "/" ? "/" : path}`
     : "";
   const ogTitle = pageSettings.ogTitle || settings.ogTitle || title;
   const ogDescription =

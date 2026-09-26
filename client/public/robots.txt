@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://rajratna-web-solutions.vercel.app/sitemap.xml
+Sitemap: https://rajratnawebsolutions.com/sitemap.xml
