@@ -82,7 +82,7 @@
 @media (max-width: 640px) {
   .floating-contact-actions {
     right: max(12px, env(safe-area-inset-right));
-    bottom: max(84px, calc(env(safe-area-inset-bottom) + 72px));
+    bottom: max(20px, calc(env(safe-area-inset-bottom) + 16px));
     gap: 8px;
   }
 
