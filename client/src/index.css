@@ -20,6 +20,78 @@
   --brand-gradient: linear-gradient(135deg, #78a9ff, #3b82f6);
 }
 
+.floating-contact-actions {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(24px, env(safe-area-inset-bottom));
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.floating-contact-action {
+  display: inline-flex;
+  width: 56px;
+  height: 56px;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: linear-gradient(145deg, #1689ed, #0755b5);
+  border: 1px solid rgba(151, 213, 255, .78);
+  border-radius: 50%;
+  box-shadow: 0 7px 22px rgba(0, 0, 0, .32), 0 0 14px rgba(43, 150, 255, .28), inset 0 1px 0 rgba(255, 255, 255, .24);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: color .2s, background .2s, border-color .2s, transform .2s, box-shadow .2s;
+}
+
+.floating-contact-action:hover {
+  color: #fff;
+  background: linear-gradient(145deg, #36baff, #0871dc);
+  border-color: #c5ecff;
+  transform: translateY(-2px);
+  box-shadow: 0 9px 26px rgba(0, 0, 0, .35), 0 0 20px rgba(43, 150, 255, .48);
+}
+
+.floating-contact-action--whatsapp {
+  background: linear-gradient(145deg, #25d366, #119447);
+  border-color: rgba(170, 255, 207, .82);
+  box-shadow: 0 7px 22px rgba(0, 0, 0, .32), 0 0 15px rgba(37, 211, 102, .3), inset 0 1px 0 rgba(255, 255, 255, .24);
+}
+
+.floating-contact-action--whatsapp:hover {
+  background: linear-gradient(145deg, #38e879, #13a852);
+  border-color: #c7ffdc;
+  box-shadow: 0 9px 26px rgba(0, 0, 0, .35), 0 0 21px rgba(37, 211, 102, .48);
+}
+
+.floating-contact-action--call {
+  background: linear-gradient(145deg, #22b8ee, #1268cd);
+}
+
+.floating-contact-action--email {
+  background: linear-gradient(145deg, #438dff, #394fc2);
+}
+
+.floating-contact-action:focus-visible {
+  outline: 2px solid #a9c8ff;
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .floating-contact-actions {
+    right: max(12px, env(safe-area-inset-right));
+    bottom: max(84px, calc(env(safe-area-inset-bottom) + 72px));
+    gap: 8px;
+  }
+
+  .floating-contact-action {
+    width: 52px;
+    height: 52px;
+  }
+}
+
 :root {
   font-family: var(--font-sans);
   color: var(--ink);
