@@ -213,6 +213,13 @@ export default function App() {
 
         const url = settings.faviconUrl;
         if (!url) return;
+        const faviconUrl = new URL(url, window.location.href);
+        if (
+          faviconUrl.origin === window.location.origin &&
+          faviconUrl.pathname === "/favicon.svg"
+        ) {
+          return;
+        }
         let link = document.querySelector("link[rel='icon']");
         if (!link) {
           link = document.createElement("link");
@@ -220,6 +227,7 @@ export default function App() {
           document.head.appendChild(link);
         }
         link.href = url;
+        link.removeAttribute("type");
       })
       .catch(() => {});
   }, [location.pathname]);
