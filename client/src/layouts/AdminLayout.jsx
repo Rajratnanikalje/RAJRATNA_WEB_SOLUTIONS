@@ -323,7 +323,11 @@ export default function AdminLayout() {
 
   const fetchNotifications = async () => {
     try {
-      const r = await admin.enquiries.list();
+      const r = await admin.enquiries.list({
+        page: 1,
+        limit: 50,
+        status: "unread",
+      });
       const all = r.data.data || [];
       const currentNew = all.filter(
         (e) => e.status === "New" || e.status === "NEW",

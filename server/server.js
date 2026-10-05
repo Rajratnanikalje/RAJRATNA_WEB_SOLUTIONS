@@ -25,6 +25,9 @@ app.use((req, res, next) => {
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
   });
+  if (process.env.NODE_ENV === "production" && req.secure) {
+    res.set("Strict-Transport-Security", "max-age=31536000");
+  }
   next();
 });
 const allowed = (process.env.CLIENT_URL || "http://localhost:5173")

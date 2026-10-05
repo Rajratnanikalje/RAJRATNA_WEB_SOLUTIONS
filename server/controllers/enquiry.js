@@ -137,7 +137,72 @@ export const create = async (req, res) => {
 
 export const list = async (req, res) => {
   res.set("Cache-Control", "no-store");
-  res.json({ data: await Enquiry.find().sort({ createdAt: -1 }) });
+  const integerParam = (value, fallback) => {
+    if (value === undefined) return fallback;
+    if (typeof value !== "string" || !/^\d+$/.test(value)) return null;
+    const parsed = Number(value);
+    return Number.isSafeInteger(parsed) ? parsed : null;
+  };
+  const page = integerParam(req.query.page, 1);
+  const limit = integerParam(req.query.limit, 50);
+  const search =
+    typeof req.query.search === "string" ? req.query.search.trim() : "";
+  const status =
+    typeof req.query.status === "string" ? req.query.status : "all";
+  const allowedStatuses = [
+    "New",
+    "In Progress",
+    "Resolved",
+    "NEW",
+    "CONTACTED",
+    "DISCUSSION",
+    "QUOTED",
+    "CONVERTED",
+    "CLOSED",
+  ];
+
+  if (!page || page < 1 || !limit || limit < 1 || limit > 100)
+    return res.status(422).json({
+      message: "Page must be positive and limit must be between 1 and 100.",
+    });
+  if (search.length > 100)
+    return res.status(422).json({
+      message: "Search must be 100 characters or fewer.",
+    });
+  if (
+    status !== "all" &&
+    status !== "unread" &&
+    !allowedStatuses.includes(status)
+  )
+    return res
+      .status(422)
+      .json({ message: "Invalid enquiry status filter." });
+
+  const query = {};
+  if (status === "unread") query.status = { $in: ["New", "NEW"] };
+  else if (status !== "all") query.status = status;
+  if (search) {
+    const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    query.$or = ["name", "email", "company", "message", "status"].map(
+      (field) => ({ [field]: { $regex: escaped, $options: "i" } }),
+    );
+  }
+
+  const [total, newCount] = await Promise.all([
+    Enquiry.countDocuments(query),
+    Enquiry.countDocuments({ status: { $in: ["New", "NEW"] } }),
+  ]);
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const currentPage = Math.min(page, totalPages);
+  const data = await Enquiry.find(query)
+    .sort({ createdAt: -1, _id: -1 })
+    .skip((currentPage - 1) * limit)
+    .limit(limit);
+
+  res.json({
+    data,
+    pagination: { page: currentPage, limit, total, totalPages, newCount },
+  });
 };
 
 export const update = async (req, res) => {

@@ -6,6 +6,7 @@ export default mongoose.model(
       email: { type: String, unique: true, required: true, lowercase: true },
       password: { type: String, required: true },
       active: { type: Boolean, default: true },
+      sessionVersion: { type: Number, default: 0 },
       passwordResetOtpHash: { type: String, select: false },
       passwordResetOtpExpires: { type: Date, select: false },
       passwordResetOtpAttempts: { type: Number, default: 0, select: false },

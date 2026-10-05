@@ -7,7 +7,11 @@ export async function protect(req, res, next) {
       return res.status(401).json({ message: "Authentication required" });
     const d = jwt.verify(h.slice(7), process.env.JWT_SECRET),
       a = await Admin.findById(d.id);
-    if (!a?.active) return res.status(401).json({ message: "Invalid session" });
+    if (
+      !a?.active ||
+      (Number.isInteger(d.sv) ? d.sv : 0) !== (a.sessionVersion ?? 0)
+    )
+      return res.status(401).json({ message: "Invalid session" });
     req.admin = a;
     next();
   } catch (e) {

@@ -19,7 +19,7 @@ import {
   get as getSettings,
   save as saveSettings,
 } from "../controllers/settings.js";
-import { uploadImage } from "../controllers/upload.js";
+import { uploadImage, validateImageContent } from "../controllers/upload.js";
 const r = Router(),
   u = ["services", "projects", "technologies"];
 r.post(
@@ -99,7 +99,7 @@ const IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"],
   MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const imageUpload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: MAX_IMAGE_BYTES },
+  limits: { fileSize: MAX_IMAGE_BYTES, files: 1, fields: 0, parts: 1 },
   fileFilter: (q, f, cb) =>
     IMAGE_TYPES.includes(f.mimetype)
       ? cb(null, true)
@@ -123,5 +123,11 @@ const singleImage = (q, s, n) =>
       .status(e.statusCode || 422)
       .json({ message: e.message || "Unsupported image file." });
   });
-r.post("/uploads/image", protect, singleImage, uploadImage);
+r.post(
+  "/uploads/image",
+  protect,
+  singleImage,
+  validateImageContent,
+  uploadImage,
+);
 export default r;

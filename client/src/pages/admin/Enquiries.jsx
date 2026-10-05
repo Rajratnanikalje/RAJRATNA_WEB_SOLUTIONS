@@ -24,18 +24,29 @@ const statusColors = {
   "In Progress": "bg-amber-500/15 text-amber-300 border-amber-500/30",
   Resolved: "bg-green-500/15 text-green-300 border-green-500/30",
 };
+const PAGE_SIZE = 50;
 
 export default function Enquiries() {
   const [items, setItems] = useState([]);
   const [error, setError] = useState("");
   const [flashId, setFlashId] = useState(null);
   const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: PAGE_SIZE,
+    total: 0,
+    totalPages: 1,
+    newCount: 0,
+  });
   const [loading, setLoading] = useState(true);
   const highlightRefs = useRef({});
   const requestInFlight = useRef(false);
   const refreshQueued = useRef(false);
   const mounted = useRef(false);
+  const loadRef = useRef(null);
 
   const load = useCallback((silent = false) => {
     if (requestInFlight.current) {
@@ -45,10 +56,20 @@ export default function Enquiries() {
     requestInFlight.current = true;
     if (!silent) setLoading(true);
     admin.enquiries
-      .list()
+      .list({
+        page,
+        limit: PAGE_SIZE,
+        search,
+        status: statusFilter,
+      })
       .then((r) => {
         if (!mounted.current) return;
         setItems(r.data.data || []);
+        const nextPagination = r.data.pagination;
+        if (nextPagination) {
+          setPagination(nextPagination);
+          if (nextPagination.page !== page) setPage(nextPagination.page);
+        }
         setError("");
       })
       .catch((e) => {
@@ -61,10 +82,19 @@ export default function Enquiries() {
         setLoading(false);
         if (refreshQueued.current) {
           refreshQueued.current = false;
-          load(true);
+          loadRef.current?.(true);
         }
       });
-  }, []);
+  }, [page, search, statusFilter]);
+  loadRef.current = load;
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      setPage(1);
+      setSearch(searchInput.trim());
+    }, 250);
+    return () => window.clearTimeout(timeout);
+  }, [searchInput]);
 
   useEffect(() => {
     mounted.current = true;
@@ -128,16 +158,6 @@ export default function Enquiries() {
     }
   };
 
-  const filtered = items.filter(
-    (i) =>
-      (statusFilter === "all" || i.status === statusFilter) &&
-      (i.name.toLowerCase().includes(search.toLowerCase()) ||
-        i.email.toLowerCase().includes(search.toLowerCase()) ||
-        (i.company || "").toLowerCase().includes(search.toLowerCase()) ||
-        (i.message || "").toLowerCase().includes(search.toLowerCase()) ||
-        (i.status || "").toLowerCase().includes(search.toLowerCase())),
-  );
-
   const formatPhone = (p) => (p ? p.replace(/[\s\-()]/g, "") : "");
 
   return (
@@ -169,8 +189,8 @@ export default function Enquiries() {
           <input
             type="search"
             placeholder="Search enquiries..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
             className="input pl-10 w-full sm:w-72"
           />
         </div>
@@ -178,21 +198,28 @@ export default function Enquiries() {
           aria-label="Filter enquiries by status"
           className="input w-full sm:w-52"
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          onChange={(e) => {
+            setPage(1);
+            setStatusFilter(e.target.value);
+          }}
         >
           <option value="all">All statuses</option>
-          {[...new Set(items.map((item) => item.status))].map((status) => (
-            <option key={status} value={status}>
-              {status}
-            </option>
-          ))}
+          <option value="New">New</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Resolved">Resolved</option>
+          <option value="NEW">NEW</option>
+          <option value="CONTACTED">CONTACTED</option>
+          <option value="DISCUSSION">DISCUSSION</option>
+          <option value="QUOTED">QUOTED</option>
+          <option value="CONVERTED">CONVERTED</option>
+          <option value="CLOSED">CLOSED</option>
         </select>
         <span
           className={`text-xs px-3 py-1 rounded-full border ${
             statusColors[items.find((i) => i.status === "New")?.status || "New"]
           }`}
         >
-          {items.filter((i) => i.status === "New").length} new
+          {pagination.newCount} new
         </span>
       </div>
 
@@ -205,10 +232,10 @@ export default function Enquiries() {
               <div className="h-3 w-1/2 bg-white/5 rounded" />
             </Card>
           ))
-        ) : !filtered.length ? (
-          <Card className="p-7 muted text-center">No enquiries yet.</Card>
+        ) : !items.length ? (
+          <Card className="p-7 muted text-center">No matching enquiries.</Card>
         ) : (
-          filtered.map((item) => {
+          items.map((item) => {
             const Icon = statusIcons[item.status] || AlertCircle;
             const phone = formatPhone(item.phone);
             const actions = [];
@@ -379,6 +406,35 @@ export default function Enquiries() {
           })
         )}
       </div>
+      {pagination.totalPages > 1 && (
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+          <span className="text-sm text-slate-400">
+            Showing {(page - 1) * PAGE_SIZE + 1}–
+            {Math.min(page * PAGE_SIZE, pagination.total)} of {pagination.total}
+          </span>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="rounded-xl border border-white/10 px-4 py-2 text-sm text-slate-300 disabled:opacity-40"
+              disabled={page <= 1 || loading}
+              onClick={() => setPage((current) => current - 1)}
+            >
+              Previous
+            </button>
+            <span className="self-center px-2 text-sm text-slate-400">
+              Page {page} of {pagination.totalPages}
+            </span>
+            <button
+              type="button"
+              className="rounded-xl border border-white/10 px-4 py-2 text-sm text-slate-300 disabled:opacity-40"
+              disabled={page >= pagination.totalPages || loading}
+              onClick={() => setPage((current) => current + 1)}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

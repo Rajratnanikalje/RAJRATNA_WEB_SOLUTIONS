@@ -11,6 +11,10 @@ const resendCooldownMs = 60 * 1000;
 const maximumOtpAttempts = 5;
 const genericResetMessage =
   "If this email belongs to an active admin account, an OTP has been sent.";
+const DUMMY_PASSWORD_HASH = bcrypt.hash(
+  crypto.randomBytes(32).toString("hex"),
+  12,
+);
 const hashOtp = (otp) =>
   crypto.createHmac("sha256", process.env.JWT_SECRET).update(otp).digest("hex");
 const hashResetToken = (token) =>
@@ -41,20 +45,26 @@ const getMailTransport = () =>
   });
 
 export async function login(req, res) {
-  const { email, password } = req.body;
-  if (!email || !password)
-    return res.status(400).json({ message: "Email and password are required" });
-  const admin = await Admin.findOne({ email: email.toLowerCase().trim() });
-  if (!admin)
-    return res.status(401).json({ message: "Admin account not found" });
-  if (!admin.active)
-    return res.status(401).json({ message: "Admin account inactive" });
-  if (!(await bcrypt.compare(password, admin.password)))
-    return res.status(401).json({ message: "Admin password mismatch" });
+  const body = req.body || {};
+  const email =
+    typeof body.email === "string" ? body.email.toLowerCase().trim() : "";
+  const password = typeof body.password === "string" ? body.password : "";
+  const admin = email ? await Admin.findOne({ email }) : null;
+  const dummyPasswordHash = await DUMMY_PASSWORD_HASH;
+  const passwordMatches = await bcrypt.compare(
+    password,
+    admin?.password || dummyPasswordHash,
+  );
+  if (!admin || !admin.active || !passwordMatches)
+    return res.status(401).json({ message: "Invalid email or password" });
   res.json({
-    token: jwt.sign({ id: admin._id }, process.env.JWT_SECRET, {
-      expiresIn: "2h",
-    }),
+    token: jwt.sign(
+      { id: admin._id, sv: admin.sessionVersion ?? 0 },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "2h",
+      },
+    ),
   });
 }
 
@@ -98,6 +108,7 @@ export async function updateAccount(req, res) {
     admin.email = email;
   }
   if (newPassword) admin.password = await bcrypt.hash(newPassword, 12);
+  admin.sessionVersion = (admin.sessionVersion ?? 0) + 1;
   clearResetToken(admin);
   clearOtp(admin);
   await admin.save();
@@ -253,6 +264,7 @@ export async function resetPassword(req, res) {
       .status(400)
       .json({ message: "Password reset authorization is invalid or expired." });
   admin.password = await bcrypt.hash(password, 12);
+  admin.sessionVersion = (admin.sessionVersion ?? 0) + 1;
   clearResetToken(admin);
   clearOtp(admin);
   await admin.save();

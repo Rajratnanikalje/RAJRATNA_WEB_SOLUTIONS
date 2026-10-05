@@ -69,7 +69,7 @@ export const admin = {
     del: (id) => api.delete(`/technologies/${id}`),
   },
   enquiries: {
-    list: () => api.get("/enquiries"),
+    list: (params) => api.get("/enquiries", { params }),
     update: (id, d) => api.patch(`/enquiries/${id}`, d),
     del: (id) => api.delete(`/enquiries/${id}`),
   },
