@@ -32,21 +32,15 @@ export default function FloatingContactActions() {
 
   return (
     <nav className="floating-contact-actions" aria-label="Quick contact">
-      {whatsappHref && (
-        <a className="floating-contact-action floating-contact-action--whatsapp" href={whatsappHref} target="_blank" rel="noopener noreferrer" aria-label="Contact us on WhatsApp">
-          <WhatsAppIcon />
-        </a>
-      )}
-      {phoneHref && (
-        <a className="floating-contact-action floating-contact-action--call" href={phoneHref} aria-label="Call us">
-          <Phone size={26} strokeWidth={2.2} aria-hidden="true" />
-        </a>
-      )}
-      {email && (
-        <a className="floating-contact-action floating-contact-action--email" href={`mailto:${email}`} aria-label="Email us">
-          <Mail size={26} strokeWidth={2.2} aria-hidden="true" />
-        </a>
-      )}
+      <a className="floating-contact-action floating-contact-action--whatsapp" href={whatsappHref || undefined} target="_blank" rel="noopener noreferrer" aria-label="Contact us on WhatsApp">
+        <WhatsAppIcon />
+      </a>
+      <a className="floating-contact-action floating-contact-action--call" href={phoneHref || undefined} aria-label="Call us">
+        <Phone size={26} strokeWidth={2.2} aria-hidden="true" />
+      </a>
+      <a className="floating-contact-action floating-contact-action--email" href={email ? `mailto:${email}` : undefined} aria-label="Email us">
+        <Mail size={26} strokeWidth={2.2} aria-hidden="true" />
+      </a>
     </nav>
   );
 }
