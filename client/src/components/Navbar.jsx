@@ -87,6 +87,8 @@ export default function Navbar() {
                 src={logoUrl}
                 alt={`${siteTitle} logo`}
                 className="h-11 w-auto max-w-[110px] object-contain shrink-0"
+                fetchPriority="high"
+                decoding="async"
               />
             )}
             <span>

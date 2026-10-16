@@ -15,6 +15,35 @@ export function notifyEnquiryCreated() {
 }
 
 const api = axios.create({ baseURL: API });
+
+// Several always-mounted public components need the same settings document.
+// Share the in-flight request and keep its result briefly to avoid repeating
+// the Mongo-backed request during initial mount and nearby route changes.
+const PUBLIC_SETTINGS_CACHE_MS = 10_000;
+let publicSettingsCache = null;
+let publicSettingsRequest = null;
+
+function getPublicSettings() {
+  if (publicSettingsCache && Date.now() - publicSettingsCache.time < PUBLIC_SETTINGS_CACHE_MS) {
+    return Promise.resolve(publicSettingsCache.response);
+  }
+  if (publicSettingsRequest) return publicSettingsRequest;
+
+  publicSettingsRequest = api
+    .get("/settings/public")
+    .then((response) => {
+      publicSettingsCache = { response, time: Date.now() };
+      return response;
+    })
+    .finally(() => {
+      publicSettingsRequest = null;
+    });
+  return publicSettingsRequest;
+}
+
+export function invalidatePublicSettingsCache() {
+  publicSettingsCache = null;
+}
 api.interceptors.request.use((c) => {
   const t = localStorage.getItem("rws_token");
   if (t) c.headers.Authorization = `Bearer ${t}`;
@@ -37,7 +66,7 @@ export const pub = {
   projects: () => api.get("/projects/public", { params: { _t: Date.now() } }),
   technologies: () =>
     api.get("/technologies/public", { params: { _t: Date.now() } }),
-  settings: () => api.get("/settings/public", { params: { _t: Date.now() } }),
+  settings: getPublicSettings,
   enquiry: (d) => api.post("/enquiries", d),
   view: () => api.post("/dashboard/view"),
 };

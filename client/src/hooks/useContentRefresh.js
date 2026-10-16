@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
+import { invalidatePublicSettingsCache } from "../services/api";
 
 export const CONTENT_UPDATED_KEY = "rws_content_updated_at";
 
@@ -41,6 +42,7 @@ export default function useContentRefresh(refetch) {
     const now = Date.now();
     if (now - lastRun.current < 1500) return;
     lastRun.current = now;
+    invalidatePublicSettingsCache();
     try {
       cb.current?.();
     } catch {
@@ -58,6 +60,7 @@ export default function useContentRefresh(refetch) {
       // switch, but an explicit admin save must never be swallowed.
       if (throttle && now - lastRun.current < 1500) return;
       lastRun.current = now;
+      invalidatePublicSettingsCache();
       try {
         cb.current?.();
       } catch {

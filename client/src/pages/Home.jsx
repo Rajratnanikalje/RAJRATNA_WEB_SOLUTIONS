@@ -179,7 +179,14 @@ export default function Home() {
         <section className="hero-section relative min-h-[min(100svh,820px)] flex items-center overflow-hidden pt-20 sm:pt-24">
           <div className="hero-bg" aria-hidden="true">
             {settings.heroImageUrl ? (
-              <img src={settings.heroImageUrl} alt="" fetchPriority="high" />
+              <img
+                src={settings.heroImageUrl}
+                alt=""
+                fetchPriority="high"
+                loading="eager"
+                decoding="async"
+                sizes="100vw"
+              />
             ) : (
               <div className="hero-bg-fallback" />
             )}

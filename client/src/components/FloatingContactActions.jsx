@@ -13,7 +13,12 @@ function WhatsAppIcon() {
 }
 
 export default function FloatingContactActions() {
-  const [settings, setSettings] = useState({});
+  const [settings, setSettings] = useState({
+    phone: "+91 9156914227",
+    footerPhone: "+91 9156914227",
+    email: "rajratnawebsolutions@gmail.com",
+    footerEmail: "rajratnawebsolutions@gmail.com",
+  });
   const loadSettings = useCallback(() => {
     void pub.settings().then((r) => setSettings(r.data?.data || {})).catch(() => {});
   }, []);
