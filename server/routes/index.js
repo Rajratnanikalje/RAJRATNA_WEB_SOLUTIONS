@@ -99,7 +99,7 @@ const IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"],
   MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const imageUpload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: MAX_IMAGE_BYTES, files: 1, fields: 0, parts: 1 },
+  limits: { fileSize: MAX_IMAGE_BYTES, files: 1, fields: 0 },
   fileFilter: (q, f, cb) =>
     IMAGE_TYPES.includes(f.mimetype)
       ? cb(null, true)
@@ -119,6 +119,22 @@ const singleImage = (q, s, n) =>
       return s
         .status(413)
         .json({ message: "Image is too large. Maximum size is 8 MB." });
+    if (e.code === "LIMIT_FILE_COUNT")
+      return s
+        .status(400)
+        .json({ message: "Only one image can be uploaded at a time." });
+    if (e.code === "LIMIT_UNEXPECTED_FILE" && e.field === "image")
+      return s
+        .status(400)
+        .json({ message: "Only one image can be uploaded at a time." });
+    if (e.code === "LIMIT_UNEXPECTED_FILE")
+      return s.status(400).json({
+        message: "Upload one image using the 'image' field.",
+      });
+    if (e.code === "LIMIT_FIELD_COUNT")
+      return s.status(400).json({
+        message: "Unexpected form fields. Upload one image only.",
+      });
     return s
       .status(e.statusCode || 422)
       .json({ message: e.message || "Unsupported image file." });

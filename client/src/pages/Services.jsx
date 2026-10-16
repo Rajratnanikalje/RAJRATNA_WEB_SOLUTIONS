@@ -1,10 +1,43 @@
 import { useCallback, useEffect, useState } from "react";
-import { ArrowUpRight, Code } from "lucide-react";
+import {
+  ArrowUpRight,
+  Briefcase,
+  Building2,
+  Code,
+  Code2,
+  Settings,
+  ShieldCheck,
+  ShoppingCart,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { pub } from "../services/api";
 import useContentRefresh from "../hooks/useContentRefresh";
 import { Card, Reveal, Heading } from "../components/UI";
 import { publicPath } from "../content/siteRoutes";
+
+const serviceVisuals = [
+  { match: /e.?commerce|online/i, type: "commerce", Icon: ShoppingCart },
+  { match: /portfolio|showcase/i, type: "portfolio", Icon: Briefcase },
+  {
+    match: /maintenance|secure|up.?to.?date/i,
+    type: "maintenance",
+    Icon: ShieldCheck,
+    DetailIcon: Settings,
+  },
+  {
+    match: /custom|tailored/i,
+    type: "custom",
+    Icon: Code2,
+    DetailIcon: Settings,
+  },
+  { match: /business|professional/i, type: "business", Icon: Building2 },
+];
+
+const serviceVisualFor = (title = "") =>
+  serviceVisuals.find(({ match }) => match.test(title)) || {
+    type: "default",
+    Icon: Code,
+  };
 
 export default function Services() {
   const [services, setServices] = useState([]);
@@ -76,41 +109,63 @@ export default function Services() {
             ))}
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mt-12">
-            {services.map((s, i) => (
-              <Reveal key={s._id || i} delay={i * 0.06}>
-                <Card className="service-card p-7 h-full group">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#78a9ff] to-[#3b82f6] flex items-center justify-center overflow-hidden mb-6 shadow-[0_0_25px_rgba(120,169,255,.25)]">
-                    {s.imageUrl ? (
-                      <img
-                        src={s.imageUrl}
-                        alt=""
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <Code size={22} className="text-slate-900" />
-                    )}
-                  </div>
-                  <div className="text-xs text-slate-500 font-mono mb-2">
-                    0{i + 1}
-                  </div>
-                  <h3 className="text-2xl font-bold group-hover:text-[#78a9ff] transition-colors">
-                    {s.title}
-                  </h3>
-                  <p className="muted mt-3 leading-7">{s.description}</p>
-                  <Link
-                    to={publicPath(
-                      settings.serviceCardCtaRouteKey || "contact",
-                      "/contact",
-                    )}
-                    className="secondary mt-6 text-sm group-hover:border-[#78a9ff] transition-colors"
-                  >
-                    {settings.serviceCardCtaText || "Enquire now"}{" "}
-                    <ArrowUpRight size={14} />
-                  </Link>
-                </Card>
-              </Reveal>
-            ))}
+          <div className="service-card-grid grid md:grid-cols-2 lg:grid-cols-3 gap-5 mt-12">
+            {services.map((s, i) => {
+              const { type, Icon, DetailIcon } = serviceVisualFor(s.title);
+
+              return (
+                <Reveal key={s._id || i} delay={i * 0.06}>
+                  <Card className="service-card p-7 h-full group">
+                    <div
+                      className={`w-14 h-14 rounded-2xl bg-gradient-to-br from-[#78a9ff] to-[#3b82f6] flex items-center justify-center overflow-hidden mb-6 shadow-[0_0_25px_rgba(120,169,255,.25)] ${s.imageUrl ? "" : "service-icon service-icon-3d"}`}
+                      data-service-visual={type}
+                    >
+                      {s.imageUrl ? (
+                        <img
+                          src={s.imageUrl}
+                          alt=""
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <>
+                          <Icon
+                            className="service-icon-main"
+                            size={25}
+                            strokeWidth={1.8}
+                            aria-hidden="true"
+                          />
+                          {DetailIcon && (
+                            <DetailIcon
+                              className="service-icon-detail"
+                              size={14}
+                              strokeWidth={2}
+                              aria-hidden="true"
+                            />
+                          )}
+                        </>
+                      )}
+                    </div>
+                    <div className="text-xs text-slate-500 font-mono mb-2">
+                      0{i + 1}
+                    </div>
+                    <h3 className="text-2xl font-bold group-hover:text-[#78a9ff] transition-colors">
+                      {s.title}
+                    </h3>
+                    <p className="muted mt-3 leading-7">{s.description}</p>
+                    <Link
+                      to={publicPath(
+                        settings.serviceCardCtaRouteKey || "contact",
+                        "/contact",
+                      )}
+                      className="secondary mt-6 text-sm group-hover:border-[#78a9ff] transition-colors"
+                    >
+                      {settings.serviceCardCtaText || "Enquire now"}{" "}
+                      <ArrowUpRight size={14} />
+                    </Link>
+                  </Card>
+                </Reveal>
+              );
+            })}
           </div>
         )}
 

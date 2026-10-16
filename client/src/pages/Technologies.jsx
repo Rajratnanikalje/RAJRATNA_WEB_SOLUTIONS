@@ -13,6 +13,32 @@ const categoryIcons = {
   Language: <Zap size={16} />,
 };
 
+const technologyBrandIcons = {
+  html5: "html5/html5-original.svg",
+  css3: "css3/css3-original.svg",
+  javascript: "javascript/javascript-original.svg",
+  react: "react/react-original.svg",
+  reactjs: "react/react-original.svg",
+  nodejs: "nodejs/nodejs-original.svg",
+  express: "express/express-original.svg",
+  expressjs: "express/express-original.svg",
+  mongodb: "mongodb/mongodb-original.svg",
+  git: "git/git-original.svg",
+  github: "github/github-original.svg",
+  tailwindcss: "tailwindcss/tailwindcss-original.svg",
+  reduxtoolkit: "redux/redux-original.svg",
+  mui: "materialui/materialui-original.svg",
+  materialui: "materialui/materialui-original.svg",
+};
+
+const technologyBrandIcon = (name = "") => {
+  const key = name.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const iconPath = technologyBrandIcons[key];
+  return iconPath
+    ? `https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/icons/${iconPath}`
+    : "";
+};
+
 export default function Technologies() {
   const [techs, setTechs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -83,31 +109,46 @@ export default function Technologies() {
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mt-12">
-            {techs.map((t, i) => (
-              <Reveal key={t._id || i} delay={i * 0.02}>
-                <Card className="tech-card group p-7 h-full">
-                  {t.iconUrl ? (
-                    <img
-                      src={t.iconUrl}
-                      alt={t.name}
-                      className="w-14 h-14 mx-auto mb-3 rounded-xl object-contain"
-                    />
-                  ) : (
-                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#78a9ff] to-[#3b82f6] flex items-center justify-center mx-auto mb-3 shadow-[0_0_20px_rgba(120,169,255,.3)]">
-                      {categoryIcons[t.category] || (
-                        <Code size={24} className="text-slate-900" />
-                      )}
+            {techs.map((t, i) => {
+              const brandIcon = !t.iconUrl && technologyBrandIcon(t.name);
+              const monochromeBrand = ["express", "express.js", "github"]
+                .includes(t.name.toLowerCase());
+
+              return (
+                <Reveal key={t._id || i} delay={i * 0.02}>
+                  <Card className="tech-card group p-7 h-full">
+                    {t.iconUrl || brandIcon ? (
+                      <div className="technology-logo-3d">
+                        <img
+                          src={t.iconUrl || brandIcon}
+                          alt={`${t.name} logo`}
+                          loading="lazy"
+                          decoding="async"
+                          className="technology-logo-image w-10 h-10 object-contain"
+                          style={
+                            !t.iconUrl && monochromeBrand
+                              ? { filter: "brightness(0) invert(1)" }
+                              : undefined
+                          }
+                        />
+                      </div>
+                    ) : (
+                      <div className="technology-logo-3d technology-icon w-14 h-14 rounded-xl bg-gradient-to-br from-[#78a9ff] to-[#3b82f6] flex items-center justify-center mx-auto mb-3 shadow-[0_0_20px_rgba(120,169,255,.3)]" data-category={t.category || "default"}>
+                        {categoryIcons[t.category] || (
+                          <Code size={24} className="text-slate-900" />
+                        )}
+                      </div>
+                    )}
+                    <div className="tech-name group-hover:text-[#78a9ff] transition-colors">
+                      {t.name}
                     </div>
-                  )}
-                  <div className="tech-name group-hover:text-[#78a9ff] transition-colors">
-                    {t.name}
-                  </div>
-                  {t.category && (
-                    <div className="tech-category">{t.category}</div>
-                  )}
-                </Card>
-              </Reveal>
-            ))}
+                    {t.category && (
+                      <div className="tech-category">{t.category}</div>
+                    )}
+                  </Card>
+                </Reveal>
+              );
+            })}
           </div>
         )}
 

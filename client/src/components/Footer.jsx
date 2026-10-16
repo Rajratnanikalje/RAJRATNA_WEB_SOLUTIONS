@@ -156,7 +156,7 @@ export default function Footer() {
                           href={url}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-xs text-slate-400 hover:text-white transition-colors"
+                          className="footer-link text-xs text-slate-400 hover:text-white transition-colors"
                         >
                           {label}
                         </a>
@@ -186,7 +186,7 @@ export default function Footer() {
                             })
                         : undefined
                     }
-                    className="text-slate-300 hover:text-white transition-colors"
+                    className="footer-link text-slate-300 hover:text-white transition-colors"
                   >
                     {item.routeKey === "privacy"
                       ? settings.footerPrivacyLabel || item.label
@@ -219,18 +219,24 @@ export default function Footer() {
                 {settings.footerShowPhone !== false && (
                   <a
                     href={`tel:${phone.replace(/[^\d+]/g, "")}`}
-                    className="flex gap-2 text-slate-300 hover:text-white"
+                    className="footer-link flex gap-2 text-slate-300 hover:text-white"
                   >
-                    <Phone size={14} className="text-[#78a9ff] shrink-0" />
+                    <Phone
+                      size={14}
+                      className="footer-contact-icon footer-contact-icon--phone shrink-0"
+                    />
                     <span>{phone}</span>
                   </a>
                 )}
                 {settings.footerShowEmail !== false && (
                   <a
                     href={`mailto:${email}`}
-                    className="flex gap-2 text-slate-300 hover:text-white break-all"
+                    className="footer-link flex gap-2 text-slate-300 hover:text-white break-all"
                   >
-                    <Mail size={14} className="text-[#78a9ff] shrink-0" />
+                    <Mail
+                      size={14}
+                      className="footer-contact-icon footer-contact-icon--email shrink-0"
+                    />
                     <span>{email}</span>
                   </a>
                 )}
@@ -239,15 +245,20 @@ export default function Footer() {
                     href={whatsappHref}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex gap-2 text-slate-300 hover:text-white"
+                    className="footer-link flex gap-2 text-slate-300 hover:text-white"
                   >
-                    <WhatsAppIcon className="text-[#78a9ff] shrink-0" />
+                    <WhatsAppIcon
+                      className="footer-contact-icon footer-contact-icon--whatsapp shrink-0"
+                    />
                     <span>{settings.footerWhatsappLabel || "WhatsApp"}</span>
                   </a>
                 )}
                 {settings.footerShowLocation !== false && (
                   <div className="flex gap-2 text-slate-300">
-                    <MapPin size={14} className="text-[#78a9ff] shrink-0" />
+                    <MapPin
+                      size={14}
+                      className="footer-contact-icon footer-contact-icon--location shrink-0"
+                    />
                     <span>{location}</span>
                   </div>
                 )}

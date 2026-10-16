@@ -115,8 +115,8 @@ export default function Navbar() {
                   onClick={item.routeKey === "home" ? goHome : undefined}
                   className={({ isActive }) =>
                     isActive
-                      ? "text-[#78a9ff]"
-                      : "hover:text-white transition-colors"
+                      ? "navbar-link is-active text-[#78a9ff]"
+                      : "navbar-link hover:text-white transition-colors"
                   }
                 >
                   {item.label}
@@ -130,11 +130,11 @@ export default function Navbar() {
               to={ctaPath}
               className="primary !hidden lg:!inline-flex text-xs py-3"
             >
-              {ctaText} <ArrowUpRight size={14} />
+              {ctaText} <ArrowUpRight className="navbar-cta-icon" size={14} />
             </Link>
           )}
           <button
-            className="lg:hidden inline-flex p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-all"
+            className="navbar-menu-toggle lg:hidden inline-flex p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-all"
             onClick={() => setOpen(!open)}
             aria-label="Toggle navigation"
             aria-expanded={open}
@@ -166,7 +166,7 @@ export default function Navbar() {
                     onClick={
                       item.routeKey === "home" ? goHome : () => setOpen(false)
                     }
-                    className="min-h-12 flex items-center py-3 px-3 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 active:bg-[#78a9ff]/10 transition-colors"
+                    className="navbar-mobile-link min-h-12 flex items-center py-3 px-3 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 active:bg-[#78a9ff]/10 transition-colors"
                   >
                     {item.label}
                   </Link>
@@ -178,7 +178,7 @@ export default function Navbar() {
                   onClick={() => setOpen(false)}
                   className="primary min-h-12 text-sm justify-center mt-2"
                 >
-                  {ctaText} <ArrowUpRight size={14} />
+                  {ctaText} <ArrowUpRight className="navbar-cta-icon" size={14} />
                 </Link>
               )}
             </nav>

@@ -372,6 +372,8 @@ export default function CMS({ type }) {
         className="input"
         placeholder={f.placeholder}
         value={value}
+        min={f.key === "displayOrder" ? 0 : undefined}
+        step={f.key === "displayOrder" ? 1 : undefined}
         onChange={(e) => handleChange(f.key, e.target.value)}
       />
     );
@@ -503,6 +505,11 @@ export default function CMS({ type }) {
                   {f.label}
                 </label>
                 {renderField(f)}
+                {f.key === "displayOrder" && (
+                  <p className="text-xs text-slate-500 mt-1">
+                    Lower numbers appear first on the public site.
+                  </p>
+                )}
               </div>
             ))}
             <label className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[.03] p-3 text-sm text-slate-300 cursor-pointer">
@@ -569,15 +576,18 @@ export default function CMS({ type }) {
               <table className="w-full text-sm table-fixed">
                 <thead>
                   <tr>
-                    <th className="text-left whitespace-nowrap w-[38%]">
+                    <th className="text-left whitespace-nowrap w-[32%]">
                       {type === "projects"
                         ? "Name"
                         : type === "services"
                           ? "Title"
                           : "Name"}
                     </th>
-                    <th className="text-left whitespace-nowrap w-[42%]">
+                    <th className="text-left whitespace-nowrap w-[38%]">
                       Details
+                    </th>
+                    <th className="text-left whitespace-nowrap w-[14%]">
+                      Order
                     </th>
                     <th className="text-right whitespace-nowrap">Actions</th>
                   </tr>
@@ -627,6 +637,9 @@ export default function CMS({ type }) {
                               ? item.technologies.join(", ")
                               : "")}
                         </div>
+                      </td>
+                      <td className="text-slate-400 text-xs py-3">
+                        {Number(item.displayOrder) || 0}
                       </td>
                       <td className="py-3">
                         <div className="flex justify-end gap-1">

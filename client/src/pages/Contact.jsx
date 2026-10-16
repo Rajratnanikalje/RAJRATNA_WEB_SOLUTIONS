@@ -289,16 +289,19 @@ export default function Contact() {
   const contacts = [
     {
       icon: Phone,
+      kind: "phone",
       label: settings.contactPhoneLabel || "Phone",
       value: settings.phone || "+91 9156914227",
     },
     {
       icon: Mail,
+      kind: "email",
       label: settings.contactEmailLabel || "Email",
       value: settings.email || "rajratnawebsolutions@gmail.com",
     },
     {
       icon: MapPin,
+      kind: "location",
       label: settings.contactLocationLabel || "Location",
       value: settings.location || "Buldhana, Maharashtra, India",
     },
@@ -337,6 +340,7 @@ export default function Contact() {
   if (whatsappUrl)
     contacts.push({
       icon: MessageCircle,
+      kind: "whatsapp",
       label: settings.contactWhatsappLabel || "WhatsApp",
       value: whatsappDisplayNumber,
     });
@@ -376,7 +380,9 @@ export default function Contact() {
                   const Icon = c.icon;
                   return (
                     <div key={c.label} className="flex gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#78a9ff] to-[#3b82f6] flex items-center justify-center flex-shrink-0">
+                      <div
+                        className={`contact-method-icon contact-method-icon--${c.kind} w-10 h-10 rounded-xl bg-gradient-to-br from-[#78a9ff] to-[#3b82f6] flex items-center justify-center flex-shrink-0`}
+                      >
                         <Icon size={18} className="text-slate-900" />
                       </div>
                       <div className="min-w-0">
@@ -420,7 +426,7 @@ export default function Contact() {
                               href={url}
                               target="_blank"
                               rel="noreferrer"
-                              className="text-sm text-[#78a9ff] hover:text-white"
+                              className="contact-social-link text-sm text-[#78a9ff] hover:text-white"
                             >
                               {label}
                             </a>

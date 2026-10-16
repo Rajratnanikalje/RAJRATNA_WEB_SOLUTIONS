@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { pub } from "../services/api";
 import useContentRefresh from "../hooks/useContentRefresh";
 import { Card, Reveal, Heading } from "./UI";
@@ -31,6 +32,7 @@ export default function ProcessSection({
   useEffect(load, [load]);
   useContentRefresh(load);
   const settings = providedSettings || loadedSettings;
+  const prefersReducedMotion = useReducedMotion();
   if (
     (standalone && settings.processPageVisible === false) ||
     (!standalone && settings.processVisible === false)
@@ -64,11 +66,22 @@ export default function ProcessSection({
             }
           />
         </Reveal>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-12">
+        <motion.div
+          className="process-progress-line"
+          aria-hidden="true"
+          initial={prefersReducedMotion === false ? { scaleX: 0.72 } : false}
+          whileInView={{ scaleX: 1 }}
+          viewport={{ once: true, amount: 0.8 }}
+          transition={{
+            duration: prefersReducedMotion === false ? 0.65 : 0,
+            ease: "easeOut",
+          }}
+        />
+        <div className="process-steps grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
           {steps.map((step, index) => (
             <Reveal key={step.number || step.title} delay={index * 0.04}>
-              <Card className="p-6 h-full">
-                <span className="font-mono text-sm text-[#78a9ff]">
+              <Card className="process-step-card p-6 h-full">
+                <span className="process-step-number font-mono text-sm text-[#78a9ff]">
                   {step.number}
                 </span>
                 <h3 className="text-xl font-bold mt-3">{step.title}</h3>

@@ -4,21 +4,52 @@ import {
   ArrowRight,
   ArrowUpRight,
   Braces,
+  Briefcase,
+  Building2,
   Code2,
   Database,
   Github,
   Layers3,
   MessageCircle,
   MonitorSmartphone,
+  ShoppingCart,
   ShieldCheck,
   Zap,
+  Wrench,
 } from "lucide-react";
 import { pub } from "../services/api";
 import useContentRefresh from "../hooks/useContentRefresh";
 import { Card, Reveal, Heading } from "../components/UI";
+import HeroTechnologyVisual from "../components/HeroTechnologyVisual";
 import ProcessSection from "../components/ProcessSection";
 import { publicPath, routeKeyFromPath } from "../content/siteRoutes";
 import { withWhatsAppMessage } from "../utils/whatsapp";
+
+const homeTechnologyBrandIcons = {
+  html5: "html5/html5-original.svg",
+  css3: "css3/css3-original.svg",
+  javascript: "javascript/javascript-original.svg",
+  react: "react/react-original.svg",
+  reactjs: "react/react-original.svg",
+  nodejs: "nodejs/nodejs-original.svg",
+  express: "express/express-original.svg",
+  expressjs: "express/express-original.svg",
+  mongodb: "mongodb/mongodb-original.svg",
+  git: "git/git-original.svg",
+  github: "github/github-original.svg",
+  tailwindcss: "tailwindcss/tailwindcss-original.svg",
+  reduxtoolkit: "redux/redux-original.svg",
+  mui: "materialui/materialui-original.svg",
+  materialui: "materialui/materialui-original.svg",
+};
+
+const homeTechnologyBrandIcon = (name = "") => {
+  const key = name.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const iconPath = homeTechnologyBrandIcons[key];
+  return iconPath
+    ? `https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/icons/${iconPath}`
+    : "";
+};
 
 const reasons = [
   [
@@ -195,6 +226,8 @@ export default function Home() {
             <div className="hero-shade" />
           </div>
 
+          <HeroTechnologyVisual />
+
           {settings.homeHeroVerticalVisible !== false && (
             <div className="hero-script" aria-hidden="true">
               {heroWords.map((item) => (
@@ -238,7 +271,7 @@ export default function Home() {
           </svg>
 
           <div className="container relative z-10 py-8 sm:py-10 lg:py-12">
-            <Reveal>
+            <Reveal immediate>
               <div className="hero-copy max-w-2xl">
                 <p className="hero-tagline">
                   {(
@@ -362,24 +395,39 @@ export default function Home() {
                 }
               />
             </Reveal>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-12">
+            <div className="home-service-grid grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-12">
               {cmsServices.map(({ title, description, imageUrl }, index) => {
-                const Icon = Code2;
+                const normalizedTitle = title.toLowerCase();
+                const serviceVisual = normalizedTitle.includes("e-commerce")
+                  ? { Icon: ShoppingCart, visual: "commerce" }
+                  : normalizedTitle.includes("portfolio")
+                    ? { Icon: Briefcase, visual: "portfolio" }
+                    : normalizedTitle.includes("maintenance")
+                      ? { Icon: Wrench, visual: "maintenance" }
+                      : normalizedTitle.includes("custom")
+                        ? { Icon: Layers3, visual: "custom" }
+                        : normalizedTitle.includes("business")
+                          ? { Icon: Building2, visual: "business" }
+                          : { Icon: Code2, visual: "custom" };
+                const Icon = serviceVisual.Icon;
                 return (
                   <Reveal key={title} delay={index * 0.035}>
                     <Card className="p-6 h-full group">
-                      {imageUrl ? (
-                        <img
-                          src={imageUrl}
-                          alt={title}
-                          loading="lazy"
-                          className="w-11 h-11 rounded-xl object-cover mb-5"
-                        />
-                      ) : (
-                        <div className="w-11 h-11 rounded-xl bg-[#78a9ff]/10 border border-[#78a9ff]/20 flex items-center justify-center mb-5">
-                          <Icon size={20} className="text-[#78a9ff]" />
-                        </div>
-                      )}
+                      <div
+                        className="service-icon service-icon-3d home-service-icon w-11 h-11 rounded-xl bg-[#78a9ff]/10 border border-[#78a9ff]/20 flex items-center justify-center mb-5"
+                        data-service-visual={serviceVisual.visual}
+                      >
+                        {imageUrl ? (
+                          <img
+                            src={imageUrl}
+                            alt={title}
+                            loading="lazy"
+                            className="service-icon-main w-full h-full rounded-xl object-cover"
+                          />
+                        ) : (
+                          <Icon size={20} className="service-icon-main" />
+                        )}
+                      </div>
                       <h3 className="font-bold text-lg group-hover:text-[#78a9ff] transition-colors">
                         {title}
                       </h3>
@@ -570,15 +618,23 @@ export default function Home() {
                 {technologies.map((tech, index) => (
                   <Reveal key={tech._id || tech.name} delay={index * 0.02}>
                     <div className="tech-card group min-h-24 flex flex-col items-center justify-center gap-2">
-                      {tech.iconUrl ? (
-                        <img
-                          src={tech.iconUrl}
-                          alt=""
-                          loading="lazy"
-                          className="w-7 h-7 object-contain"
-                        />
+                      {tech.iconUrl || homeTechnologyBrandIcon(tech.name) ? (
+                        <div className="technology-logo-3d">
+                          <img
+                            src={tech.iconUrl || homeTechnologyBrandIcon(tech.name)}
+                            alt=""
+                            loading="lazy"
+                            decoding="async"
+                            className="technology-logo-image w-10 h-10 object-contain"
+                          />
+                        </div>
                       ) : (
-                        <Code2 size={20} className="text-[#78a9ff]" />
+                        <div
+                          className="technology-logo-3d technology-icon w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-3"
+                          data-category={tech.category || "default"}
+                        >
+                          <Code2 size={20} className="home-tech-icon" />
+                        </div>
                       )}
                       <span className="tech-name text-sm">{tech.name}</span>
                     </div>
@@ -609,7 +665,7 @@ export default function Home() {
                 }
               />
             </Reveal>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-12">
+            <div className="home-reason-grid grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-12">
               {(
                 settings.whyItems ||
                 reasons.map(([icon, title, description], displayOrder) => ({
@@ -648,7 +704,10 @@ export default function Home() {
                   return (
                     <Reveal key={item.title} delay={index * 0.035}>
                       <Card className="p-6 h-full">
-                        <Icon size={22} className="text-[#78a9ff] mb-4" />
+                        <Icon
+                          size={22}
+                          className="why-icon text-[#78a9ff] mb-4"
+                        />
                         <h3 className="font-bold">{item.title}</h3>
                         <p className="muted text-sm leading-6 mt-2">
                           {item.description}
@@ -693,11 +752,11 @@ export default function Home() {
                 .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
                 .map((item, index) => (
                   <Reveal key={item.question} delay={index * 0.025}>
-                    <details className="glass rounded-2xl p-5 group">
+                    <details className="faq-item glass rounded-2xl p-5 group">
                       <summary className="cursor-pointer list-none font-semibold flex items-center justify-between gap-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#78a9ff]">
                         {item.question}
                         <span
-                          className="text-[#78a9ff] group-open:rotate-45 transition-transform"
+                          className="faq-toggle text-[#78a9ff] group-open:rotate-45 transition-transform"
                           aria-hidden="true"
                         >
                           +
