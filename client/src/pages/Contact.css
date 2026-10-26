@@ -1,0 +1,135 @@
+.contact-section .contact-form {
+  display: grid;
+  gap: 20px;
+}
+
+.contact-section .contact-form > div,
+.contact-section .contact-form > div > div {
+  min-width: 0;
+}
+
+.contact-section .contact-form label {
+  display: block;
+  margin: 0 0 8px;
+  color: #a9b5cb;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.contact-section .contact-form input.input,
+.contact-section .contact-form select.input,
+.contact-section .contact-form textarea.input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 13px 14px;
+  border: 1px solid rgba(181, 204, 241, .22);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, .035);
+  color: #f4f7ff;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s, background .2s;
+}
+
+.contact-section .contact-form input.input::placeholder,
+.contact-section .contact-form textarea.input::placeholder {
+  color: #8e9bb2;
+  opacity: 1;
+}
+
+.contact-section .contact-form input.input:focus,
+.contact-section .contact-form select.input:focus,
+.contact-section .contact-form textarea.input:focus {
+  border-color: #78a9ff;
+  background: rgba(120, 169, 255, .06);
+  box-shadow: 0 0 0 4px rgba(120, 169, 255, .13);
+}
+
+.contact-section .contact-form select.input {
+  cursor: pointer;
+}
+
+.contact-section .contact-form select.input option {
+  background: #10182b;
+  color: #f4f7ff;
+}
+
+.contact-section .contact-form textarea.input {
+  min-height: 160px;
+  resize: vertical;
+}
+
+.contact-section .contact-phone-field {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.contact-section .contact-country-selector {
+  flex: 0 0 auto;
+}
+
+.contact-section .contact-country-trigger {
+  min-height: 48px;
+  border: 1px solid rgba(181, 204, 241, .22);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, .035);
+  color: #f4f7ff;
+}
+
+.contact-section .contact-phone-input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.contact-section .contact-phone-input .contact-phone-number-input {
+  width: 100%;
+  min-width: 0;
+  height: 48px;
+  padding: 0 13px;
+  border: 1px solid rgba(181, 204, 241, .22);
+  border-radius: 0 13px 13px 0;
+  background: rgba(255, 255, 255, .035);
+  color: #f4f7ff;
+  font: inherit;
+  font-size: 14px;
+}
+
+.contact-section .contact-phone-input .react-international-phone-dial-code-preview {
+  min-height: 48px;
+  border-color: rgba(181, 204, 241, .22);
+  border-right: 0;
+  border-radius: 13px 0 0 13px;
+  background: rgba(255, 255, 255, .035);
+  color: #c9d8f3;
+}
+
+.contact-section .contact-form > button[type="submit"] {
+  min-height: 48px;
+  justify-content: center;
+}
+
+@media (max-width: 420px) {
+  .contact-section .contact-form {
+    gap: 16px;
+  }
+
+  .contact-section .contact-phone-field {
+    gap: 6px;
+  }
+
+  .contact-section .contact-country-trigger {
+    padding-inline: 9px;
+  }
+
+  .contact-section .contact-country-code {
+    display: none;
+  }
+}

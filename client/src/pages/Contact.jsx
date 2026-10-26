@@ -6,6 +6,7 @@ import {
   PhoneInput,
 } from "react-international-phone";
 import "react-international-phone/style.css";
+import "./Contact.css";
 import { withWhatsAppMessage } from "../utils/whatsapp";
 import { notifyEnquiryCreated, pub } from "../services/api";
 import useContentRefresh from "../hooks/useContentRefresh";
