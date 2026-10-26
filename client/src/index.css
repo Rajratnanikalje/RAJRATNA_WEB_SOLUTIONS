@@ -763,9 +763,19 @@ body:before {
   color: inherit;
 }
 
-.hero-tech-icon svg {
+.hero-tech-icon svg,
+.hero-tech-icon img {
   width: 100%;
   height: 100%;
+}
+
+.hero-tech-icon img { object-fit: contain; }
+.hero-tech-icon .hero-tech-logo:not(img) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 800;
 }
 
 .hero-tech-name {
@@ -778,41 +788,6 @@ body:before {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
-.hero-tech-js {
-  display: flex;
-  width: 24px;
-  height: 24px;
-  align-items: flex-end;
-  justify-content: flex-end;
-  padding: 2px;
-  background: #f7df1e;
-  color: #151719;
-  font-size: 14px;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.hero-tech-express {
-  color: #f1f5f9;
-  font-size: 25px;
-  font-weight: 700;
-  letter-spacing: -.1em;
-}
-
-.hero-tech-card[data-brand="react"] { --brand-color: #61dafb; }
-.hero-tech-card[data-brand="javascript"] { --brand-color: #f7df1e; }
-.hero-tech-card[data-brand="html"] { --brand-color: #e44d26; }
-.hero-tech-card[data-brand="css"] { --brand-color: #1572b6; }
-.hero-tech-card[data-brand="node"] { --brand-color: #83cd29; }
-.hero-tech-card[data-brand="express"] { --brand-color: #e2e8f0; }
-.hero-tech-card[data-brand="mongo"] { --brand-color: #47a248; }
-.hero-tech-card[data-brand="api"] { --brand-color: #78a9ff; }
-.hero-tech-card[data-brand="git"] { --brand-color: #f05032; }
-.hero-tech-card[data-brand="github"] { --brand-color: #f0f6fc; }
-.hero-tech-card[data-brand="tailwind"] { --brand-color: #38bdf8; }
-.hero-tech-card[data-brand="vercel"] { --brand-color: #f8fafc; }
-.hero-tech-card[data-brand="cloudinary"] { --brand-color: #f6a623; }
 
 @keyframes hero-tech-sphere-rotate {
   from { transform: rotateY(0deg); }
@@ -881,14 +856,6 @@ body:before {
     filter: brightness(1.08) contrast(1.08) drop-shadow(0 0 3px color-mix(in srgb, var(--brand-color) 32%, transparent));
   }
 
-  .hero-tech-js {
-    width: 27px;
-    height: 27px;
-  }
-
-  .hero-tech-express {
-    font-size: 28px;
-  }
 }
 
 @media (max-width:1023px) and (min-width:768px) {
@@ -898,8 +865,8 @@ body:before {
   }
 
   .hero-tech-stage {
-    width: 170px;
-    height: 170px;
+    width: min(31vw, 270px);
+    height: min(31vw, 270px);
   }
 
   .hero-tech-ring--equator {
@@ -913,22 +880,13 @@ body:before {
     height: 98%;
   }
 
-  .hero-tech-node:nth-of-type(2),
-  .hero-tech-node:nth-of-type(4),
-  .hero-tech-node:nth-of-type(6),
-  .hero-tech-node:nth-of-type(8),
-  .hero-tech-node:nth-of-type(9),
-  .hero-tech-node:nth-of-type(11) {
-    display: none;
-  }
-
   .hero-tech-node {
     transform: translate(-50%, -50%) translateZ(var(--node-z-small));
   }
 
   .hero-tech-card {
-    width: 52px;
-    height: 50px;
+    width: 44px;
+    height: 44px;
   }
 
   .hero-tech-content {
@@ -936,12 +894,12 @@ body:before {
   }
 
   .hero-tech-icon {
-    width: 23px;
-    height: 23px;
+    width: 20px;
+    height: 20px;
   }
 
   .hero-tech-name {
-    font-size: 7px;
+    font-size: 6.5px;
   }
 }
 
@@ -1163,31 +1121,22 @@ body:before {
     aspect-ratio: 1 / 1;
   }
 
-  .hero-tech-node:nth-of-type(2),
-  .hero-tech-node:nth-of-type(4),
-  .hero-tech-node:nth-of-type(6),
-  .hero-tech-node:nth-of-type(8),
-  .hero-tech-node:nth-of-type(9),
-  .hero-tech-node:nth-of-type(11) {
-    display: none;
-  }
-
   .hero-tech-node {
     transform: translate(-50%, -50%) translateZ(var(--node-z-small));
   }
 
   .hero-tech-card {
-    width: 52px;
-    height: 50px;
+    width: 40px;
+    height: 42px;
   }
 
   .hero-tech-icon {
-    width: 23px;
-    height: 23px;
+    width: 18px;
+    height: 18px;
   }
 
   .hero-tech-name {
-    font-size: 7px;
+    font-size: 6px;
   }
 
   .hero-tech-content {

@@ -22,34 +22,11 @@ import useContentRefresh from "../hooks/useContentRefresh";
 import { Card, Reveal, Heading } from "../components/UI";
 import HeroTechnologyVisual from "../components/HeroTechnologyVisual";
 import ProcessSection from "../components/ProcessSection";
+import TechnologyLogo from "../components/TechnologyLogo";
 import { publicPath, routeKeyFromPath } from "../content/siteRoutes";
+import { technologies } from "../data/technologies";
 import { withWhatsAppMessage } from "../utils/whatsapp";
-
-const homeTechnologyBrandIcons = {
-  html5: "html5/html5-original.svg",
-  css3: "css3/css3-original.svg",
-  javascript: "javascript/javascript-original.svg",
-  react: "react/react-original.svg",
-  reactjs: "react/react-original.svg",
-  nodejs: "nodejs/nodejs-original.svg",
-  express: "express/express-original.svg",
-  expressjs: "express/express-original.svg",
-  mongodb: "mongodb/mongodb-original.svg",
-  git: "git/git-original.svg",
-  github: "github/github-original.svg",
-  tailwindcss: "tailwindcss/tailwindcss-original.svg",
-  reduxtoolkit: "redux/redux-original.svg",
-  mui: "materialui/materialui-original.svg",
-  materialui: "materialui/materialui-original.svg",
-};
-
-const homeTechnologyBrandIcon = (name = "") => {
-  const key = name.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const iconPath = homeTechnologyBrandIcons[key];
-  return iconPath
-    ? `https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/icons/${iconPath}`
-    : "";
-};
+import { responsiveCloudinaryImage } from "../utils/cloudinaryImage";
 
 const reasons = [
   [
@@ -128,40 +105,55 @@ const faqs = [
 export default function Home() {
   const [projects, setProjects] = useState([]);
   const [cmsServices, setCmsServices] = useState([]);
-  const [technologies, setTechnologies] = useState([]);
   const [settings, setSettings] = useState({});
+  const [loadingServices, setLoadingServices] = useState(true);
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [loadError, setLoadError] = useState("");
 
-  const loadContent = useCallback(() => {
-    Promise.allSettled([
-      pub.services(),
-      pub.projects(),
-      pub.technologies(),
-      pub.settings(),
-    ]).then(
-      ([serviceResult, projectResult, technologyResult, settingsResult]) => {
-        if (serviceResult.status === "fulfilled")
-          setCmsServices(serviceResult.value.data?.data || []);
-        if (projectResult.status === "fulfilled")
-          setProjects(projectResult.value.data?.data || []);
-        else
-          setLoadError(
-            "Some site content could not be loaded. Please try again shortly.",
-          );
-        if (technologyResult.status === "fulfilled")
-          setTechnologies(technologyResult.value.data?.data || []);
-        if (settingsResult.status === "fulfilled")
-          setSettings(settingsResult.value.data?.data || {});
-        setLoadingProjects(false);
-      },
-    );
+  const loadSettings = useCallback(() => {
+    pub.settings().then((result) => {
+      setSettings(result.data?.data || {});
+    }).catch(() => {});
   }, []);
 
+  const loadBelowFoldContent = useCallback(() => {
+    pub.services()
+      .then((result) => setCmsServices(result.data?.data || []))
+      .catch(() => {})
+      .finally(() => setLoadingServices(false));
+    pub.projects()
+      .then((result) => setProjects(result.data?.data || []))
+      .catch(() =>
+        setLoadError(
+          "Some site content could not be loaded. Please try again shortly.",
+        ),
+      )
+      .finally(() => setLoadingProjects(false));
+  }, []);
+
+  const loadContent = useCallback(() => {
+    loadSettings();
+    loadBelowFoldContent();
+  }, [loadBelowFoldContent, loadSettings]);
+
   useEffect(() => {
-    loadContent();
-    pub.view().catch(() => {});
-  }, [loadContent]);
+    loadSettings();
+    let idleId;
+    let timeoutId;
+    const loadNonCritical = () => {
+      loadBelowFoldContent();
+      pub.view().catch(() => {});
+    };
+    if ("requestIdleCallback" in window) {
+      idleId = window.requestIdleCallback(loadNonCritical, { timeout: 1200 });
+    } else {
+      timeoutId = window.setTimeout(loadNonCritical, 250);
+    }
+    return () => {
+      if (idleId !== undefined) window.cancelIdleCallback(idleId);
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+    };
+  }, [loadBelowFoldContent, loadSettings]);
 
   useContentRefresh(loadContent);
 
@@ -212,6 +204,7 @@ export default function Home() {
             {settings.heroImageUrl ? (
               <img
                 src={settings.heroImageUrl}
+                {...responsiveCloudinaryImage(settings.heroImageUrl)}
                 alt=""
                 fetchPriority="high"
                 loading="eager"
@@ -420,6 +413,8 @@ export default function Home() {
                         {imageUrl ? (
                           <img
                             src={imageUrl}
+                            {...responsiveCloudinaryImage(imageUrl, [128, 256, 480])}
+                            sizes="44px"
                             alt={title}
                             loading="lazy"
                             className="service-icon-main w-full h-full rounded-xl object-cover"
@@ -438,7 +433,7 @@ export default function Home() {
                   </Reveal>
                 );
               })}
-              {!cmsServices.length && (
+              {!loadingServices && !cmsServices.length && (
                 <p className="muted col-span-full text-center py-8">
                   No services are currently available.
                 </p>
@@ -494,6 +489,8 @@ export default function Home() {
                         {project.imageUrl ? (
                           <img
                             src={project.imageUrl}
+                            {...responsiveCloudinaryImage(project.imageUrl, [480, 800, 1200])}
+                            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                             alt={`${project.name} project preview`}
                             loading="lazy"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -616,26 +613,16 @@ export default function Home() {
             {technologies.length ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mt-10">
                 {technologies.map((tech, index) => (
-                  <Reveal key={tech._id || tech.name} delay={index * 0.02}>
+                  <Reveal key={tech.name} delay={index * 0.02}>
                     <div className="tech-card group min-h-24 flex flex-col items-center justify-center gap-2">
-                      {tech.iconUrl || homeTechnologyBrandIcon(tech.name) ? (
-                        <div className="technology-logo-3d">
-                          <img
-                            src={tech.iconUrl || homeTechnologyBrandIcon(tech.name)}
-                            alt=""
-                            loading="lazy"
-                            decoding="async"
-                            className="technology-logo-image w-10 h-10 object-contain"
-                          />
-                        </div>
-                      ) : (
-                        <div
-                          className="technology-logo-3d technology-icon w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-3"
-                          data-category={tech.category || "default"}
-                        >
-                          <Code2 size={20} className="home-tech-icon" />
-                        </div>
-                      )}
+                      <div className="technology-logo-3d technology-icon w-14 h-14 rounded-xl flex items-center justify-center">
+                        <TechnologyLogo
+                          technology={tech}
+                          alt={`${tech.name} logo`}
+                          className="technology-logo-image w-10 h-10 object-contain text-slate-200"
+                          fetchPriority="low"
+                        />
+                      </div>
                       <span className="tech-name text-sm">{tech.name}</span>
                     </div>
                   </Reveal>

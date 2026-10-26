@@ -2,17 +2,18 @@ import { lazy, Suspense, useCallback, useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import CustomerLayout from "./layouts/CustomerLayout";
 import Home from "./pages/Home";
-import About from "./pages/About";
-import Services from "./pages/Services";
-import Portfolio from "./pages/Portfolio";
-import Technologies from "./pages/Technologies";
-import Contact from "./pages/Contact";
-import NotFound from "./pages/NotFound";
-import Legal from "./pages/Legal";
-import Process from "./pages/Process";
 import { pub } from "./services/api";
 import useContentRefresh from "./hooks/useContentRefresh";
 import { routeKeyFromPath } from "./content/siteRoutes";
+
+const About = lazy(() => import("./pages/About"));
+const Services = lazy(() => import("./pages/Services"));
+const Portfolio = lazy(() => import("./pages/Portfolio"));
+const Technologies = lazy(() => import("./pages/Technologies"));
+const Contact = lazy(() => import("./pages/Contact"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Legal = lazy(() => import("./pages/Legal"));
+const Process = lazy(() => import("./pages/Process"));
 
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 const AdminLayout = lazy(() => import("./layouts/AdminLayout"));

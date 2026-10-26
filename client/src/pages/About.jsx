@@ -6,13 +6,14 @@ import {
   Shield,
   Smartphone,
   Zap,
-  Globe,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { pub } from "../services/api";
 import useContentRefresh from "../hooks/useContentRefresh";
 import { Card, Reveal, Heading } from "../components/UI";
+import TechnologyLogo from "../components/TechnologyLogo";
 import { publicPath } from "../content/siteRoutes";
+import { technologies } from "../data/technologies";
 
 const features = [
   {
@@ -48,49 +49,16 @@ const features = [
 ];
 const featureIcons = { Layout, Smartphone, Database, Code2, Shield, Zap };
 
-const technologyBrandIcons = {
-  html5: "html5/html5-original.svg",
-  css3: "css3/css3-original.svg",
-  javascript: "javascript/javascript-original.svg",
-  react: "react/react-original.svg",
-  reactjs: "react/react-original.svg",
-  nodejs: "nodejs/nodejs-original.svg",
-  express: "express/express-original.svg",
-  expressjs: "express/express-original.svg",
-  mongodb: "mongodb/mongodb-original.svg",
-  git: "git/git-original.svg",
-  github: "github/github-original.svg",
-  tailwindcss: "tailwindcss/tailwindcss-original.svg",
-  reduxtoolkit: "redux/redux-original.svg",
-  mui: "materialui/materialui-original.svg",
-  materialui: "materialui/materialui-original.svg",
-};
-
-const technologyBrandIcon = (name = "") => {
-  const key = name.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const iconPath = technologyBrandIcons[key];
-  return iconPath
-    ? `https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/icons/${iconPath}`
-    : "";
-};
-
 export default function About() {
   const [aboutImageUrl, setAboutImageUrl] = useState("");
   const [content, setContent] = useState({});
-  const [cmsTechnologies, setCmsTechnologies] = useState([]);
 
   const loadAboutImage = useCallback(() => {
-    Promise.allSettled([pub.settings(), pub.technologies()]).then(
-      ([settingsResult, technologiesResult]) => {
-        if (settingsResult.status === "fulfilled") {
-          const data = settingsResult.value.data?.data || {};
-          setAboutImageUrl(data.aboutImageUrl || "");
-          setContent(data);
-        }
-        if (technologiesResult.status === "fulfilled")
-          setCmsTechnologies(technologiesResult.value.data?.data || []);
-      },
-    );
+    pub.settings().then((result) => {
+      const data = result.data?.data || {};
+      setAboutImageUrl(data.aboutImageUrl || "");
+      setContent(data);
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -111,9 +79,6 @@ export default function About() {
   )
     .filter((item) => item.active !== false)
     .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
-  const displayedTechStack = cmsTechnologies.map(
-    ({ name, category, iconUrl }) => ({ name, category, iconUrl }),
-  );
 
   return (
     <section className="section pt-40 relative overflow-hidden">
@@ -211,51 +176,21 @@ export default function About() {
                 }
               />
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-12">
-                {displayedTechStack.map((t, i) => {
-                  const brandIcon = !t.iconUrl && technologyBrandIcon(t.name);
-                  return (
-                    <Reveal key={t.name} delay={i * 0.04}>
-                      <Card className="tech-card group p-6 text-center h-full">
-                        <div
-                          className={`w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-3 ${brandIcon ? "" : "bg-gradient-to-br from-[#78a9ff] to-[#3b82f6] shadow-[0_0_20px_rgba(120,169,255,.3)]"} ${t.iconUrl ? "" : "technology-icon"}`}
-                          data-category={
-                            t.iconUrl || brandIcon
-                              ? undefined
-                              : t.category || "default"
-                          }
-                        >
-                          {t.iconUrl ? (
-                            <img
-                              src={t.iconUrl}
-                              alt={t.name}
-                              loading="lazy"
-                              className="w-9 h-9 object-contain"
-                            />
-                          ) : brandIcon ? (
-                            <img
-                              src={brandIcon}
-                              alt={`${t.name} logo`}
-                              loading="lazy"
-                              decoding="async"
-                              className="w-10 h-10 object-contain"
-                              style={
-                                ["express", "express.js", "github"].includes(
-                                  t.name.toLowerCase(),
-                                )
-                                  ? { filter: "brightness(0) invert(1)" }
-                                  : undefined
-                              }
-                            />
-                          ) : (
-                            <Globe size={22} className="text-slate-900" />
-                          )}
-                        </div>
-                        <div className="tech-name">{t.name}</div>
-                        <div className="tech-category">{t.category}</div>
-                      </Card>
-                    </Reveal>
-                  );
-                })}
+                {technologies.map((t, i) => (
+                  <Reveal key={t.name} delay={i * 0.04}>
+                    <Card className="tech-card group p-6 text-center h-full">
+                      <div className="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-3">
+                        <TechnologyLogo
+                          technology={t}
+                          alt={`${t.name} logo`}
+                          className="w-10 h-10 object-contain text-slate-200"
+                        />
+                      </div>
+                      <div className="tech-name">{t.name}</div>
+                      <div className="tech-category">{t.category}</div>
+                    </Card>
+                  </Reveal>
+                ))}
               </div>
             </div>
           </Reveal>
